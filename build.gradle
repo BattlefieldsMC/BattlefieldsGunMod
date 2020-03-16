@@ -41,8 +41,8 @@ repositories {
 }
 
 dependencies {
-    compile 'obfuscate:Obfuscate:0.2.6:1.12.2'
-    provided 'controllable:Controllable:1.12.2:0.3.0'
+    compile "obfuscate:Obfuscate:${obfuscate_version}:1.12.2"
+    provided "controllable:Controllable:1.12.2:${controllable_version}"
 }
 
 processResources {
