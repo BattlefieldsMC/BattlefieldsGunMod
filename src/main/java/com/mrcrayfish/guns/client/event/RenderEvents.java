@@ -884,7 +884,7 @@ public class RenderEvents
             // Render white screen-filling overlay at full alpha effect when duration is above threshold
             // When below threshold, fade to full transparency as duration approaches 0
             float percent = Math.min((effect.getDuration() / (float) GunConfig.SERVER.stunGrenades.blind.alphaFadeThresholdSynced), 1);
-            Gui.drawRect(0, 0, Integer.MAX_VALUE, Integer.MAX_VALUE, ((int) (percent * GunConfig.SERVER.stunGrenades.blind.alphaOverlaySynced + 0.5) << 24) | 16777215);
+            Gui.drawRect(0, 0, event.getResolution().getScaledWidth(), event.getResolution().getScaledHeight(), ((int) (percent * GunConfig.SERVER.stunGrenades.blind.alphaOverlaySynced + 0.5) << 24) | 16777215);
         }
     }
 
