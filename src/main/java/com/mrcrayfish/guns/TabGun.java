@@ -6,14 +6,19 @@ import net.minecraft.item.ItemStack;
 
 public class TabGun extends CreativeTabs
 {
-	public TabGun() 
-	{
-		super("tabCGM");
-	}
+    public TabGun()
+    {
+        super("tabCGM");
+    }
 
-	@Override
-	public ItemStack createIcon()
-	{
-		return new ItemStack(ModGuns.PISTOL);
-	}
+    @Override
+    public ItemStack createIcon()
+    {
+        //		return new ItemStack(ModGuns.PISTOL);
+		/* Battlefields Begin */
+        ItemStack stack = new ItemStack(ModGuns.PISTOL);
+        ItemStackUtil.createTagCompound(stack).setInteger("AmmoCount", ModGuns.PISTOL.getModifiedGun(stack).general.maxAmmo);
+        return stack;
+		/* Battlefields End */
+    }
 }
