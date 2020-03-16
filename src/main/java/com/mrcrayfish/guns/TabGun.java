@@ -15,7 +15,7 @@ public class TabGun extends CreativeTabs
     public ItemStack createIcon()
     {
         //		return new ItemStack(ModGuns.PISTOL);
-		/* Battlefields Begin */
+		/* Battlefields - Updated creative tab gun */
         ItemStack stack = new ItemStack(ModGuns.PISTOL);
         ItemStackUtil.createTagCompound(stack).setInteger("AmmoCount", ModGuns.PISTOL.getModifiedGun(stack).general.maxAmmo);
         return stack;
