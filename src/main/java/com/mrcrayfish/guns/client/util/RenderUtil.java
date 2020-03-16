@@ -19,49 +19,40 @@ import net.minecraft.util.EnumFacing;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class RenderUtil
-{
-    public static IBakedModel getModel(Item item, int meta)
-    {
+public class RenderUtil {
+    public static IBakedModel getModel(Item item, int meta) {
         return Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(new ItemStack(item, 1, meta));
     }
 
-    public static void rotateZ(float xOffset, float yOffset, float rotation)
-    {
+    public static void rotateZ(float xOffset, float yOffset, float rotation) {
         GlStateManager.translate(xOffset, yOffset, 0);
         GlStateManager.rotate(rotation, 0, 0, -1);
         GlStateManager.translate(-xOffset, -yOffset, 0);
     }
 
-    public static void renderModel(ItemStack stack)
-    {
+    public static void renderModel(ItemStack stack) {
         renderModel(stack, ItemCameraTransforms.TransformType.NONE);
     }
 
-    public static void renderModel(ItemStack child, ItemStack parent)
-    {
+    public static void renderModel(ItemStack child, ItemStack parent) {
         IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(child);
         renderModel(model, ItemCameraTransforms.TransformType.NONE, null, child, parent);
     }
 
-    public static void renderModel(ItemStack stack, ItemCameraTransforms.TransformType transformType)
-    {
+    public static void renderModel(ItemStack stack, ItemCameraTransforms.TransformType transformType) {
         IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(stack);
         renderModel(model, transformType, stack);
     }
 
-    public static void renderModel(IBakedModel model, ItemStack stack)
-    {
+    public static void renderModel(IBakedModel model, ItemStack stack) {
         renderModel(model, ItemCameraTransforms.TransformType.NONE, stack);
     }
 
-    public static void renderModel(IBakedModel model, ItemCameraTransforms.TransformType transformType, ItemStack stack)
-    {
+    public static void renderModel(IBakedModel model, ItemCameraTransforms.TransformType transformType, ItemStack stack) {
         renderModel(model, transformType, null, stack, ItemStack.EMPTY);
     }
 
-    public static void renderModel(IBakedModel model, ItemCameraTransforms.TransformType transformType, @Nullable Transform transform, ItemStack stack, ItemStack parent)
-    {
+    public static void renderModel(IBakedModel model, ItemCameraTransforms.TransformType transformType, @Nullable Transform transform, ItemStack stack, ItemStack parent) {
         GlStateManager.pushMatrix();
         {
             Minecraft.getMinecraft().getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
@@ -91,34 +82,28 @@ public class RenderUtil
         GlStateManager.popMatrix();
     }
 
-    private static void renderModel(IBakedModel model, @Nullable Transform transform, ItemStack stack, ItemStack parent)
-    {
+    private static void renderModel(IBakedModel model, @Nullable Transform transform, ItemStack stack, ItemStack parent) {
         GlStateManager.translate(-0.5F, -0.5F, -0.5F);
-        if(transform != null) transform.apply();
+        if (transform != null) transform.apply();
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
         buffer.begin(7, DefaultVertexFormats.ITEM);
-        for(EnumFacing enumfacing : EnumFacing.values())
-        {
+        for (EnumFacing enumfacing : EnumFacing.values()) {
             renderQuads(buffer, model.getQuads(null, enumfacing, 0L), stack, parent);
         }
         renderQuads(buffer, model.getQuads(null, null, 0L), stack, parent);
         tessellator.draw();
     }
 
-    private static void renderQuads(BufferBuilder buffer, List<BakedQuad> quads, ItemStack stack, ItemStack parent)
-    {
+    private static void renderQuads(BufferBuilder buffer, List<BakedQuad> quads, ItemStack stack, ItemStack parent) {
         int i = 0;
-        for (int j = quads.size(); i < j; ++i)
-        {
+        for (int j = quads.size(); i < j; ++i) {
             BakedQuad bakedQuad = quads.get(i);
             int color = -1;
-            if (bakedQuad.hasTintIndex())
-            {
+            if (bakedQuad.hasTintIndex()) {
                 color = getItemStackColor(stack, parent, bakedQuad.getTintIndex());
 
-                if (EntityRenderer.anaglyphEnable)
-                {
+                if (EntityRenderer.anaglyphEnable) {
                     color = TextureUtil.anaglyphColor(color);
                 }
 
@@ -128,21 +113,17 @@ public class RenderUtil
         }
     }
 
-    private static int getItemStackColor(ItemStack stack, ItemStack parent, int tintIndex)
-    {
+    private static int getItemStackColor(ItemStack stack, ItemStack parent, int tintIndex) {
         int color = Minecraft.getMinecraft().getItemColors().colorMultiplier(stack, tintIndex);
-        if(color == -1)
-        {
-            if(!parent.isEmpty())
-            {
+        if (color == -1) {
+            if (!parent.isEmpty()) {
                 return getItemStackColor(parent, ItemStack.EMPTY, tintIndex);
             }
         }
         return color;
     }
 
-    public static void applyTransformType(ItemStack stack, ItemCameraTransforms.TransformType transformType)
-    {
+    public static void applyTransformType(ItemStack stack, ItemCameraTransforms.TransformType transformType) {
         IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(stack);
         ItemTransformVec3f transformVec3f = model.getItemCameraTransforms().getTransform(transformType);
         GlStateManager.translate(transformVec3f.translation.getX(), transformVec3f.translation.getY(), transformVec3f.translation.getZ());
@@ -152,8 +133,20 @@ public class RenderUtil
         GlStateManager.scale(transformVec3f.scale.getX(), transformVec3f.scale.getY(), transformVec3f.scale.getZ());
     }
 
-    public interface Transform
-    {
+    public static void drawScaledCustomSizeModalRect(double x, double y, double u, double v, double uWidth, double vHeight, double width, double height, double tileWidth, double tileHeight) {
+        double f = 1.0F / tileWidth;
+        double f1 = 1.0F / tileHeight;
+        Tessellator tessellator = Tessellator.getInstance();
+        BufferBuilder bufferbuilder = tessellator.getBuffer();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
+        bufferbuilder.pos(x, (y + height), 0.0D).tex((u * f), ((v + (float) vHeight) * f1)).endVertex();
+        bufferbuilder.pos((x + width), (y + height), 0.0D).tex(((u + (float) uWidth) * f), ((v + (float) vHeight) * f1)).endVertex();
+        bufferbuilder.pos((x + width), y, 0.0D).tex(((u + (float) uWidth) * f), (v * f1)).endVertex();
+        bufferbuilder.pos(x, y, 0.0D).tex((u * f), (v * f1)).endVertex();
+        tessellator.draw();
+    }
+
+    public interface Transform {
         void apply();
     }
 }
