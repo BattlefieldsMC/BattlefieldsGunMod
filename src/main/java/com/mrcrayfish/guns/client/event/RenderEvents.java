@@ -847,27 +847,20 @@ public class RenderEvents
         GlStateManager.popMatrix();
     }
 
-    private void renderArm(EnumHandSide hand, float scale)
+    private void renderArm(EnumHandSide side, float scale)
     {
         AbstractClientPlayer abstractClientPlayer = Minecraft.getMinecraft().player;
         Minecraft.getMinecraft().getTextureManager().bindTexture(abstractClientPlayer.getLocationSkin());
         RenderPlayer renderPlayer = (RenderPlayer) Minecraft.getMinecraft().getRenderManager().<AbstractClientPlayer>getEntityRenderObject(abstractClientPlayer);
-
         GlStateManager.disableCull();
 
-        if(hand == EnumHandSide.RIGHT)
+        if (side == EnumHandSide.RIGHT)
         {
-            renderPlayer.getMainModel().bipedRightArm.rotateAngleX = 0F;
-            renderPlayer.getMainModel().bipedRightArm.rotateAngleY = 0F;
-            renderPlayer.getMainModel().bipedRightArm.rotateAngleZ = 0F;
-            renderPlayer.getMainModel().bipedRightArm.render(scale);
+            renderPlayer.renderRightArm(abstractClientPlayer);
         }
         else
         {
-            renderPlayer.getMainModel().bipedLeftArm.rotateAngleX = 0F;
-            renderPlayer.getMainModel().bipedLeftArm.rotateAngleY = 0F;
-            renderPlayer.getMainModel().bipedLeftArm.rotateAngleZ = 0F;
-            renderPlayer.getMainModel().bipedLeftArm.render(scale);
+            renderPlayer.renderLeftArm(abstractClientPlayer);
         }
 
         GlStateManager.enableCull();
