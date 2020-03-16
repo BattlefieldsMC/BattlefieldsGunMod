@@ -24,13 +24,13 @@ import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.model.ModelBiped;
 import net.minecraft.client.model.ModelPlayer;
 import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderPlayer;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -39,7 +39,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.*;
+import net.minecraft.util.CooldownTracker;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumHandSide;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -85,7 +88,7 @@ public class RenderEvents
     @SubscribeEvent
     public void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
-        if(event.phase == TickEvent.Phase.START && event.player.world.isRemote)
+        if (event.phase == TickEvent.Phase.START && event.player.world.isRemote)
         {
             getCooldownTracker(event.player.getUniqueID()).tick();
         }
@@ -94,7 +97,7 @@ public class RenderEvents
     @SubscribeEvent
     public void onKeyPressedEvent(KeyInputEvent event)
     {
-        if(Minecraft.getMinecraft().gameSettings.keyBindSmoothCamera.isPressed())
+        if (Minecraft.getMinecraft().gameSettings.keyBindSmoothCamera.isPressed())
         {
             Minecraft.getMinecraft().gameSettings.smoothCamera = !Minecraft.getMinecraft().gameSettings.smoothCamera;
             lastSmoothCamera = Minecraft.getMinecraft().gameSettings.smoothCamera;
@@ -105,26 +108,26 @@ public class RenderEvents
     public void onFovUpdate(FOVUpdateEvent event)
     {
         Minecraft mc = Minecraft.getMinecraft();
-        if(!mc.player.getHeldItemMainhand().isEmpty() && mc.gameSettings.thirdPersonView == 0)
+        if (!mc.player.getHeldItemMainhand().isEmpty() && mc.gameSettings.thirdPersonView == 0)
         {
             ItemStack heldItem = mc.player.getHeldItemMainhand();
-            if(heldItem.getItem() instanceof ItemGun)
+            if (heldItem.getItem() instanceof ItemGun)
             {
                 ItemStack scope = Gun.getScope(heldItem);
 
                 ItemGun gun = (ItemGun) heldItem.getItem();
-                if(isZooming(Minecraft.getMinecraft().player) && !mc.player.getDataManager().get(CommonEvents.RELOADING))
+                if (isZooming(Minecraft.getMinecraft().player) && !mc.player.getDataManager().get(CommonEvents.RELOADING))
                 {
                     mc.gameSettings.smoothCamera = gun.getGun().modules.zoom.smooth;
                     float newFov = gun.getGun().modules.zoom.fovModifier - 0.1F;
-                    if(scope != null)
+                    if (scope != null)
                     {
                         ItemScope.Type scopeType = ItemScope.Type.getFromStack(scope);
-                        if(scopeType != null)
+                        if (scopeType != null)
                         {
                             newFov -= scopeType.getAdditionalZoom();
                             mc.gameSettings.smoothCamera = gun.getGun().modules.attachments.scope.smooth;
-                            if(scopeType == ItemScope.Type.LONG)
+                            if (scopeType == ItemScope.Type.LONG)
                             {
                                 mc.gameSettings.smoothCamera = true;
                             }
@@ -151,22 +154,22 @@ public class RenderEvents
     @SubscribeEvent
     public void onPreClientTick(TickEvent.ClientTickEvent event)
     {
-        if(event.phase != TickEvent.Phase.START)
+        if (event.phase != TickEvent.Phase.START)
             return;
 
         lastZoomProgress = zoomProgress;
 
         EntityPlayer player = Minecraft.getMinecraft().player;
-        if(isZooming(player) && !player.getDataManager().get(CommonEvents.RELOADING))
+        if (isZooming(player) && !player.getDataManager().get(CommonEvents.RELOADING))
         {
-            if(zoomProgress < ZOOM_TICKS)
+            if (zoomProgress < ZOOM_TICKS)
             {
                 zoomProgress++;
             }
         }
         else
         {
-            if(zoomProgress > 0)
+            if (zoomProgress > 0)
             {
                 zoomProgress--;
             }
@@ -176,38 +179,38 @@ public class RenderEvents
     @SubscribeEvent
     public void onTick(TickEvent.ClientTickEvent event)
     {
-        if(event.phase != TickEvent.Phase.END)
+        if (event.phase != TickEvent.Phase.END)
             return;
 
         prevReloadTimer = reloadTimer;
 
         EntityPlayer player = Minecraft.getMinecraft().player;
-        if(isZooming(player) && !player.getDataManager().get(CommonEvents.RELOADING))
+        if (isZooming(player) && !player.getDataManager().get(CommonEvents.RELOADING))
         {
             Minecraft.getMinecraft().player.prevCameraYaw = 0.0075F;
             Minecraft.getMinecraft().player.cameraYaw = 0.0075F;
         }
 
-        if(player != null)
+        if (player != null)
         {
             ItemStack heldItem = player.getHeldItemMainhand();
-            if(!heldItem.isEmpty() && heldItem.getItem() instanceof ItemGun)
+            if (!heldItem.isEmpty() && heldItem.getItem() instanceof ItemGun)
             {
                 IOverrideModel model = ModelOverrides.getModel(heldItem);
-                if(model != null)
+                if (model != null)
                 {
                     model.tick(player);
                 }
             }
 
-            if(player.getDataManager().get(CommonEvents.RELOADING))
+            if (player.getDataManager().get(CommonEvents.RELOADING))
             {
-                if(startTick == -1)
+                if (startTick == -1)
                 {
                     startTick = player.ticksExisted + 5;
                 }
 
-                if(reloadTimer < 5)
+                if (reloadTimer < 5)
                 {
                     reloadTimer++;
                 }
@@ -216,12 +219,12 @@ public class RenderEvents
             {
                 playAnimation = false;
 
-                if(startTick != -1)
+                if (startTick != -1)
                 {
                     startTick = -1;
                 }
 
-                if(reloadTimer > 0)
+                if (reloadTimer > 0)
                 {
                     reloadTimer -= 1;
                 }
@@ -233,7 +236,7 @@ public class RenderEvents
     public void onRenderOverlay(RenderGameOverlayEvent event)
     {
         normalZoomProgress = (lastZoomProgress + (zoomProgress - lastZoomProgress) * (lastZoomProgress == 0 || lastZoomProgress == ZOOM_TICKS ? 0.0 : event.getPartialTicks())) / ZOOM_TICKS;
-        if(normalZoomProgress > 0 && event.getType() == RenderGameOverlayEvent.ElementType.CROSSHAIRS)
+        if (normalZoomProgress > 0 && event.getType() == RenderGameOverlayEvent.ElementType.CROSSHAIRS)
         {
             event.setCanceled(true);
         }
@@ -245,12 +248,12 @@ public class RenderEvents
         boolean right = Minecraft.getMinecraft().gameSettings.mainHand == EnumHandSide.RIGHT ? event.getHand() == EnumHand.MAIN_HAND : event.getHand() == EnumHand.OFF_HAND;
         ItemStack heldItem = event.getItemStack();
 
-        if(event.getHand() == EnumHand.OFF_HAND)
+        if (event.getHand() == EnumHand.OFF_HAND)
         {
             ItemStack mainHandStack = Minecraft.getMinecraft().player.getHeldItemMainhand();
-            if(mainHandStack.getItem() instanceof ItemGun)
+            if (mainHandStack.getItem() instanceof ItemGun)
             {
-                if(((ItemGun) mainHandStack.getItem()).getGun().general.gripType != GripType.ONE_HANDED)
+                if (((ItemGun) mainHandStack.getItem()).getGun().general.gripType != GripType.ONE_HANDED)
                 {
                     event.setCanceled(true);
                     return;
@@ -258,14 +261,14 @@ public class RenderEvents
             }
         }
 
-        if(!(heldItem.getItem() instanceof ItemGun))
+        if (!(heldItem.getItem() instanceof ItemGun))
             return;
 
         // Cancel it because we are doing our own custom render
         event.setCanceled(true);
 
         // Ignores rendering the gun if the grip type doesn't allow it to be render in the offhand
-        if(event.getHand() == EnumHand.OFF_HAND)
+        if (event.getHand() == EnumHand.OFF_HAND)
         {
             return;
         }
@@ -280,24 +283,24 @@ public class RenderEvents
         float translateZ = model.getItemCameraTransforms().firstperson_right.translation.getZ() * scaleZ;
 
         GlStateManager.pushMatrix();
-        if(normalZoomProgress > 0)
+        if (normalZoomProgress > 0)
         {
             ItemGun itemGun = (ItemGun) heldItem.getItem();
-            if(event.getHand() == EnumHand.MAIN_HAND)
+            if (event.getHand() == EnumHand.MAIN_HAND)
             {
                 double xOffset = 0.0;
                 double yOffset = 0.0;
                 double zOffset = 0.0;
 
                 Gun gun = itemGun.getGun();
-                if(gun.canAttachType(IAttachment.Type.SCOPE) && scope != null && scopeType != null)
+                if (gun.canAttachType(IAttachment.Type.SCOPE) && scope != null && scopeType != null)
                 {
                     Gun.ScaledPositioned scaledPos = gun.modules.attachments.scope;
                     xOffset -= scaledPos.xOffset * 0.0625 * scaleX;
                     yOffset -= scaledPos.yOffset * 0.0625 * scaleY - translateY + scopeType.getHeightToCenter() * scaleY * 0.0625 * scaledPos.scale;
                     zOffset -= scaledPos.zOffset * 0.0625 * scaleZ - translateZ - 0.35;
                 }
-                else if(gun.modules.zoom != null)
+                else if (gun.modules.zoom != null)
                 {
                     xOffset -= gun.modules.zoom.xOffset * 0.0625 * scaleX;
                     yOffset -= gun.modules.zoom.yOffset * 0.0625 * scaleY - translateY;
@@ -351,9 +354,9 @@ public class RenderEvents
     {
         CooldownTracker tracker = getCooldownTracker(Minecraft.getMinecraft().player.getUniqueID());
         float cooldown = tracker.getCooldown(item, Minecraft.getMinecraft().getRenderPartialTicks());
-        cooldown = cooldown >= gun.general.recoilDurationOffset  ? (cooldown - gun.general.recoilDurationOffset) / (1.0F - gun.general.recoilDurationOffset) : 0.0F;
+        cooldown = cooldown >= gun.general.recoilDurationOffset ? (cooldown - gun.general.recoilDurationOffset) / (1.0F - gun.general.recoilDurationOffset) : 0.0F;
 
-        if(cooldown >= 0.8)
+        if (cooldown >= 0.8)
         {
             float amount = 1.0F * ((1.0F - cooldown) / 0.2F);
             recoilNormal = 1 - (--amount) * amount * amount * amount;
@@ -374,10 +377,10 @@ public class RenderEvents
 
     private boolean isZooming(EntityPlayer player)
     {
-        if(player != null && player.getHeldItemMainhand() != ItemStack.EMPTY)
+        if (player != null && player.getHeldItemMainhand() != ItemStack.EMPTY)
         {
             ItemStack stack = player.getHeldItemMainhand();
-            if(stack.getItem() instanceof ItemGun)
+            if (stack.getItem() instanceof ItemGun)
             {
                 Gun gun = ((ItemGun) stack.getItem()).getGun();
                 return gun.modules != null && gun.modules.zoom != null && MrCrayfishGunMod.proxy.isZooming();
@@ -389,32 +392,32 @@ public class RenderEvents
     @SubscribeEvent
     public void onTick(TickEvent.RenderTickEvent event)
     {
-        if(event.phase.equals(TickEvent.Phase.START))
+        if (event.phase.equals(TickEvent.Phase.START))
             return;
 
         Minecraft mc = Minecraft.getMinecraft();
-        if(!mc.inGameHasFocus)
+        if (!mc.inGameHasFocus)
             return;
 
         EntityPlayer player = mc.player;
-        if(player == null)
+        if (player == null)
             return;
 
-        if(Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)
+        if (Minecraft.getMinecraft().gameSettings.thirdPersonView != 0)
             return;
 
         ItemStack heldItem = player.getHeldItem(EnumHand.MAIN_HAND);
-        if(heldItem.isEmpty() || !(heldItem.getItem() instanceof ItemGun))
+        if (heldItem.isEmpty() || !(heldItem.getItem() instanceof ItemGun))
             return;
 
         ScaledResolution scaledResolution = new ScaledResolution(mc);
 
-        if(!heldItem.isEmpty() && heldItem.getItem() instanceof ItemGun)
+        if (!heldItem.isEmpty() && heldItem.getItem() instanceof ItemGun)
         {
             ItemScope.Type scopeType = ItemScope.Type.getFromStack(Gun.getAttachment(IAttachment.Type.SCOPE, heldItem));
-            if(scopeType == ItemScope.Type.LONG && normalZoomProgress == 1.0)
+            if (scopeType == ItemScope.Type.LONG && normalZoomProgress == 1.0)
             {
-                if(true) return;
+                if (true) return;
 
                 mc.getTextureManager().bindTexture(SCOPE_OVERLAY);
                 GlStateManager.color(1.0F, 1.0F, 1.0F);
@@ -437,10 +440,10 @@ public class RenderEvents
             }
 
             Gun gun = ((ItemGun) heldItem.getItem()).getGun();
-            if(!gun.general.auto)
+            if (!gun.general.auto)
             {
                 float coolDown = player.getCooldownTracker().getCooldown(heldItem.getItem(), event.renderTickTime);
-                if(coolDown > 0.0F)
+                if (coolDown > 0.0F)
                 {
                     double scale = 3;
                     int i = (int) ((scaledResolution.getScaledHeight() / 2 - 7 - 60) / scale);
@@ -469,37 +472,40 @@ public class RenderEvents
         EntityLivingBase entity = event.getEntity();
         ItemStack heldItem = entity.getHeldItem(hand);
 
-        if(heldItem.getItem() instanceof ItemGun)
+        if (hand == EnumHand.OFF_HAND && entity.getHeldItemMainhand().getItem() instanceof ItemGun && !((ItemGun) entity.getHeldItemMainhand().getItem()).getGun().general.gripType.canRenderOffhand())
+        {
+            event.setCanceled(true);
+            return;
+        }
+
+        if (heldItem.getItem() instanceof ItemGun)
         {
             event.setCanceled(true);
             Gun gun = ((ItemGun) heldItem.getItem()).getGun();
             gun.general.gripType.getHeldAnimation().applyHeldItemTransforms(hand, entity instanceof EntityPlayer ? GunHandler.getAimProgress((EntityPlayer) entity, event.getPartialTicks()) : 0f);
-            if(hand == EnumHand.MAIN_HAND)
-            {
-                this.renderWeapon(entity, heldItem, event.getTransformType(), event.getPartialTicks());
-            }
+            this.renderWeapon(entity, heldItem, event.getTransformType(), event.getPartialTicks());
         }
 
-        if(hand == EnumHand.OFF_HAND)
-        {
-            ItemStack mainHandStack = entity.getHeldItemMainhand();
-            if(!mainHandStack.isEmpty() && mainHandStack.getItem() instanceof ItemGun)
-            {
-                Gun mainHandGun = ((ItemGun) mainHandStack.getItem()).getGun();
-                if(!mainHandGun.general.gripType.canRenderOffhand())
-                {
-                    event.setCanceled(true);
-                }
-                else if(heldItem.getItem() instanceof ItemGun)
-                {
-                    Gun gun = ((ItemGun) heldItem.getItem()).getGun();
-                    if(gun.general.gripType.canRenderOffhand())
-                    {
-                        this.renderWeapon(entity, heldItem, event.getTransformType(), event.getPartialTicks());
-                    }
-                }
-            }
-        }
+        //        if (hand == EnumHand.OFF_HAND)
+        //        {
+        //            ItemStack mainHandStack = entity.getHeldItemMainhand();
+        //            if (!mainHandStack.isEmpty() && mainHandStack.getItem() instanceof ItemGun)
+        //            {
+        //                Gun mainHandGun = ((ItemGun) mainHandStack.getItem()).getGun();
+        //                if (!mainHandGun.general.gripType.canRenderOffhand())
+        //                {
+        //                    event.setCanceled(true);
+        //                }
+        //                else if (heldItem.getItem() instanceof ItemGun)
+        //                {
+        //                    Gun gun = ((ItemGun) heldItem.getItem()).getGun();
+        //                    if (gun.general.gripType.canRenderOffhand())
+        //                    {
+        //                        this.renderWeapon(entity, heldItem, event.getTransformType(), event.getPartialTicks());
+        //                    }
+        //                }
+        //            }
+        //        }
     }
 
     @SubscribeEvent
@@ -507,7 +513,7 @@ public class RenderEvents
     {
         EntityPlayer player = event.getEntityPlayer();
         ItemStack heldItem = player.getHeldItemMainhand();
-        if(!heldItem.isEmpty() && heldItem.getItem() instanceof ItemGun)
+        if (!heldItem.isEmpty() && heldItem.getItem() instanceof ItemGun)
         {
             ModelPlayer model = event.getModelPlayer();
             Gun gun = ((ItemGun) heldItem.getItem()).getGun();
@@ -522,7 +528,7 @@ public class RenderEvents
     {
         EntityPlayer player = event.getEntityPlayer();
         ItemStack heldItem = player.getHeldItemMainhand();
-        if(!heldItem.isEmpty() && heldItem.getItem() instanceof ItemGun)
+        if (!heldItem.isEmpty() && heldItem.getItem() instanceof ItemGun)
         {
             Gun gun = ((ItemGun) heldItem.getItem()).getGun();
             gun.general.gripType.getHeldAnimation().applyPlayerPreRender(player, EnumHand.MAIN_HAND, GunHandler.getAimProgress((EntityPlayer) event.getEntity(), event.getPartialRenderTick()));
@@ -534,9 +540,9 @@ public class RenderEvents
     {
         EntityPlayer player = event.getEntityPlayer();
         ItemStack offHandStack = player.getHeldItemOffhand();
-        if(offHandStack.getItem() instanceof ItemGun)
+        if (offHandStack.getItem() instanceof ItemGun)
         {
-            switch(player.getPrimaryHand().opposite())
+            switch (player.getPrimaryHand().opposite())
             {
                 case LEFT:
                     event.getModelPlayer().leftArmPose = ModelBiped.ArmPose.EMPTY;
@@ -553,15 +559,15 @@ public class RenderEvents
     {
         EntityPlayer player = event.getEntityPlayer();
         ItemStack heldItem = player.getHeldItemOffhand();
-        if(!heldItem.isEmpty() && heldItem.getItem() instanceof ItemGun)
+        if (!heldItem.isEmpty() && heldItem.getItem() instanceof ItemGun)
         {
             Gun gun = ((ItemGun) heldItem.getItem()).getGun();
-            if(!gun.general.gripType.canRenderOffhand())
+            if (!gun.general.gripType.canRenderOffhand())
             {
                 GlStateManager.pushMatrix();
                 GlStateManager.rotate(180F, 0, 1, 0);
                 GlStateManager.rotate(180F, 0, 0, 1);
-                if(player.isSneaking())
+                if (player.isSneaking())
                 {
                     GlStateManager.translate(0 * 0.0625, -7 * 0.0625, -5 * 0.0625);
                     GlStateManager.rotate(30F, 1, 0, 0);
@@ -580,13 +586,13 @@ public class RenderEvents
                 GlStateManager.pushMatrix();
                 GlStateManager.rotate(180F, 0, 1, 0);
                 GlStateManager.rotate(180F, 0, 0, 1);
-                if(player.isSneaking())
+                if (player.isSneaking())
                 {
-                    GlStateManager.translate(-4.5 * 0.0625, -15 * 0.0625, -4 * 0.0625);
+                    GlStateManager.translate(4.5 * 0.0625, -15 * 0.0625, -4 * 0.0625);
                 }
                 else
                 {
-                    GlStateManager.translate(-4.5 * 0.0625, -13 * 0.0625, 1 * 0.0625);
+                    GlStateManager.translate(4.5 * 0.0625, -13 * 0.0625, 1 * 0.0625);
                 }
                 GlStateManager.rotate(90F, 0, 1, 0);
                 GlStateManager.rotate(75F, 0, 0, 1);
@@ -616,14 +622,14 @@ public class RenderEvents
 
     private boolean renderWeapon(EntityLivingBase entity, ItemStack stack, ItemCameraTransforms.TransformType transformType, float partialTicks)
     {
-        if(stack.getItem() instanceof ItemGun)
+        if (stack.getItem() instanceof ItemGun)
         {
             GlStateManager.pushMatrix();
 
             ItemStack model = ItemStack.EMPTY;
-            if(stack.getTagCompound() != null)
+            if (stack.getTagCompound() != null)
             {
-                if(stack.getTagCompound().hasKey("model", Constants.NBT.TAG_COMPOUND))
+                if (stack.getTagCompound().hasKey("model", Constants.NBT.TAG_COMPOUND))
                 {
                     model = new ItemStack(stack.getTagCompound().getCompoundTag("model"));
                     model.setTagCompound(stack.getTagCompound().copy());
@@ -632,7 +638,7 @@ public class RenderEvents
 
             RenderUtil.applyTransformType(model.isEmpty() ? stack : model, transformType);
 
-            if(transformType == ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND)
+            if (transformType == ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND)
             {
                 this.renderMuzzleFlash(stack);
             }
@@ -648,10 +654,10 @@ public class RenderEvents
 
     private void renderGun(EntityLivingBase entity, ItemCameraTransforms.TransformType transformType, ItemStack stack, float partialTicks)
     {
-        if(ModelOverrides.hasModel(stack))
+        if (ModelOverrides.hasModel(stack))
         {
             IOverrideModel model = ModelOverrides.getModel(stack);
-            if(model != null)
+            if (model != null)
             {
                 model.render(partialTicks, transformType, stack, ItemStack.EMPTY, entity);
             }
@@ -664,23 +670,23 @@ public class RenderEvents
 
     private void renderAttachments(EntityLivingBase entity, ItemCameraTransforms.TransformType transformType, ItemStack stack, float partialTicks)
     {
-        if(stack.getItem() instanceof ItemGun)
+        if (stack.getItem() instanceof ItemGun)
         {
             Gun gun = ((ItemGun) stack.getItem()).getGun();
             NBTTagCompound gunTag = ItemStackUtil.createTagCompound(stack);
             NBTTagCompound attachments = gunTag.getCompoundTag("attachments");
-            for(String attachmentKey : attachments.getKeySet())
+            for (String attachmentKey : attachments.getKeySet())
             {
                 IAttachment.Type type = IAttachment.Type.getType(attachmentKey);
-                if(gun.canAttachType(type))
+                if (gun.canAttachType(type))
                 {
                     ItemStack attachmentStack = Gun.getAttachment(type, stack);
-                    if(!attachmentStack.isEmpty())
+                    if (!attachmentStack.isEmpty())
                     {
                         GlStateManager.pushMatrix();
                         {
                             Gun.ScaledPositioned positioned = gun.getAttachmentPosition(type);
-                            if(positioned != null)
+                            if (positioned != null)
                             {
                                 double displayX = positioned.xOffset * 0.0625;
                                 double displayY = positioned.yOffset * 0.0625;
@@ -690,7 +696,7 @@ public class RenderEvents
                                 GlStateManager.scale(positioned.scale, positioned.scale, positioned.scale);
 
                                 IOverrideModel model = ModelOverrides.getModel(attachmentStack);
-                                if(model != null)
+                                if (model != null)
                                 {
                                     model.render(partialTicks, transformType, attachmentStack, stack, entity);
                                 }
@@ -710,9 +716,9 @@ public class RenderEvents
     private void renderMuzzleFlash(ItemStack weapon)
     {
         Gun gun = ((ItemGun) weapon.getItem()).getGun();
-        if(drawFlash)
+        if (drawFlash)
         {
-            if(flash == null)
+            if (flash == null)
             {
                 flash = new ItemStack(ModGuns.PARTS, 1, 2);
             }
@@ -722,10 +728,10 @@ public class RenderEvents
                 GlStateManager.disableLighting();
                 GlStateManager.translate(gun.display.flash.xOffset * 0.0625, gun.display.flash.yOffset * 0.0625, gun.display.flash.zOffset * 0.0625);
 
-                if(!Gun.getAttachment(IAttachment.Type.BARREL, weapon).isEmpty())
+                if (!Gun.getAttachment(IAttachment.Type.BARREL, weapon).isEmpty())
                 {
                     Gun.ScaledPositioned positioned = gun.getAttachmentPosition(IAttachment.Type.BARREL);
-                    if(positioned != null)
+                    if (positioned != null)
                     {
                         GlStateManager.translate(0, 0, (gun.display.flash.zOffset - positioned.zOffset) * 0.0625 - positioned.scale);
                         GlStateManager.scale(0.5, 0.5, 0);
@@ -754,7 +760,7 @@ public class RenderEvents
         GlStateManager.pushMatrix();
 
         Gun gun = ((ItemGun) stack.getItem()).getModifiedGun(stack);
-        if(gun.general.gripType == GripType.TWO_HANDED)
+        if (gun.general.gripType == GripType.TWO_HANDED)
         {
             GlStateManager.translate(0, 0, -1);
             GlStateManager.rotate(180F, 0, 1, 0);
@@ -765,7 +771,7 @@ public class RenderEvents
             int side = hand.opposite() == EnumHandSide.RIGHT ? 1 : -1;
             GlStateManager.translate(6.5 * side * 0.0625, -0.55, -0.5625);
 
-            if(Minecraft.getMinecraft().player.getSkinType().equals("slim") && hand.opposite() == EnumHandSide.LEFT)
+            if (Minecraft.getMinecraft().player.getSkinType().equals("slim") && hand.opposite() == EnumHandSide.LEFT)
             {
                 GlStateManager.translate(0.03125F * -side, 0, 0);
             }
@@ -778,13 +784,13 @@ public class RenderEvents
             GlStateManager.scale(0.5, 0.5, 0.5);
             this.renderArm(hand.opposite(), 0.0625F);
         }
-        else if(gun.general.gripType == GripType.ONE_HANDED)
+        else if (gun.general.gripType == GripType.ONE_HANDED)
         {
             GlStateManager.translate(0, 0, -1);
             GlStateManager.rotate(180F, 0, 1, 0);
 
             double centerOffset = 2.5;
-            if(Minecraft.getMinecraft().player.getSkinType().equals("slim"))
+            if (Minecraft.getMinecraft().player.getSkinType().equals("slim"))
             {
                 centerOffset += hand == EnumHandSide.RIGHT ? 0.2 : 0.8;
             }
@@ -802,20 +808,20 @@ public class RenderEvents
     private void renderReloadArm(ItemStack stack, EnumHandSide hand)
     {
         Minecraft mc = Minecraft.getMinecraft();
-        if(mc.player.ticksExisted < startTick || reloadTimer != 5)
+        if (mc.player.ticksExisted < startTick || reloadTimer != 5)
             return;
 
         Gun gun = ((ItemGun) stack.getItem()).getModifiedGun(stack);
 
         ItemAmmo ammo = AmmoRegistry.getInstance().getAmmo(gun.projectile.item);
-        if(ammo == null)
+        if (ammo == null)
             return;
 
         GlStateManager.pushMatrix();
 
         float reload = ((mc.player.ticksExisted - startTick + mc.getRenderPartialTicks()) % 10F) / 10F;
         float percent = 1.0F - reload;
-        if(percent >= 0.5F)
+        if (percent >= 0.5F)
         {
             percent = 1.0F - percent;
         }
@@ -834,7 +840,7 @@ public class RenderEvents
 
         GlStateManager.scale(0.5, 0.5, 0.5);
         this.renderArm(hand.opposite(), 0.0625F);
-        if(reload < 0.5F)
+        if (reload < 0.5F)
         {
             GlStateManager.pushMatrix();
             GlStateManager.translate(-side * 5 * 0.0625, 15 * 0.0625, -1 * 0.0625);
@@ -869,11 +875,11 @@ public class RenderEvents
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
     public void blindPlayer(RenderGameOverlayEvent.Pre event)
     {
-        if(event.getType() != ElementType.ALL)
+        if (event.getType() != ElementType.ALL)
             return;
 
         PotionEffect effect = Minecraft.getMinecraft().player.getActivePotionEffect(ModPotions.BLINDED);
-        if(effect != null)
+        if (effect != null)
         {
             // Render white screen-filling overlay at full alpha effect when duration is above threshold
             // When below threshold, fade to full transparency as duration approaches 0
@@ -885,26 +891,26 @@ public class RenderEvents
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void onRenderLastWorld(RenderWorldLastEvent event)
     {
-        if(FMLClientHandler.instance().hasOptifine())
+        if (FMLClientHandler.instance().hasOptifine())
         {
             try
             {
                 Class<?> clazz = Class.forName("net.optifine.shaders.Shaders");
-                if(clazz != null)
+                if (clazz != null)
                 {
                     Field field = clazz.getDeclaredField("activeProgramID");
                     int activeProgramID = (int) field.get(null);
                     shadersEnabled = activeProgramID != 0;
                 }
             }
-            catch(ClassNotFoundException | NoSuchFieldException | IllegalAccessException e)
+            catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException e)
             {
                 e.printStackTrace();
             }
         }
-        if(!shadersEnabled)
+        if (!shadersEnabled)
         {
-            if(screenTextureId == -1)
+            if (screenTextureId == -1)
             {
                 screenTextureId = GlStateManager.generateTexture();
             }
@@ -912,7 +918,7 @@ public class RenderEvents
             GlStateManager.bindTexture(screenTextureId);
             GL11.glCopyTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGB, 0, 0, mc.displayWidth, mc.displayHeight, 0);
         }
-        else if(screenTextureId != -1)
+        else if (screenTextureId != -1)
         {
             GlStateManager.deleteTexture(screenTextureId);
             screenTextureId = -1;
@@ -921,7 +927,7 @@ public class RenderEvents
 
     public static CooldownTracker getCooldownTracker(UUID uuid)
     {
-        if(!COOLDOWN_TRACKER_MAP.containsKey(uuid))
+        if (!COOLDOWN_TRACKER_MAP.containsKey(uuid))
         {
             COOLDOWN_TRACKER_MAP.put(uuid, new CooldownTracker());
         }
@@ -931,7 +937,7 @@ public class RenderEvents
     @SubscribeEvent
     public void onRenderBullets(RenderWorldLastEvent event)
     {
-        for(Bullet bullet : bullets)
+        for (Bullet bullet : bullets)
         {
             this.renderBullet(bullet, event.getPartialTicks());
         }
@@ -940,7 +946,7 @@ public class RenderEvents
     private void renderBullet(Bullet bullet, float partialTicks)
     {
         Entity entity = Minecraft.getMinecraft().getRenderViewEntity();
-        if(entity == null || bullet.isFinished() || bullet.getProjectile() == null)
+        if (entity == null || bullet.isFinished() || bullet.getProjectile() == null)
             return;
 
         GlStateManager.pushMatrix();
@@ -974,9 +980,9 @@ public class RenderEvents
             double length = (motionVec.length() / 3.0) * bullet.getTrailLengthMultiplier();
 
             int trailColor = bullet.getTrailColor();
-            float r = (float)(trailColor >> 16 & 255) / 255.0F;
-            float g = (float)(trailColor >> 8 & 255) / 255.0F;
-            float b = (float)(trailColor & 255) / 255.0F;
+            float r = (float) (trailColor >> 16 & 255) / 255.0F;
+            float g = (float) (trailColor >> 8 & 255) / 255.0F;
+            float b = (float) (trailColor & 255) / 255.0F;
             float a = 1.0F;
 
             buffer.pos(0, 0, -0.035).tex(0, 0).color(r, g, b, a).endVertex();
@@ -997,7 +1003,7 @@ public class RenderEvents
         }
 
         // No point rendering item if empty, so return
-        if(bullet.getProjectile().getItem().isEmpty())
+        if (bullet.getProjectile().getItem().isEmpty())
         {
             GlStateManager.popMatrix();
             return;
@@ -1018,7 +1024,7 @@ public class RenderEvents
         }
         int x = brightness % 65536;
         int y = brightness / 65536;
-        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float)x, (float)y);
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, (float) x, (float) y);
         Minecraft.getMinecraft().getRenderItem().renderItem(bullet.getProjectile().getItem(), ItemCameraTransforms.TransformType.NONE);
         mc.entityRenderer.disableLightmap();
 
@@ -1028,7 +1034,7 @@ public class RenderEvents
     @SubscribeEvent
     public void onTickBullets(TickEvent.ClientTickEvent event)
     {
-        if(event.phase == TickEvent.Phase.END)
+        if (event.phase == TickEvent.Phase.END)
         {
             bullets.forEach(bullet -> bullet.tick(Minecraft.getMinecraft().world));
             bullets.removeIf(Bullet::isFinished);
