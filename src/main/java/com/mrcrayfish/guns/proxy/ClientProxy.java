@@ -97,7 +97,7 @@ public class ClientProxy extends CommonProxy
 			}
 			return -1;
 		};
-		RegistrationHandler.Items.getItems().forEach(item ->
+		ItemColored.COLORED_ITEMS.forEach(item ->
 		{
 			if(item instanceof ItemColored)
 			{
