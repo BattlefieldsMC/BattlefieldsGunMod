@@ -10,8 +10,7 @@ import javax.annotation.Nullable;
 /**
  * Author: MrCrayfish
  */
-public class Bullet
-{
+public class Bullet {
     private EntityProjectile projectile;
     private int entityId;
     private double posX;
@@ -26,8 +25,7 @@ public class Bullet
     private int trailColor;
     private double trailLengthMultiplier;
 
-    public Bullet(@Nullable EntityProjectile projectile, int entityId, double posX, double posY, double posZ, double motionX, double motionY, double motionZ, int trailColor, double trailLengthMultiplier)
-    {
+    public Bullet(@Nullable EntityProjectile projectile, int entityId, double posX, double posY, double posZ, double motionX, double motionY, double motionZ, int trailColor, double trailLengthMultiplier) {
         this.projectile = projectile;
         this.entityId = entityId;
         this.posX = posX;
@@ -41,20 +39,21 @@ public class Bullet
         this.updateHeading();
     }
 
-    private void updateHeading()
-    {
+    private void updateHeading() {
         float d = MathHelper.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
         this.rotationYaw = (float) (MathHelper.atan2(this.motionX, this.motionZ) * (180D / Math.PI));
         this.rotationPitch = (float) (MathHelper.atan2(this.motionY, (double) d) * (180D / Math.PI));
     }
 
-    public void tick(World world)
-    {
-        if(this.projectile == null)
-        {
+    public void tick(@Nullable World world) {
+        if (world == null) {
+            this.finished = true;
+            return;
+        }
+
+        if (this.projectile == null) {
             Entity entity = world.getEntityByID(this.entityId);
-            if(entity instanceof EntityProjectile)
-            {
+            if (entity instanceof EntityProjectile) {
                 this.projectile = (EntityProjectile) entity;
                 /*this.posX = this.projectile.posX;
                 this.posY = this.projectile.posY;
@@ -63,82 +62,65 @@ public class Bullet
                 this.motionY = this.projectile.motionY;
                 this.motionZ = this.projectile.motionZ;*/
             }
-        }
-        else if(this.projectile.isDead)
-        {
+        } else if (this.projectile.isDead) {
             this.finished = true;
-        }
-        else
-        {
+        } else {
             this.posX += this.motionX;
             this.posY += this.motionY;
             this.posZ += this.motionZ;
 
-            if(this.projectile.getProjectile().gravity)
-            {
+            if (this.projectile.getProjectile().gravity) {
                 this.motionY -= 0.05;
                 this.updateHeading();
             }
         }
     }
 
-    public EntityProjectile getProjectile()
-    {
+    public EntityProjectile getProjectile() {
         return projectile;
     }
 
-    public double getPosX()
-    {
+    public double getPosX() {
         return posX;
     }
 
-    public double getPosY()
-    {
+    public double getPosY() {
         return posY;
     }
 
-    public double getPosZ()
-    {
+    public double getPosZ() {
         return posZ;
     }
 
-    public double getMotionX()
-    {
+    public double getMotionX() {
         return motionX;
     }
 
-    public double getMotionY()
-    {
+    public double getMotionY() {
         return motionY;
     }
 
-    public double getMotionZ()
-    {
+    public double getMotionZ() {
         return motionZ;
     }
 
-    public float getRotationYaw()
-    {
+    public float getRotationYaw() {
         return rotationYaw;
     }
 
-    public float getRotationPitch()
-    {
+    public float getRotationPitch() {
         return rotationPitch;
     }
 
-    public boolean isFinished()
-    {
+    public boolean isFinished() {
         return finished;
     }
 
-    public int getTrailColor()
-    {
+    public int getTrailColor() {
         return trailColor;
     }
 
-    public double getTrailLengthMultiplier()
-    {
+    public double getTrailLengthMultiplier() {
         return trailLengthMultiplier;
     }
 }
