@@ -15,10 +15,7 @@ import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLServerStartedEvent;
+import net.minecraftforge.fml.common.event.*;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import org.apache.logging.log4j.Logger;
 
@@ -74,9 +71,9 @@ public class MrCrayfishGunMod
 	}
 
 	@EventHandler
-	public void onServerStart(FMLServerStartedEvent event)
+	public void onServerStart(FMLServerStartingEvent event)
 	{
-		GameRules rules = FMLCommonHandler.instance().getMinecraftServerInstance().getWorld(0).getGameRules();
+		GameRules rules = event.getServer().getWorld(0).getGameRules();
 		if (!rules.hasRule("gunGriefing"))
 		{
 			rules.addGameRule("gunGriefing", "true", GameRules.ValueType.BOOLEAN_VALUE);
