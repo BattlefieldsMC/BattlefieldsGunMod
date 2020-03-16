@@ -420,13 +420,9 @@ public class RenderEvents
                 GlStateManager.enableAlpha();
                 Minecraft.getMinecraft().getTextureManager().bindTexture(Gui.ICONS);
 
-                GlStateManager.pushMatrix();
-                {
-                    GlStateManager.color(1.0F, 1.0F, 1.0F);
-                    RenderUtil.drawScaledCustomSizeModalRect(x, y, 36, 94, 16, 4, 16 * scale, 4 * scale, 256, 256);
-                    RenderUtil.drawScaledCustomSizeModalRect(x, y, 52, 94, (int) Math.ceil(16 * coolDown), 4, (int) Math.ceil(16 * coolDown) * scale, 4 * scale, 256, 256);
-                }
-                GlStateManager.popMatrix();
+                GlStateManager.color(1.0F, 1.0F, 1.0F);
+                RenderUtil.drawScaledCustomSizeModalRect(x, y, 36, 94, 16, 4, 16 * scale, 4 * scale, 256, 256);
+                RenderUtil.drawScaledCustomSizeModalRect(x, y, 52, 94, (int) Math.ceil(16 * coolDown), 4, (int) Math.ceil(16 * coolDown) * scale, 4 * scale, 256, 256);
             }
         }
     }
