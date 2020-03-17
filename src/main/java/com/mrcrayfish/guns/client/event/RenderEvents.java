@@ -434,7 +434,7 @@ public class RenderEvents
         EntityLivingBase entity = event.getEntity();
         ItemStack heldItem = entity.getHeldItem(hand);
 
-        if (hand == EnumHand.OFF_HAND && entity.getHeldItemMainhand().getItem() instanceof ItemGun && !((ItemGun) entity.getHeldItemMainhand().getItem()).getGun().general.gripType.canRenderOffhand())
+        if (hand == EnumHand.OFF_HAND)
         {
             event.setCanceled(true);
             return;
