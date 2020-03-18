@@ -75,11 +75,11 @@ public class ItemGun extends ItemColored
                 float additionalDamage = tagCompound.getFloat("AdditionalDamage");
                 if(additionalDamage > 0)
                 {
-                    additionalDamageText = TextFormatting.GREEN + " +" + tagCompound.getFloat("AdditionalDamage");
+                    additionalDamageText = TextFormatting.GREEN + " +" + ItemStack.DECIMALFORMAT.format(additionalDamage);
                 }
                 else if(additionalDamage < 0)
                 {
-                    additionalDamageText = TextFormatting.RED + " " + tagCompound.getFloat("AdditionalDamage");
+                    additionalDamageText = TextFormatting.RED + " " + ItemStack.DECIMALFORMAT.format(additionalDamage);
                 }
             }
         }
