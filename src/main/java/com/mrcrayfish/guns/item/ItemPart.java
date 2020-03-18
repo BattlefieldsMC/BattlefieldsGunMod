@@ -24,7 +24,7 @@ public class ItemPart extends Item implements ISubItems
     @Override
     public String getTranslationKey(ItemStack stack)
     {
-        return super.getTranslationKey(stack) + "_" + PARTS[stack.getItemDamage()];
+        return super.getTranslationKey(stack) + "_" + PARTS[stack.getItemDamage() > PARTS.length ? 0 : stack.getItemDamage()]; // Battlefields - Fixed crash when given invalid metadata
     }
 
     @Override

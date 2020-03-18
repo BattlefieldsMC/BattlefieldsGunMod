@@ -25,7 +25,7 @@ public class ItemScope extends ItemAttachment implements ISubItems
     @Override
     public String getTranslationKey(ItemStack stack)
     {
-        return super.getTranslationKey(stack) + "." + Type.values()[stack.getItemDamage()].name;
+        return super.getTranslationKey(stack) + "." + Type.values()[stack.getItemDamage() > Type.values().length ? 0 : stack.getItemDamage()].name; // Battlefields - Fixed crash when given invalid metadata
     }
 
     @Override
