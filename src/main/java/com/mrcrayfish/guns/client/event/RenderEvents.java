@@ -447,27 +447,6 @@ public class RenderEvents
             gun.general.gripType.getHeldAnimation().applyHeldItemTransforms(hand, entity instanceof EntityPlayer ? GunHandler.getAimProgress((EntityPlayer) entity, event.getPartialTicks()) : 0f);
             this.renderWeapon(entity, heldItem, event.getTransformType(), event.getPartialTicks());
         }
-
-        //        if (hand == EnumHand.OFF_HAND)
-        //        {
-        //            ItemStack mainHandStack = entity.getHeldItemMainhand();
-        //            if (!mainHandStack.isEmpty() && mainHandStack.getItem() instanceof ItemGun)
-        //            {
-        //                Gun mainHandGun = ((ItemGun) mainHandStack.getItem()).getGun();
-        //                if (!mainHandGun.general.gripType.canRenderOffhand())
-        //                {
-        //                    event.setCanceled(true);
-        //                }
-        //                else if (heldItem.getItem() instanceof ItemGun)
-        //                {
-        //                    Gun gun = ((ItemGun) heldItem.getItem()).getGun();
-        //                    if (gun.general.gripType.canRenderOffhand())
-        //                    {
-        //                        this.renderWeapon(entity, heldItem, event.getTransformType(), event.getPartialTicks());
-        //                    }
-        //                }
-        //            }
-        //        }
     }
 
     @SubscribeEvent
