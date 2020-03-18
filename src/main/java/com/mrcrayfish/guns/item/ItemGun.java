@@ -84,7 +84,7 @@ public class ItemGun extends ItemColored
             }
         }
 
-        tooltip.add(TextFormatting.GRAY + I18n.format("info.cgm.damage", TextFormatting.RESET + Float.toString(gun.projectile.getDamage(modifiedGun)) + additionalDamageText));
+        tooltip.add(TextFormatting.GRAY + I18n.format("info.cgm.damage", TextFormatting.RESET + ItemStack.DECIMALFORMAT.format(gun.projectile.getDamage(modifiedGun)) + additionalDamageText));
 
         if(tagCompound != null)
         {
