@@ -657,7 +657,7 @@ public class RenderEvents
     private void renderMuzzleFlash(ItemStack weapon)
     {
         Gun gun = ((ItemGun) weapon.getItem()).getGun();
-        if (drawFlash)
+        if (drawFlash && gun.display.flash != null)
         {
             if (flash == null)
             {
