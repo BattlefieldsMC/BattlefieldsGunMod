@@ -23,7 +23,6 @@ import com.mrcrayfish.guns.entity.EntityProjectile;
 import com.mrcrayfish.guns.entity.EntityThrowableGrenade;
 import com.mrcrayfish.guns.entity.EntityThrowableStunGrenade;
 import com.mrcrayfish.guns.init.ModGuns;
-import com.mrcrayfish.guns.init.RegistrationHandler;
 import com.mrcrayfish.guns.item.GunRegistry;
 import com.mrcrayfish.guns.item.ItemColored;
 import com.mrcrayfish.guns.item.ItemGun;
@@ -38,7 +37,6 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.color.IItemColor;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundCategory;
@@ -57,113 +55,113 @@ import java.util.Random;
 
 public class ClientProxy extends CommonProxy
 {
-	public static RenderEvents renderEvents;
-	public static boolean controllableLoaded = false;
+    public static RenderEvents renderEvents;
+    public static boolean controllableLoaded = false;
 
-	@Override
-	public void preInit()
-	{
-		super.preInit();
+    @Override
+    public void preInit()
+    {
+        super.preInit();
 
-		MinecraftForge.EVENT_BUS.register(renderEvents = new RenderEvents());
-		MinecraftForge.EVENT_BUS.register(new GunHandler());
-		MinecraftForge.EVENT_BUS.register(new ReloadHandler());
+        MinecraftForge.EVENT_BUS.register(renderEvents = new RenderEvents());
+        MinecraftForge.EVENT_BUS.register(new GunHandler());
+        MinecraftForge.EVENT_BUS.register(new ReloadHandler());
 
-		RenderingRegistry.registerEntityRenderingHandler(EntityProjectile.class, RenderProjectile::new);
-		RenderingRegistry.registerEntityRenderingHandler(EntityThrowableGrenade.class, RenderGrenade::new);
-		RenderingRegistry.registerEntityRenderingHandler(EntityThrowableStunGrenade.class, RenderGrenade::new);
+        RenderingRegistry.registerEntityRenderingHandler(EntityProjectile.class, RenderProjectile::new);
+        RenderingRegistry.registerEntityRenderingHandler(EntityThrowableGrenade.class, RenderGrenade::new);
+        RenderingRegistry.registerEntityRenderingHandler(EntityThrowableStunGrenade.class, RenderGrenade::new);
 
-		KeyBinds.register();
+        KeyBinds.register();
 
-		SoundEvents.initReflection();
+        SoundEvents.initReflection();
 
-		if(Loader.isModLoaded("controllable"))
-		{
-			controllableLoaded = true;
-			MinecraftForge.EVENT_BUS.register(new ControllerEvents());
-		}
-	}
+        if (Loader.isModLoaded("controllable"))
+        {
+            controllableLoaded = true;
+            MinecraftForge.EVENT_BUS.register(new ControllerEvents());
+        }
+    }
 
-	@Override
-	@SuppressWarnings({"ConstantConditions"})
-	public void init()
-	{
-		super.init();
-		IItemColor color = (stack, index) ->
-		{
-			if(index == 0 && stack.hasTagCompound() && stack.getTagCompound().hasKey("color", Constants.NBT.TAG_INT))
-			{
-				return stack.getTagCompound().getInteger("color");
-			}
-			return -1;
-		};
-		ItemColored.COLORED_ITEMS.forEach(item ->
-		{
-			if(item instanceof ItemColored)
-			{
-				Minecraft.getMinecraft().getItemColors().registerItemColorHandler(color, item);
-			}
-		});
+    @Override
+    @SuppressWarnings({"ConstantConditions"})
+    public void init()
+    {
+        super.init();
+        IItemColor color = (stack, index) ->
+        {
+            if (index == 0 && stack.hasTagCompound() && stack.getTagCompound().hasKey("color", Constants.NBT.TAG_INT))
+            {
+                return stack.getTagCompound().getInteger("color");
+            }
+            return -1;
+        };
+        ItemColored.COLORED_ITEMS.forEach(item ->
+        {
+            if (item instanceof ItemColored)
+            {
+                Minecraft.getMinecraft().getItemColors().registerItemColorHandler(color, item);
+            }
+        });
 
-		ModelOverrides.register(new ItemStack(ModGuns.CHAIN_GUN), new ModelChainGun());
-		ModelOverrides.register(new ItemStack(ModGuns.SCOPES, 1, ItemScope.Type.SMALL.ordinal()), new ModelShortScope());
-		ModelOverrides.register(new ItemStack(ModGuns.SCOPES, 1, ItemScope.Type.MEDIUM.ordinal()), new ModelMediumScope());
-		ModelOverrides.register(new ItemStack(ModGuns.SCOPES, 1, ItemScope.Type.LONG.ordinal()), new ModelLongScope());
+        ModelOverrides.register(new ItemStack(ModGuns.CHAIN_GUN), new ModelChainGun());
+        ModelOverrides.register(new ItemStack(ModGuns.SCOPES, 1, ItemScope.Type.SMALL.ordinal()), new ModelShortScope());
+        ModelOverrides.register(new ItemStack(ModGuns.SCOPES, 1, ItemScope.Type.MEDIUM.ordinal()), new ModelMediumScope());
+        ModelOverrides.register(new ItemStack(ModGuns.SCOPES, 1, ItemScope.Type.LONG.ordinal()), new ModelLongScope());
 
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.PISTOL), new DisplayProperty(0.0F, 0.55F, -0.25F, 0.0F, 0.0F, 0.0F, 3.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.SHOTGUN), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 3.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.RIFLE), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 3.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.GRENADE_LAUNCHER), new DisplayProperty(0.0F, 0.55F, -0.1F, 0.0F, 0.0F, 0.0F, 3.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.BAZOOKA), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 2.5F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.CHAIN_GUN), new DisplayProperty(0.0F, 0.55F, 0.1F, 0.0F, 0.0F, 0.0F, 2.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.ASSAULT_RIFLE), new DisplayProperty(0.0F, 0.55F, -0.15F, 0.0F, 0.0F, 0.0F, 3.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.BASIC_AMMO), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.ADVANCED_AMMO), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.SHELL), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 1.5F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.GRENADE), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 3.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.MISSILE), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 2.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.STUN_GRENADE), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 3.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.SCOPES, 1, ItemScope.Type.SMALL.ordinal()), new DisplayProperty(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 4.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.SCOPES, 1, ItemScope.Type.MEDIUM.ordinal()), new DisplayProperty(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 4.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.SCOPES, 1, ItemScope.Type.LONG.ordinal()), new DisplayProperty(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 4.0F));
-		GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.SILENCER), new DisplayProperty(0.0F, 0.25F, 0.5F, 0.0F, 0.0F, 0.0F, 1.5F));
-	}
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.PISTOL), new DisplayProperty(0.0F, 0.55F, -0.25F, 0.0F, 0.0F, 0.0F, 3.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.SHOTGUN), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 3.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.RIFLE), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 3.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.GRENADE_LAUNCHER), new DisplayProperty(0.0F, 0.55F, -0.1F, 0.0F, 0.0F, 0.0F, 3.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.BAZOOKA), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 2.5F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.CHAIN_GUN), new DisplayProperty(0.0F, 0.55F, 0.1F, 0.0F, 0.0F, 0.0F, 2.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.ASSAULT_RIFLE), new DisplayProperty(0.0F, 0.55F, -0.15F, 0.0F, 0.0F, 0.0F, 3.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.BASIC_AMMO), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.ADVANCED_AMMO), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 1.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.SHELL), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 1.5F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.GRENADE), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 3.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.MISSILE), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 2.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.STUN_GRENADE), new DisplayProperty(0.0F, 0.55F, 0.0F, 0.0F, 0.0F, 0.0F, 3.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.SCOPES, 1, ItemScope.Type.SMALL.ordinal()), new DisplayProperty(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 4.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.SCOPES, 1, ItemScope.Type.MEDIUM.ordinal()), new DisplayProperty(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 4.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.SCOPES, 1, ItemScope.Type.LONG.ordinal()), new DisplayProperty(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 4.0F));
+        GuiWorkbench.addDisplayProperty(new ItemStack(ModGuns.SILENCER), new DisplayProperty(0.0F, 0.25F, 0.5F, 0.0F, 0.0F, 0.0F, 1.5F));
+    }
 
-	@Override
-	public void postInit()
-	{
-		super.postInit();
-		ModelOverrides.getModelMap().forEach((item, map) -> map.values().forEach(IOverrideModel::init));
-	}
+    @Override
+    public void postInit()
+    {
+        super.postInit();
+        ModelOverrides.getModelMap().forEach((item, map) -> map.values().forEach(IOverrideModel::init));
+    }
 
-	@Override
-	public void showMuzzleFlash()
-	{
-		RenderEvents.drawFlash = true;
-	}
+    @Override
+    public void showMuzzleFlash()
+    {
+        RenderEvents.drawFlash = true;
+    }
 
-	@Override
-	public void playClientSound(SoundEvent sound)
-	{
-		Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(sound, 1.0F));
-	}
+    @Override
+    public void playClientSound(SoundEvent sound)
+    {
+        Minecraft.getMinecraft().getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(sound, 1.0F));
+    }
 
-	@Override
-	public void playClientSound(double posX, double posY, double posZ, SoundEvent event, SoundCategory category, float volume, float pitch)
-	{
-		ISound sound = new PositionedSoundRecord(event.getSoundName(), category, volume, pitch, false, 0, ISound.AttenuationType.NONE, 0, 0, 0);
-		Minecraft.getMinecraft().getSoundHandler().playSound(sound);
-	}
+    @Override
+    public void playClientSound(double posX, double posY, double posZ, SoundEvent event, SoundCategory category, float volume, float pitch)
+    {
+        ISound sound = new PositionedSoundRecord(event.getSoundName(), category, volume, pitch, false, 0, ISound.AttenuationType.NONE, 0, 0, 0);
+        Minecraft.getMinecraft().getSoundHandler().playSound(sound);
+    }
 
-	@SubscribeEvent
-	public void onClientDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event)
-	{
-		GunRegistry.getInstance().getGuns().forEach((location, gun) -> gun.getGun().serverGun = null);
-	}
+    @SubscribeEvent
+    public void onClientDisconnect(FMLNetworkEvent.ClientDisconnectionFromServerEvent event)
+    {
+        GunRegistry.getInstance().getGuns().forEach((location, gun) -> gun.getGun().serverGun = null);
+    }
 
-	@Override
-	public void createExplosionStunGrenade(double x, double y, double z)
-	{
+    @Override
+    public void createExplosionStunGrenade(double x, double y, double z)
+    {
         ParticleManager particleManager = Minecraft.getMinecraft().effectRenderer;
         World world = Minecraft.getMinecraft().world;
         Random rand = world.rand;
@@ -176,11 +174,11 @@ public class ClientProxy extends CommonProxy
         for (int i = 0; i < 30; i++)
         {
             Particle smoke = createParticle(x, y, z, world, rand, new ParticleCloud.Factory(), 4);
-            smoke.setMaxAge((int)((8 / (Math.random() * 0.1 + 0.4)) * 0.5));
+            smoke.setMaxAge((int) ((8 / (Math.random() * 0.1 + 0.4)) * 0.5));
             particleManager.addEffect(smoke);
             particleManager.addEffect(createParticle(x, y, z, world, rand, new ParticleCrit.Factory(), 4));
         }
-	}
+    }
 
     private Particle createParticle(double x, double y, double z, World world, Random rand, IParticleFactory factory, double velocityMultiplier)
     {
@@ -188,85 +186,85 @@ public class ClientProxy extends CommonProxy
                 (rand.nextDouble() - 0.5) * velocityMultiplier, (rand.nextDouble() - 0.5) * velocityMultiplier, (rand.nextDouble() - 0.5) * velocityMultiplier);
     }
 
-	@Override
-	public boolean canShoot()
-	{
-		return GunConfig.CLIENT.controls.oldControls;
-	}
+    @Override
+    public boolean canShoot()
+    {
+        return GunConfig.CLIENT.controls.oldControls;
+    }
 
-	@Override
-	public boolean isZooming()
-	{
-		Minecraft mc = Minecraft.getMinecraft();
-		if(!mc.inGameHasFocus)
-			return false;
-		
-		if(mc.player.isSpectator())
-			return false;
+    @Override
+    public boolean isZooming()
+    {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (!mc.inGameHasFocus)
+            return false;
 
-		if(!(mc.player.inventory.getCurrentItem().getItem() instanceof ItemGun))
-			return false;
+        if (mc.player.isSpectator())
+            return false;
 
-		boolean zooming = GunConfig.CLIENT.controls.oldControls ? GuiScreen.isAltKeyDown() : Mouse.isButtonDown(1);
-		if(controllableLoaded)
-		{
-			Controller controller = Controllable.getController();
-			if(controller != null)
-			{
-				zooming |= controller.getLTriggerValue() >= 0.5;
-			}
-		}
+        if (!(mc.player.inventory.getCurrentItem().getItem() instanceof ItemGun))
+            return false;
 
-		return zooming;
-	}
+        boolean zooming = GunConfig.CLIENT.controls.oldControls ? GuiScreen.isAltKeyDown() : Mouse.isButtonDown(1);
+        if (controllableLoaded)
+        {
+            Controller controller = Controllable.getController();
+            if (controller != null)
+            {
+                zooming |= controller.getLTriggerValue() >= 0.5;
+            }
+        }
 
-	@Override
-	public void startReloadAnimation()
-	{
-		renderEvents.playAnimation = true;
-	}
+        return zooming;
+    }
 
-	public static boolean isLookingAtInteractBlock()
-	{
-		Minecraft mc = Minecraft.getMinecraft();
-		if(mc.objectMouseOver != null)
-		{
-			if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
-			{
-				IBlockState state = mc.world.getBlockState(mc.objectMouseOver.getBlockPos());
-				Block block = state.getBlock();
-				if(block instanceof BlockContainer || block.hasTileEntity(state) || block == Blocks.CRAFTING_TABLE)
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    @Override
+    public void startReloadAnimation()
+    {
+        renderEvents.playAnimation = true;
+    }
 
-	public static boolean isLookingAtInteract()
-	{
-		Minecraft mc = Minecraft.getMinecraft();
-		if(mc.objectMouseOver != null)
-		{
-			if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
-			{
-				IBlockState state = mc.world.getBlockState(mc.objectMouseOver.getBlockPos());
-				Block block = state.getBlock();
-				if(block instanceof BlockContainer || block.hasTileEntity(state) || block == Blocks.CRAFTING_TABLE)
-				{
-					return true;
-				}
-			}
-			else if(mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
-			{
-				Entity entity = mc.objectMouseOver.entityHit;
-				if(entity != null)
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+    public static boolean isLookingAtInteractBlock()
+    {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.objectMouseOver != null)
+        {
+            if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
+            {
+                IBlockState state = mc.world.getBlockState(mc.objectMouseOver.getBlockPos());
+                Block block = state.getBlock();
+                if (block instanceof BlockContainer || block.hasTileEntity(state) || block == Blocks.CRAFTING_TABLE)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean isLookingAtInteract()
+    {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.objectMouseOver != null)
+        {
+            if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.BLOCK)
+            {
+                IBlockState state = mc.world.getBlockState(mc.objectMouseOver.getBlockPos());
+                Block block = state.getBlock();
+                if (block instanceof BlockContainer || block.hasTileEntity(state) || block == Blocks.CRAFTING_TABLE)
+                {
+                    return true;
+                }
+            }
+            else if (mc.objectMouseOver.typeOfHit == RayTraceResult.Type.ENTITY)
+            {
+                Entity entity = mc.objectMouseOver.entityHit;
+                if (entity != null)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }
