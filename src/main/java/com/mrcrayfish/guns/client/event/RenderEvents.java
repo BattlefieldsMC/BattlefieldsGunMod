@@ -388,7 +388,7 @@ public class RenderEvents
     }
 
     @SubscribeEvent
-    public void onTick(RenderGameOverlayEvent.Pre event)
+    public void onRenderGameOverlay(RenderGameOverlayEvent.Pre event)
     {
         if (event.getType() != ElementType.TEXT)
             return;
@@ -434,7 +434,7 @@ public class RenderEvents
         EntityLivingBase entity = event.getEntity();
         ItemStack heldItem = entity.getHeldItem(hand);
 
-        if (hand == EnumHand.OFF_HAND)
+        if (hand == EnumHand.OFF_HAND && (entity.getHeldItemOffhand().getItem() instanceof ItemGun || entity.getHeldItemMainhand().getItem() instanceof ItemGun && !((ItemGun) entity.getHeldItemMainhand().getItem()).getGun().general.gripType.canRenderOffhand()))
         {
             event.setCanceled(true);
             return;
@@ -524,16 +524,17 @@ public class RenderEvents
             }
             else
             {
+                int f = player.getPrimaryHand() == EnumHandSide.RIGHT ? 1 : -1;
                 GlStateManager.pushMatrix();
                 GlStateManager.rotate(180F, 0, 1, 0);
                 GlStateManager.rotate(180F, 0, 0, 1);
                 if (player.isSneaking())
                 {
-                    GlStateManager.translate(4.5 * 0.0625, -15 * 0.0625, -4 * 0.0625);
+                    GlStateManager.translate(f * 4.5 * 0.0625, -15 * 0.0625, -4 * 0.0625);
                 }
                 else
                 {
-                    GlStateManager.translate(4.5 * 0.0625, -13 * 0.0625, 1 * 0.0625);
+                    GlStateManager.translate(f * 4.5 * 0.0625, -13 * 0.0625, 1 * 0.0625);
                 }
                 GlStateManager.rotate(90F, 0, 1, 0);
                 GlStateManager.rotate(75F, 0, 0, 1);
