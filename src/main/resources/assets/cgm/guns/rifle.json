@@ -12,9 +12,9 @@
         "item": "cgm:advanced_ammo",
         "visible": false,
         "gravity": true,
-        "damage": 20.0,
+        "damage": 9.0,
         "size": 0.0625,
-        "speed": 15.0,
+        "speed": 40.0,
         "life": 10,
         "damageReduceIfNotZoomed": true
     },

@@ -5,15 +5,17 @@
         "rate": 4,
         "gripType": "two_handed",
         "maxAmmo": 30,
-        "reloadSpeed": 2,
-        "recoilKick": 0.25
+        "reloadSpeed": 5,
+        "recoilKick": 0.25,
+        "alwaysSpread": true,
+        "spread": 3.0
     },
     "projectile": {
         "item": "cgm:basic_ammo",
         "visible": false,
-        "damage": 6.0,
+        "damage": 2.0,
         "size": 0.2,
-        "speed": 10.0,
+        "speed": 30.0,
         "life": 10
     },
     "sounds": {

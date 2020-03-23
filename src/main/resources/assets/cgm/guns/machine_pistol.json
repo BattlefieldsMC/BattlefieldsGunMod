@@ -4,15 +4,16 @@
         "auto": true,
         "rate": 2,
         "gripType": "one_handed",
-        "maxAmmo": 30,
+        "maxAmmo": 25,
         "reloadSpeed": 5,
         "recoilKick": 0.25,
-        "spread": 4.0
+        "spread": 6.0,
+        "alwaysSpread": true
     },
     "projectile": {
         "item": "cgm:basic_ammo",
         "visible": false,
-        "damage": 5.0,
+        "damage": 0.75,
         "size": 0.2,
         "speed": 10.0,
         "life": 10

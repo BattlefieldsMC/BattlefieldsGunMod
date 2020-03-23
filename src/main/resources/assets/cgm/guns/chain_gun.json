@@ -5,17 +5,17 @@
         "rate": 2,
         "gripType": "chain_gun",
         "maxAmmo": 100,
-        "reloadSpeed": 4,
+        "reloadSpeed": 10,
         "recoilAngle": 1.0,
         "alwaysSpread": true,
-        "spread": 3.0
+        "spread": 8.0
     },
     "projectile": {
         "item": "cgm:basic_ammo",
         "visible": false,
-        "damage": 4.0,
+        "damage": 1.0,
         "size": 0.2,
-        "speed": 10.0,
+        "speed": 20.0,
         "life": 10
     },
     "sounds": {

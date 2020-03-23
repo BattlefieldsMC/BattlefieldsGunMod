@@ -4,14 +4,15 @@
         "rate": 12,
         "gripType": "one_handed",
         "maxAmmo": 15,
-        "recoilAngle": 15.0
+        "recoilAngle": 15.0,
+        "reloadSpeed": 3
     },
     "projectile": {
         "item": "cgm:basic_ammo",
         "visible": false,
-        "damage": 10.0,
+        "damage": 3.0,
         "size": 0.2,
-        "speed": 10.0,
+        "speed": 30.0,
         "life": 10,
         "damageReduceOverLife": true
     },
