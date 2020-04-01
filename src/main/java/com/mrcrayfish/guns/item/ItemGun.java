@@ -66,34 +66,34 @@ public class ItemGun extends ItemColored
 
         String additionalDamageText = "";
         NBTTagCompound tagCompound = stack.getTagCompound();
-        if(tagCompound != null)
+        if (tagCompound != null)
         {
-            if(tagCompound.hasKey("AdditionalDamage", Constants.NBT.TAG_FLOAT))
+            if (tagCompound.hasKey("AdditionalDamage", Constants.NBT.TAG_FLOAT))
             {
                 float additionalDamage = tagCompound.getFloat("AdditionalDamage");
-                if(additionalDamage > 0)
+                if (additionalDamage > 0)
                 {
                     additionalDamageText = TextFormatting.GREEN + " +" + ItemStack.DECIMALFORMAT.format(additionalDamage);
                 }
-                else if(additionalDamage < 0)
+                else if (additionalDamage < 0)
                 {
                     additionalDamageText = TextFormatting.RED + " " + ItemStack.DECIMALFORMAT.format(additionalDamage);
                 }
             }
         }
 
-        tooltip.add(TextFormatting.GRAY + I18n.format("info.cgm.damage", TextFormatting.RESET + ItemStack.DECIMALFORMAT.format(gun.projectile.getDamage(modifiedGun)) + additionalDamageText));
+        tooltip.add(TextFormatting.GRAY + I18n.format("info.cgm.damage", TextFormatting.RESET + ItemStack.DECIMALFORMAT.format(modifiedGun.projectile.getDamage(modifiedGun)) + additionalDamageText));
 
-        if(tagCompound != null)
+        if (tagCompound != null)
         {
-            if(tagCompound.getBoolean("IgnoreAmmo"))
+            if (tagCompound.getBoolean("IgnoreAmmo"))
             {
                 tooltip.add(TextFormatting.AQUA + I18n.format("info.cgm.ignore_ammo"));
             }
             else
             {
                 int ammoCount = tagCompound.getInteger("AmmoCount");
-                tooltip.add(TextFormatting.GRAY + I18n.format("info.cgm.ammo", TextFormatting.RESET + Integer.toString(ammoCount), gun.general.getMaxAmmo(modifiedGun)));
+                tooltip.add(TextFormatting.GRAY + I18n.format("info.cgm.ammo", TextFormatting.RESET + Integer.toString(ammoCount), modifiedGun.general.getMaxAmmo(modifiedGun)));
             }
         }
     }
@@ -114,22 +114,22 @@ public class ItemGun extends ItemColored
     public void onUsingTick(ItemStack stack, EntityLivingBase entity, int count)
     {
         Gun modifiedGun = getModifiedGun(stack);
-        if(!modifiedGun.general.auto)
+        if (!modifiedGun.general.auto)
         {
             return;
         }
 
         EntityPlayer player = (EntityPlayer) entity;
 
-        if(!player.world.isRemote)
+        if (!player.world.isRemote)
         {
             return;
         }
 
-        if(ItemGun.hasAmmo(stack) || player.capabilities.isCreativeMode)
+        if (ItemGun.hasAmmo(stack) || player.capabilities.isCreativeMode)
         {
             CooldownTracker tracker = player.getCooldownTracker();
-            if(!tracker.hasCooldown(stack.getItem()))
+            if (!tracker.hasCooldown(stack.getItem()))
             {
                 tracker.setCooldown(stack.getItem(), modifiedGun.general.rate);
                 PacketHandler.INSTANCE.sendToServer(new MessageShoot());
@@ -141,26 +141,26 @@ public class ItemGun extends ItemColored
     public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn)
     {
         ItemStack heldItem = playerIn.getHeldItem(handIn);
-        if(worldIn.isRemote)
+        if (worldIn.isRemote)
         {
-            if(!MrCrayfishGunMod.proxy.canShoot())
+            if (!MrCrayfishGunMod.proxy.canShoot())
             {
                 return new ActionResult<>(EnumActionResult.FAIL, heldItem);
             }
 
-            if(ItemGun.hasAmmo(heldItem) || playerIn.capabilities.isCreativeMode)
+            if (ItemGun.hasAmmo(heldItem) || playerIn.capabilities.isCreativeMode)
             {
-                if(playerIn.isHandActive())
+                if (playerIn.isHandActive())
                 {
                     return new ActionResult<>(EnumActionResult.FAIL, heldItem);
                 }
                 playerIn.setActiveHand(handIn);
 
                 Gun modifiedGun = getModifiedGun(heldItem);
-                if(!modifiedGun.general.auto)
+                if (!modifiedGun.general.auto)
                 {
                     CooldownTracker tracker = playerIn.getCooldownTracker();
-                    if(!tracker.hasCooldown(heldItem.getItem()))
+                    if (!tracker.hasCooldown(heldItem.getItem()))
                     {
                         tracker.setCooldown(heldItem.getItem(), modifiedGun.general.rate);
                         PacketHandler.INSTANCE.sendToServer(new MessageShoot());
@@ -177,19 +177,19 @@ public class ItemGun extends ItemColored
 
     public static void fire(World worldIn, EntityPlayer playerIn, ItemStack heldItem)
     {
-        if(worldIn.isRemote)
+        if (worldIn.isRemote)
         {
             return;
         }
 
         ItemGun item = (ItemGun) heldItem.getItem();
-        if(CommonEvents.getCooldownTracker(playerIn.getUniqueID()).hasCooldown(item))
+        if (CommonEvents.getCooldownTracker(playerIn.getUniqueID()).hasCooldown(item))
         {
             MrCrayfishGunMod.logger.info(playerIn.getName() + "(" + playerIn.getUniqueID() + ") tried to fire before cooldown finished or server is lagging?");
             return;
         }
 
-        if(playerIn.getDataManager().get(CommonEvents.RELOADING))
+        if (playerIn.getDataManager().get(CommonEvents.RELOADING))
         {
             playerIn.getDataManager().set(CommonEvents.RELOADING, false);
         }
@@ -197,24 +197,24 @@ public class ItemGun extends ItemColored
         boolean silenced = Gun.getAttachment(IAttachment.Type.BARREL, heldItem).getItem() == ModGuns.SILENCER;
 
         Gun modifiedGun = item.getModifiedGun(heldItem);
-        if(!modifiedGun.general.alwaysSpread && modifiedGun.general.spread > 0F)
+        if (!modifiedGun.general.alwaysSpread && modifiedGun.general.spread > 0F)
         {
             SpreadHandler.getSpreadTracker(playerIn.getUniqueID()).update(item);
         }
 
-        for(int i = 0; i < modifiedGun.general.projectileAmount; i++)
+        for (int i = 0; i < modifiedGun.general.projectileAmount; i++)
         {
             ProjectileFactory factory = AmmoRegistry.getInstance().getFactory(modifiedGun.projectile.item);
             EntityProjectile bullet = factory.create(worldIn, playerIn, item, modifiedGun);
             bullet.setWeapon(heldItem);
             bullet.setAdditionalDamage(ItemGun.getAdditionalDamage(heldItem));
-            if(silenced)
+            if (silenced)
             {
                 bullet.setDamageModifier(0.75F);
             }
             worldIn.spawnEntity(bullet);
 
-            if(!modifiedGun.projectile.visible)
+            if (!modifiedGun.projectile.visible)
             {
                 MessageBullet messageBullet = new MessageBullet(bullet.getEntityId(), bullet.posX, bullet.posY, bullet.posZ, bullet.motionX, bullet.motionY, bullet.motionZ, modifiedGun.projectile.trailColor, modifiedGun.projectile.trailLengthMultiplier);
                 PacketHandler.INSTANCE.sendToAllAround(messageBullet, new NetworkRegistry.TargetPoint(playerIn.dimension, playerIn.posX, playerIn.posY, playerIn.posZ, GunConfig.SERVER.network.projectileTrackingRange));
@@ -222,7 +222,7 @@ public class ItemGun extends ItemColored
             }
         }
 
-        if(GunConfig.SERVER.aggroMobs.enabled)
+        if (GunConfig.SERVER.aggroMobs.enabled)
         {
             double r = silenced ? GunConfig.SERVER.aggroMobs.rangeSilenced : GunConfig.SERVER.aggroMobs.rangeUnsilenced;
             double x = playerIn.posX + 0.5;
@@ -231,27 +231,27 @@ public class ItemGun extends ItemColored
             AxisAlignedBB box = new AxisAlignedBB(x - r, y - r, z - r, x + r, y + r, z + r);
             r *= r;
             double dx, dy, dz;
-            for(EntityLivingBase entity : playerIn.world.getEntitiesWithinAABB(EntityLivingBase.class, box, NOT_AGGRO_EXEMPT))
+            for (EntityLivingBase entity : playerIn.world.getEntitiesWithinAABB(EntityLivingBase.class, box, NOT_AGGRO_EXEMPT::test))
             {
                 dx = x - entity.posX;
                 dy = y - entity.posY;
                 dz = z - entity.posZ;
-                if(dx * dx + dy * dy + dz * dz <= r)
+                if (dx * dx + dy * dy + dz * dz <= r)
                 {
                     entity.setRevengeTarget(GunConfig.SERVER.aggroMobs.angerHostileMobs ? playerIn : entity);
                 }
             }
         }
 
-        if(silenced)
+        if (silenced)
         {
             String silencedSound = modifiedGun.sounds.getSilencedFire(modifiedGun);
             SoundEvent event = ModSounds.getSound(silencedSound);
-            if(event == null)
+            if (event == null)
             {
                 event = SoundEvent.REGISTRY.getObject(new ResourceLocation(silencedSound));
             }
-            if(event != null)
+            if (event != null)
             {
                 worldIn.playSound(null, playerIn.getPosition(), event, SoundCategory.HOSTILE, 1F, 0.8F + itemRand.nextFloat() * 0.2F);
             }
@@ -260,25 +260,25 @@ public class ItemGun extends ItemColored
         {
             String fireSound = modifiedGun.sounds.getFire(modifiedGun);
             SoundEvent event = ModSounds.getSound(fireSound);
-            if(event == null)
+            if (event == null)
             {
                 event = SoundEvent.REGISTRY.getObject(new ResourceLocation(fireSound));
             }
-            if(event != null)
+            if (event != null)
             {
                 worldIn.playSound(null, playerIn.getPosition(), event, SoundCategory.HOSTILE, 5.0F, 0.8F + itemRand.nextFloat() * 0.2F);
             }
         }
 
-        if(modifiedGun.display.flash != null)
+        if (modifiedGun.display.flash != null)
         {
             PacketHandler.INSTANCE.sendTo(new MessageMuzzleFlash(), (EntityPlayerMP) playerIn);
         }
 
-        if(!playerIn.capabilities.isCreativeMode)
+        if (!playerIn.capabilities.isCreativeMode)
         {
             NBTTagCompound tag = ItemStackUtil.createTagCompound(heldItem);
-            if(!tag.getBoolean("IgnoreAmmo"))
+            if (!tag.getBoolean("IgnoreAmmo"))
             {
                 tag.setInteger("AmmoCount", Math.max(0, tag.getInteger("AmmoCount") - 1));
             }
@@ -295,15 +295,15 @@ public class ItemGun extends ItemColored
 
     public static ItemStack findAmmo(EntityPlayer player, ResourceLocation id)
     {
-        if(player.capabilities.isCreativeMode)
+        if (player.capabilities.isCreativeMode)
         {
             ItemAmmo ammo = AmmoRegistry.getInstance().getAmmo(id);
             return ammo != null ? new ItemStack(ammo, 64) : ItemStack.EMPTY;
         }
-        for(int i = 0; i < player.inventory.getSizeInventory(); ++i)
+        for (int i = 0; i < player.inventory.getSizeInventory(); ++i)
         {
             ItemStack stack = player.inventory.getStackInSlot(i);
-            if(isAmmo(stack, id))
+            if (isAmmo(stack, id))
             {
                 return stack;
             }
@@ -325,10 +325,10 @@ public class ItemGun extends ItemColored
     @Override
     public void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items)
     {
-        if(isInCreativeTab(tab))
+        if (isInCreativeTab(tab))
         {
             ItemStack stack = new ItemStack(this);
-            ItemStackUtil.createTagCompound(stack).setInteger("AmmoCount", gun.general.maxAmmo);
+            ItemStackUtil.createTagCompound(stack).setInteger("AmmoCount", getModifiedGun(stack).general.maxAmmo);
             items.add(stack);
         }
     }
@@ -343,14 +343,14 @@ public class ItemGun extends ItemColored
     public boolean showDurabilityBar(ItemStack stack)
     {
         NBTTagCompound tagCompound = ItemStackUtil.createTagCompound(stack);
-        return !tagCompound.getBoolean("IgnoreAmmo") && tagCompound.getInteger("AmmoCount") != gun.general.maxAmmo;
+        return !tagCompound.getBoolean("IgnoreAmmo") && tagCompound.getInteger("AmmoCount") != getModifiedGun(stack).general.maxAmmo;
     }
 
     @Override
     public double getDurabilityForDisplay(ItemStack stack)
     {
         NBTTagCompound tagCompound = ItemStackUtil.createTagCompound(stack);
-        return 1.0 - (tagCompound.getInteger("AmmoCount") / (double) gun.general.maxAmmo);
+        return 1.0 - (tagCompound.getInteger("AmmoCount") / (double) getModifiedGun(stack).general.maxAmmo);
     }
 
     @Override
@@ -362,7 +362,7 @@ public class ItemGun extends ItemColored
     public Gun getModifiedGun(ItemStack stack)
     {
         NBTTagCompound tagCompound = stack.getTagCompound();
-        if(tagCompound != null && tagCompound.hasKey("Gun", Constants.NBT.TAG_COMPOUND))
+        if (tagCompound != null && tagCompound.hasKey("Gun", Constants.NBT.TAG_COMPOUND))
         {
             Gun gunCopy = gun.copy();
             gunCopy.deserializeNBT(tagCompound.getCompoundTag("Gun"));
