@@ -1,6 +1,5 @@
 package com.mrcrayfish.guns.item;
 
-import com.google.common.annotations.Beta;
 import com.mrcrayfish.guns.common.ProjectileFactory;
 import com.mrcrayfish.guns.entity.EntityProjectile;
 import net.minecraft.util.ResourceLocation;
@@ -13,14 +12,13 @@ import java.util.Objects;
 /**
  * Author: MrCrayfish
  */
-@Beta
 public class AmmoRegistry
 {
     private static AmmoRegistry instance = null;
 
     public static AmmoRegistry getInstance()
     {
-        if(instance == null)
+        if (instance == null)
         {
             instance = new AmmoRegistry();
         }

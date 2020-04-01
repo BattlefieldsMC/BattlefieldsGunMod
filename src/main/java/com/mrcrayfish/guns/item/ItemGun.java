@@ -1,7 +1,5 @@
 package com.mrcrayfish.guns.item;
 
-import com.google.common.annotations.Beta;
-import com.google.common.base.Predicate;
 import com.mrcrayfish.guns.GunConfig;
 import com.mrcrayfish.guns.ItemStackUtil;
 import com.mrcrayfish.guns.MrCrayfishGunMod;
@@ -35,8 +33,8 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.List;
+import java.util.function.Predicate;
 
-@Beta
 public class ItemGun extends ItemColored
 {
     private Gun gun;

@@ -1,6 +1,5 @@
 package com.mrcrayfish.guns.item;
 
-import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -25,17 +24,16 @@ import java.util.Objects;
 /**
  * Author: MrCrayfish
  */
-@Beta
 public class GunRegistry
 {
-    private static final Type GUN_TYPE = new TypeToken<Gun>(){}.getType();
-    private static final Type RESOURCE_LOCATION_TYPE = new TypeToken<ResourceLocation>(){}.getType();
+    private static final Type GUN_TYPE = new TypeToken<Gun>() {}.getType();
+    private static final Type RESOURCE_LOCATION_TYPE = new TypeToken<ResourceLocation>() {}.getType();
 
     private static GunRegistry instance = null;
 
     public static GunRegistry getInstance()
     {
-        if(instance == null)
+        if (instance == null)
         {
             instance = new GunRegistry();
         }
@@ -70,14 +68,14 @@ public class GunRegistry
 
         Gun gun = null;
         String assetsFile = String.format("/assets/%s/guns/%s.json", id.getNamespace(), id.getPath());
-        try(Reader reader = new InputStreamReader(GunRegistry.class.getResourceAsStream(assetsFile)))
+        try (Reader reader = new InputStreamReader(GunRegistry.class.getResourceAsStream(assetsFile)))
         {
             GsonBuilder builder = new GsonBuilder();
             builder.registerTypeAdapter(RESOURCE_LOCATION_TYPE, new Gun.ResourceLocationDeserializer());
             Gson gson = builder.create();
             gun = gson.fromJson(reader, GUN_TYPE);
         }
-        catch(IOException e)
+        catch (IOException e)
         {
             MrCrayfishGunMod.logger.error("Failed to load gun json '" + itemGun.getRegistryName() + "'");
             e.printStackTrace();
@@ -88,25 +86,25 @@ public class GunRegistry
         {
             validateFields(gun);
         }
-        catch(IllegalAccessException e)
+        catch (IllegalAccessException e)
         {
             MrCrayfishGunMod.logger.error("Failed to validate gun fields for '" + itemGun.getRegistryName() + "'");
             e.printStackTrace();
             return;
         }
-        catch(InvalidObjectException e)
+        catch (InvalidObjectException e)
         {
             e.printStackTrace();
             throw new RuntimeException("Missing property in gun '" + gun.id + "'. Refer to exception above");
         }
 
         File gunFile = new File(configFolder, id.getPath() + ".json");
-        if(!gunFile.exists())
+        if (!gunFile.exists())
         {
             writeGunToFile(gun, gunFile);
         }
 
-        try(Reader reader = new InputStreamReader(new FileInputStream(gunFile)))
+        try (Reader reader = new InputStreamReader(new FileInputStream(gunFile)))
         {
             JsonElement parent = new JsonParser().parse(reader);
             GsonBuilder builder = new GsonBuilder();
@@ -116,7 +114,7 @@ public class GunRegistry
             gun = gson.fromJson(parent, GUN_TYPE);
             itemGun.setGun(gun);
         }
-        catch(IOException e)
+        catch (IOException e)
         {
             e.printStackTrace();
         }
@@ -137,7 +135,7 @@ public class GunRegistry
             OutputStream os = new FileOutputStream(gunFile);
             IOUtils.write(gson.toJson(gun), os, StandardCharsets.UTF_8);
         }
-        catch(IOException e)
+        catch (IOException e)
         {
             e.printStackTrace();
         }
@@ -146,17 +144,17 @@ public class GunRegistry
     private static <T> boolean validateFields(@Nonnull T t) throws IllegalAccessException, InvalidObjectException
     {
         Field[] fields = t.getClass().getDeclaredFields();
-        for(Field field : fields)
+        for (Field field : fields)
         {
-            if(field.getDeclaredAnnotation(Gun.Ignored.class) != null || field.getDeclaredAnnotation(Gun.Optional.class) != null)
+            if (field.getDeclaredAnnotation(Gun.Ignored.class) != null || field.getDeclaredAnnotation(Gun.Optional.class) != null)
                 continue;
 
-            if(field.get(t) == null)
+            if (field.get(t) == null)
             {
                 throw new InvalidObjectException("Missing required property: " + field.getName());
             }
 
-            if(!field.getType().isPrimitive() && field.getType() != String.class && !field.getType().isEnum())
+            if (!field.getType().isPrimitive() && field.getType() != String.class && !field.getType().isEnum())
             {
                 return validateFields(field.get(t));
             }
