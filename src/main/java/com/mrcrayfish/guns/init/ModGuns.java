@@ -10,28 +10,28 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 public class ModGuns
 {
     @GameRegistry.ObjectHolder("cgm:handgun")
-    public static final Item PISTOL = null;
+    public static final ItemGun PISTOL = null;
 
     @GameRegistry.ObjectHolder("cgm:shotgun")
-    public static final Item SHOTGUN = null;
+    public static final ItemGun SHOTGUN = null;
 
     @GameRegistry.ObjectHolder("cgm:rifle")
-    public static final Item RIFLE = null;
+    public static final ItemGun RIFLE = null;
 
     @GameRegistry.ObjectHolder("cgm:grenade_launcher")
     public static final ItemGun GRENADE_LAUNCHER = null;
 
     @GameRegistry.ObjectHolder("cgm:bazooka")
-    public static final Item BAZOOKA = null;
+    public static final ItemGun BAZOOKA = null;
 
     @GameRegistry.ObjectHolder("cgm:chain_gun")
-    public static final Item CHAIN_GUN = null;
+    public static final ItemGun CHAIN_GUN = null;
 
     @GameRegistry.ObjectHolder("cgm:assault_rifle")
-    public static final Item ASSAULT_RIFLE = null;
+    public static final ItemGun ASSAULT_RIFLE = null;
 
     @GameRegistry.ObjectHolder("cgm:machine_pistol")
-    public static final Item MACHINE_PISTOL = null;
+    public static final ItemGun MACHINE_PISTOL = null;
 
     @GameRegistry.ObjectHolder("cgm:part")
     public static final Item PARTS = null;
