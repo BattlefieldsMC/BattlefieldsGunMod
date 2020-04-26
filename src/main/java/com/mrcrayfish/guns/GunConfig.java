@@ -15,7 +15,6 @@ import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEve
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
-import sun.nio.ch.Net;
 
 import java.util.Map;
 import java.util.Set;
@@ -25,232 +24,232 @@ import java.util.Set;
 @EventBusSubscriber(modid = Reference.MOD_ID)
 public class GunConfig
 {
-	@Config.Ignore
+    @Config.Ignore
     public static final String PREFIX = "config." + Reference.MOD_ID + ".";
 
-	@Config.Name("Client")
-	@Config.Comment("Client-only configs.")
-	@Config.LangKey(Client.PREFIX)
-	public static final Client CLIENT = new Client();
+    @Config.Name("Client")
+    @Config.Comment("Client-only configs.")
+    @Config.LangKey(Client.PREFIX)
+    public static final Client CLIENT = new Client();
 
-	@Config.Name("Server")
-	@Config.Comment("Server-only configs.")
-	@Config.LangKey(Server.PREFIX)
-	public static final Server SERVER = new Server();
+    @Config.Name("Server")
+    @Config.Comment("Server-only configs.")
+    @Config.LangKey(Server.PREFIX)
+    public static final Server SERVER = new Server();
 
-	public static class Client
-	{
-	    private static final String PREFIX = GunConfig.PREFIX + "client";
+    public static class Client
+    {
+        private static final String PREFIX = GunConfig.PREFIX + "client";
 
-		@Config.Name("Sounds")
-		@Config.Comment("Control sounds triggered by guns")
-		@Config.LangKey(Sounds.PREFIX)
-		public Sounds sound = new Sounds();
+        @Config.Name("Sounds")
+        @Config.Comment("Control sounds triggered by guns")
+        @Config.LangKey(Sounds.PREFIX)
+        public Sounds sound = new Sounds();
 
-		@Config.Name("Display")
-		@Config.Comment("Configuration for display related options")
-		@Config.LangKey(Display.PREFIX)
-		public Display display = new Display();
+        @Config.Name("Display")
+        @Config.Comment("Configuration for display related options")
+        @Config.LangKey(Display.PREFIX)
+        public Display display = new Display();
 
-		@Config.Name("Controls")
-		@Config.Comment("Configuration for control options")
-		@Config.LangKey(Controls.PREFIX)
-		public Controls controls = new Controls();
-	}
+        @Config.Name("Controls")
+        @Config.Comment("Configuration for control options")
+        @Config.LangKey(Controls.PREFIX)
+        public Controls controls = new Controls();
+    }
 
-	public static class Sounds
-	{
-	    private static final String PREFIX = Client.PREFIX + ".sounds";
+    public static class Sounds
+    {
+        private static final String PREFIX = Client.PREFIX + ".sounds";
 
-		@Config.Name("Play Hit Sound")
-		@Config.Comment("If true, a ding sound will play when you successfully hit a player with a gun")
-		@Config.LangKey(PREFIX + ".hit_sound")
-		public boolean hitSound = true;
-	}
+        @Config.Name("Play Hit Sound")
+        @Config.Comment("If true, a ding sound will play when you successfully hit a player with a gun")
+        @Config.LangKey(PREFIX + ".hit_sound")
+        public boolean hitSound = true;
+    }
 
-	public static class Server
-	{
-	    private static final String PREFIX = GunConfig.PREFIX + "server";
+    public static class Server
+    {
+        private static final String PREFIX = GunConfig.PREFIX + "server";
 
-		@Config.Name("Network")
-		@Config.Comment("Properties relating to network")
-		@Config.LangKey(Network.PREFIX)
-		public Network network = new Network();
+        @Config.Name("Network")
+        @Config.Comment("Properties relating to network")
+        @Config.LangKey(Network.PREFIX)
+        public Network network = new Network();
 
-		@Config.Name("Aggro Mobs")
-		@Config.Comment("Nearby mobs are angered and/or scared by the firing of guns.")
-		@Config.LangKey(AggroMobs.PREFIX)
-		public AggroMobs aggroMobs = new AggroMobs();
+        @Config.Name("Aggro Mobs")
+        @Config.Comment("Nearby mobs are angered and/or scared by the firing of guns.")
+        @Config.LangKey(AggroMobs.PREFIX)
+        public AggroMobs aggroMobs = new AggroMobs();
 
-		@Config.Name("Missiles")
-		@Config.Comment("Properties relating to missiles.")
-		@Config.LangKey(Missiles.PREFIX)
-		public Missiles missiles = new Missiles();
+        @Config.Name("Missiles")
+        @Config.Comment("Properties relating to missiles.")
+        @Config.LangKey(Missiles.PREFIX)
+        public Missiles missiles = new Missiles();
 
-		@Config.Name("Grenades")
-		@Config.Comment("Properties relating to grenades.")
-		@Config.LangKey(Grenades.PREFIX)
-		public Grenades grenades = new Grenades();
+        @Config.Name("Grenades")
+        @Config.Comment("Properties relating to grenades.")
+        @Config.LangKey(Grenades.PREFIX)
+        public Grenades grenades = new Grenades();
 
-		@Config.Name("Stun Grenades")
+        @Config.Name("Stun Grenades")
         @Config.Comment("Blinding/deafening properties of stun grenades.")
         @Config.LangKey(StunGrenades.PREFIX)
         public StunGrenades stunGrenades = new StunGrenades();
 
-		@Config.Name("Projectile Spread")
-		@Config.Comment("Properties relating to projectile spread")
-		@Config.LangKey(ProjectileSpread.PREFIX)
-		public ProjectileSpread projectileSpread = new ProjectileSpread();
+        @Config.Name("Projectile Spread")
+        @Config.Comment("Properties relating to projectile spread")
+        @Config.LangKey(ProjectileSpread.PREFIX)
+        public ProjectileSpread projectileSpread = new ProjectileSpread();
 
-		@Config.Name("Grow Bounding Box")
-		@Config.Comment("The extra amount to expand an entity's bounding box when checking for projectile collision. Setting this value higher will make it easier to hit players")
-		@Config.LangKey(PREFIX + ".grow_bounding_box")
-		@Config.RangeDouble(min = 0.0, max = 1.0)
-		public double growBoundingBoxAmount = 0.3;
+        @Config.Name("Grow Bounding Box")
+        @Config.Comment("The extra amount to expand an entity's bounding box when checking for projectile collision. Setting this value higher will make it easier to hit players")
+        @Config.LangKey(PREFIX + ".grow_bounding_box")
+        @Config.RangeDouble(min = 0.0, max = 1.0)
+        public double growBoundingBoxAmount = 0.3;
 
-		@Config.Name("Enable Head Shots")
-		@Config.Comment("Enables the check for head shots for players. Projectiles that hit the head of a player will have increased damage.")
-		@Config.LangKey(PREFIX + ".enabled_head_shots")
-		public boolean enableHeadShots = true;
+        @Config.Name("Enable Head Shots")
+        @Config.Comment("Enables the check for head shots for players. Projectiles that hit the head of a player will have increased damage.")
+        @Config.LangKey(PREFIX + ".enabled_head_shots")
+        public boolean enableHeadShots = true;
 
-		@Config.Name("Head Shot Damage Multiplier")
-		@Config.Comment("The value to multiply the damage by if projectile hit the players head")
-		@Config.LangKey(PREFIX + ".head_shot_damage_multiplier")
-		@Config.RangeDouble(min = 1.0)
-		public double headShotDamageMultiplier = 1.1;
-	}
+        @Config.Name("Head Shot Damage Multiplier")
+        @Config.Comment("The value to multiply the damage by if projectile hit the players head")
+        @Config.LangKey(PREFIX + ".head_shot_damage_multiplier")
+        @Config.RangeDouble(min = 1.0)
+        public double headShotDamageMultiplier = 1.1;
+    }
 
-	public static class Network
-	{
-		private static final String PREFIX = Server.PREFIX + ".network";
-
-		@Config.Name("Projectile Tracking Range")
-		@Config.Comment("The distance players need to be within to be able to track new projectiles trails. Higher values means you can see projectiles from that start from further away.")
-		@Config.LangKey(PREFIX + ".projectile_tracking_range")
-		@Config.RangeDouble(min = 0.0)
-		public double projectileTrackingRange = 200.0;
-	}
-
-	public static class AggroMobs
-	{
-	    private static final String PREFIX = Server.PREFIX + ".aggro";
-
-		@Config.Name("Aggro Mobs Enabled")
-		@Config.Comment("If true, nearby mobs are angered and/or scared by the firing of guns.")
-		@Config.LangKey(PREFIX + ".enabled")
-		public boolean enabled = true;
-
-		@Config.Name("Anger Hostile Mobs")
-		@Config.Comment("If true, in addition to causing peaceful mobs to panic, firing a gun will also cause nearby hostile mobs to target the shooter.")
-		@Config.LangKey(PREFIX + ".hostile")
-		public boolean angerHostileMobs = true;
-
-		@Config.Name("Range Silenced")
-		@Config.Comment("Any mobs within a sphere of this radius will aggro on the shooter of a silenced gun.")
-		@Config.LangKey(PREFIX + ".silenced")
-		@Config.RangeDouble(min = 0)
-		public double rangeSilenced = 10;
-
-		@Config.Name("Range Unsilenced")
-		@Config.Comment("Any mobs within a sphere of this radius will aggro on the shooter of an unsilenced gun.")
-		@Config.LangKey(PREFIX + ".unsilenced")
-		@Config.RangeDouble(min = 0)
-		public double rangeUnsilenced = 20;
-
-		@Config.Name("Exempt Mob Classes")
-		@Config.Comment("Any mobs of classes with class paths in this list will not aggro on shooters.")
-		@Config.LangKey(PREFIX + ".exempt")
-		public String[] exemptClassNames = new String[] {"net.minecraft.entity.passive.EntityVillager"};
-		public static Set<Class> exemptClasses = Sets.<Class>newHashSet();
-
-		public void setExemptionClasses()
-		{
-			exemptClasses.clear();
-			for (String className : exemptClassNames)
-			{
-				String prefix = "Exempt aggro mob class '" + className;
-				try
-				{
-					Class<?> classMob = Class.forName(className);
-					if (EntityLivingBase.class.isAssignableFrom(classMob))
-					{
-						exemptClasses.add(classMob);
-					}
-					else
-					{
-						MrCrayfishGunMod.logger.warn(prefix + "' must exend EntityLivingBase.");
-					}
-				}
-				catch (ClassNotFoundException e)
-				{
-					MrCrayfishGunMod.logger.warn(prefix + "' was not found:", e);
-				}
-			}
-		}
-	}
-
-	public static class Display
-	{
-	    private static final String PREFIX = Client.PREFIX + ".display";
-
-		@Config.Name("Workbench Animation")
-		@Config.Comment("If true, an animation is performed while cycling items in the Workbench")
-		@Config.LangKey(PREFIX + ".workbench_animation")
-		public boolean workbenchAnimation = true;
-	}
-
-	public static class Controls
-	{
-		private static final String PREFIX = Client.PREFIX + ".controls";
-
-		@Config.Name("Use Old Controls")
-		@Config.Comment("If true, uses the old controls in order to aim and shoot")
-		@Config.LangKey(PREFIX + ".old_controls")
-		public boolean oldControls = false;
-	}
-
-	public static class Missiles
-	{
-		private static final String PREFIX = Server.PREFIX + ".missiles.normal";
-
-		@Config.Name("Explosion Radius")
-		@Config.Comment("The max distance which the explosion is effective to.")
-		@Config.LangKey(PREFIX + ".explosion_range")
-		@Config.RangeDouble(min = 0)
-		public double explosionRadius = 5.0;
-	}
-
-	public static class Grenades
-	{
-		private static final String PREFIX = Server.PREFIX + ".grenade.normal";
-
-		@Config.Name("Explosion Radius")
-		@Config.Comment("The max distance which the explosion is effective to.")
-		@Config.LangKey(PREFIX + ".explosion_range")
-		@Config.RangeDouble(min = 0)
-		public double explosionRadius = 5.0;
-	}
-
-	public static class StunGrenades
+    public static class Network
     {
-	    private static final String PREFIX = Server.PREFIX + ".grenade.stun";
+        private static final String PREFIX = Server.PREFIX + ".network";
 
-	    @Config.Name("Blind")
+        @Config.Name("Projectile Tracking Range")
+        @Config.Comment("The distance players need to be within to be able to track new projectiles trails. Higher values means you can see projectiles from that start from further away.")
+        @Config.LangKey(PREFIX + ".projectile_tracking_range")
+        @Config.RangeDouble(min = 0.0)
+        public double projectileTrackingRange = 200.0;
+    }
+
+    public static class AggroMobs
+    {
+        private static final String PREFIX = Server.PREFIX + ".aggro";
+
+        @Config.Name("Aggro Mobs Enabled")
+        @Config.Comment("If true, nearby mobs are angered and/or scared by the firing of guns.")
+        @Config.LangKey(PREFIX + ".enabled")
+        public boolean enabled = true;
+
+        @Config.Name("Anger Hostile Mobs")
+        @Config.Comment("If true, in addition to causing peaceful mobs to panic, firing a gun will also cause nearby hostile mobs to target the shooter.")
+        @Config.LangKey(PREFIX + ".hostile")
+        public boolean angerHostileMobs = true;
+
+        @Config.Name("Range Silenced")
+        @Config.Comment("Any mobs within a sphere of this radius will aggro on the shooter of a silenced gun.")
+        @Config.LangKey(PREFIX + ".silenced")
+        @Config.RangeDouble(min = 0)
+        public double rangeSilenced = 10;
+
+        @Config.Name("Range Unsilenced")
+        @Config.Comment("Any mobs within a sphere of this radius will aggro on the shooter of an unsilenced gun.")
+        @Config.LangKey(PREFIX + ".unsilenced")
+        @Config.RangeDouble(min = 0)
+        public double rangeUnsilenced = 20;
+
+        @Config.Name("Exempt Mob Classes")
+        @Config.Comment("Any mobs of classes with class paths in this list will not aggro on shooters.")
+        @Config.LangKey(PREFIX + ".exempt")
+        public String[] exemptClassNames = new String[]{"net.minecraft.entity.passive.EntityVillager"};
+        public static Set<Class> exemptClasses = Sets.<Class>newHashSet();
+
+        public void setExemptionClasses()
+        {
+            exemptClasses.clear();
+            for (String className : exemptClassNames)
+            {
+                String prefix = "Exempt aggro mob class '" + className;
+                try
+                {
+                    Class<?> classMob = Class.forName(className);
+                    if (EntityLivingBase.class.isAssignableFrom(classMob))
+                    {
+                        exemptClasses.add(classMob);
+                    }
+                    else
+                    {
+                        MrCrayfishGunMod.logger.warn(prefix + "' must extend EntityLivingBase.");
+                    }
+                }
+                catch (ClassNotFoundException e)
+                {
+                    MrCrayfishGunMod.logger.warn(prefix + "' was not found:", e);
+                }
+            }
+        }
+    }
+
+    public static class Display
+    {
+        private static final String PREFIX = Client.PREFIX + ".display";
+
+        @Config.Name("Workbench Animation")
+        @Config.Comment("If true, an animation is performed while cycling items in the Workbench")
+        @Config.LangKey(PREFIX + ".workbench_animation")
+        public boolean workbenchAnimation = true;
+    }
+
+    public static class Controls
+    {
+        private static final String PREFIX = Client.PREFIX + ".controls";
+
+        @Config.Name("Use Old Controls")
+        @Config.Comment("If true, uses the old controls in order to aim and shoot")
+        @Config.LangKey(PREFIX + ".old_controls")
+        public boolean oldControls = false;
+    }
+
+    public static class Missiles
+    {
+        private static final String PREFIX = Server.PREFIX + ".missiles.normal";
+
+        @Config.Name("Explosion Radius")
+        @Config.Comment("The max distance which the explosion is effective to.")
+        @Config.LangKey(PREFIX + ".explosion_range")
+        @Config.RangeDouble(min = 0)
+        public double explosionRadius = 5.0;
+    }
+
+    public static class Grenades
+    {
+        private static final String PREFIX = Server.PREFIX + ".grenade.normal";
+
+        @Config.Name("Explosion Radius")
+        @Config.Comment("The max distance which the explosion is effective to.")
+        @Config.LangKey(PREFIX + ".explosion_range")
+        @Config.RangeDouble(min = 0)
+        public double explosionRadius = 5.0;
+    }
+
+    public static class StunGrenades
+    {
+        private static final String PREFIX = Server.PREFIX + ".grenade.stun";
+
+        @Config.Name("Blind")
         @Config.Comment("Blinding properties of stun grenades.")
         @Config.LangKey(Blind.PREFIX)
         public Blind blind = new Blind();
 
-	    @Config.Name("Deafen")
+        @Config.Name("Deafen")
         @Config.Comment("Deafening properties of stun grenades.")
         @Config.LangKey(Deafen.PREFIX)
         public Deafen deafen = new Deafen();
     }
 
-	public static class Blind
+    public static class Blind
     {
-	    private static final String PREFIX = StunGrenades.PREFIX + ".blind";
+        private static final String PREFIX = StunGrenades.PREFIX + ".blind";
 
-	    @Config.Name("Effect Criteria")
+        @Config.Name("Effect Criteria")
         @Config.Comment("Criteria that determines the presence/absence and duration of the blinding effect.")
         @Config.LangKey(EffectCriteria.PREFIX + ".blind")
         public EffectCriteria criteria = new EffectCriteria(15, 220, 10, 170, 0.75, true);
@@ -272,11 +271,11 @@ public class GunConfig
         public int alphaFadeThresholdSynced = Integer.MAX_VALUE;
     }
 
-	public static class Deafen
+    public static class Deafen
     {
-	    private static final String PREFIX = StunGrenades.PREFIX + ".deafen";
+        private static final String PREFIX = StunGrenades.PREFIX + ".deafen";
 
-	    @Config.Name("Effect Criteria")
+        @Config.Name("Effect Criteria")
         @Config.Comment("Criteria that determines the presence/absence and duration of the deafening effect.")
         @Config.LangKey(EffectCriteria.PREFIX + ".deafen")
         public EffectCriteria criteria = new EffectCriteria(15, 280, 100, 360, 0.75, false);
@@ -306,11 +305,11 @@ public class GunConfig
         public float ringVolumeSynced = 1;
     }
 
-	public static class EffectCriteria
+    public static class EffectCriteria
     {
-	    private static final String PREFIX = StunGrenades.PREFIX + ".effect_criteria";
+        private static final String PREFIX = StunGrenades.PREFIX + ".effect_criteria";
 
-	    @Config.Name("Radius")
+        @Config.Name("Radius")
         @Config.Comment("Grenade must be no more than this many meters away to have an effect.")
         @Config.LangKey(PREFIX + ".radius")
         @Config.RangeDouble(min = 0)
@@ -359,21 +358,21 @@ public class GunConfig
     }
 
     public static class ProjectileSpread
-	{
-		private static final String PREFIX = Server.PREFIX + ".projectile_spread";
+    {
+        private static final String PREFIX = Server.PREFIX + ".projectile_spread";
 
-		@Config.Name("Spread Threshold")
-		@Config.Comment("The amount of time in milliseconds before logic to apply spread is skipped. The value indicates a reasonable amount of time before a weapon is considered stable again.")
-		@Config.LangKey(PREFIX + ".spread_threshold")
-		@Config.RangeInt(min = 0, max = 1000)
-		public int spreadThreshold = 300;
+        @Config.Name("Spread Threshold")
+        @Config.Comment("The amount of time in milliseconds before logic to apply spread is skipped. The value indicates a reasonable amount of time before a weapon is considered stable again.")
+        @Config.LangKey(PREFIX + ".spread_threshold")
+        @Config.RangeInt(min = 0, max = 1000)
+        public int spreadThreshold = 300;
 
-		@Config.Name("Max Count")
-		@Config.Comment("The amount of times a player has too shoot within the spread threshold before the maximum amount of spread is applied. Setting the value higher means it will take longer for the spread to be applied.")
-		@Config.LangKey(PREFIX + ".max_count")
-		@Config.RangeInt(min = 1)
-		public int maxCount = 10;
-	}
+        @Config.Name("Max Count")
+        @Config.Comment("The amount of times a player has too shoot within the spread threshold before the maximum amount of spread is applied. Setting the value higher means it will take longer for the spread to be applied.")
+        @Config.LangKey(PREFIX + ".max_count")
+        @Config.RangeInt(min = 1)
+        public int maxCount = 10;
+    }
 
     /**
      * Sets client data values as dictated by the server, either for exclusive access on the client or for shared access
@@ -386,14 +385,14 @@ public class GunConfig
 
         public void toBytes(ByteBuf buffer)
         {
-			Map<ResourceLocation, ItemGun> guns = GunRegistry.getInstance().getGuns();
-			buffer.writeInt(guns.size());
-			guns.forEach((location, gun) ->
-			{
-				ByteBufUtils.writeUTF8String(buffer, location.toString());
-				buffer.writeFloat(gun.getGun().projectile.damage);
-				buffer.writeInt(gun.getGun().general.maxAmmo);
-			});
+            Map<ResourceLocation, ItemGun> guns = GunRegistry.getInstance().getGuns();
+            buffer.writeInt(guns.size());
+            guns.forEach((location, gun) ->
+            {
+                ByteBufUtils.writeUTF8String(buffer, location.toString());
+                buffer.writeFloat(gun.getGun().projectile.damage);
+                buffer.writeInt(gun.getGun().general.maxAmmo);
+            });
             buffer.writeInt(GunConfig.SERVER.stunGrenades.blind.alphaOverlay);
             buffer.writeInt(GunConfig.SERVER.stunGrenades.blind.alphaFadeThreshold);
             buffer.writeFloat((float) GunConfig.SERVER.stunGrenades.deafen.soundPercentage);
@@ -405,9 +404,9 @@ public class GunConfig
         {
             ImmutableMap.Builder<ResourceLocation, ServerGun> builder = ImmutableMap.builder();
             int size = buffer.readInt();
-            for(int i = 0; i < size; i++)
+            for (int i = 0; i < size; i++)
             {
-				ResourceLocation id = new ResourceLocation(ByteBufUtils.readUTF8String(buffer));
+                ResourceLocation id = new ResourceLocation(ByteBufUtils.readUTF8String(buffer));
                 ServerGun gun = new ServerGun();
                 gun.damage = buffer.readFloat();
                 gun.maxAmmo = buffer.readInt();
@@ -423,14 +422,14 @@ public class GunConfig
 
         public void syncClientToServer()
         {
-			serverGunMap.forEach((id, serverGun) ->
-			{
-				ItemGun gun = GunRegistry.getInstance().getGun(id);
-				if(gun != null)
-				{
-					gun.getGun().serverGun = serverGun;
-				}
-			});
+            serverGunMap.forEach((id, serverGun) ->
+            {
+                ItemGun gun = GunRegistry.getInstance().getGun(id);
+                if (gun != null)
+                {
+                    gun.getGun().serverGun = serverGun;
+                }
+            });
             GunConfig.SERVER.stunGrenades.blind.alphaOverlaySynced = blindnessAlphaOverlay;
             GunConfig.SERVER.stunGrenades.blind.alphaFadeThresholdSynced = alphaFadeThreshold;
             GunConfig.SERVER.stunGrenades.deafen.soundPercentageSynced = soundPercentage;
@@ -439,13 +438,13 @@ public class GunConfig
         }
     }
 
-	@SubscribeEvent
-	public static void onConfigChanged(OnConfigChangedEvent event)
-	{
-		if (event.getModID().equalsIgnoreCase(Reference.MOD_ID))
-		{
-			ConfigManager.sync(Reference.MOD_ID, Type.INSTANCE);
-			SERVER.aggroMobs.setExemptionClasses();
-		}
-	}
+    @SubscribeEvent
+    public static void onConfigChanged(OnConfigChangedEvent event)
+    {
+        if (event.getModID().equalsIgnoreCase(Reference.MOD_ID))
+        {
+            ConfigManager.sync(Reference.MOD_ID, Type.INSTANCE);
+            SERVER.aggroMobs.setExemptionClasses();
+        }
+    }
 }

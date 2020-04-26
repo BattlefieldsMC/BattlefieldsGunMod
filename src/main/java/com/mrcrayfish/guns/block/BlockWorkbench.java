@@ -28,7 +28,7 @@ public class BlockWorkbench extends BlockRotatedObject
     }
 
     @Override
-    public BlockRenderLayer getRenderLayer()
+    public BlockRenderLayer getBlockLayer()
     {
         return BlockRenderLayer.CUTOUT;
     }

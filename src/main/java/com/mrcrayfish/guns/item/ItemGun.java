@@ -45,8 +45,8 @@ public class ItemGun extends ItemColored
 
     public ItemGun(ResourceLocation id)
     {
-        this.setTranslationKey(id.getNamespace() + "." + id.getPath());
         this.setRegistryName(id);
+        this.setUnlocalizedName(id.getResourceDomain() + "." + id.getResourcePath());
         this.setMaxStackSize(1);
         GunRegistry.getInstance().register(this);
     }

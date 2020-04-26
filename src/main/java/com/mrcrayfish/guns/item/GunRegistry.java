@@ -65,12 +65,12 @@ public class GunRegistry
     {
         ResourceLocation id = Objects.requireNonNull(itemGun.getRegistryName());
 
-        File configFolder = new File(new File("."), "config/" + id.getNamespace() + "/guns/");
+        File configFolder = new File(new File("."), "config/" + id.getResourceDomain() + "/guns/");
         configFolder.mkdirs();
 
         Gun gun = null;
-        String assetsFile = String.format("/assets/%s/guns/%s.json", id.getNamespace(), id.getPath());
-        try(Reader reader = new InputStreamReader(GunRegistry.class.getResourceAsStream(assetsFile)))
+        String assetsFile = String.format("/assets/%s/guns/%s.json", id.getResourceDomain(), id.getResourcePath());
+        try (Reader reader = new InputStreamReader(GunRegistry.class.getResourceAsStream(assetsFile)))
         {
             GsonBuilder builder = new GsonBuilder();
             builder.registerTypeAdapter(RESOURCE_LOCATION_TYPE, new Gun.ResourceLocationDeserializer());
@@ -100,8 +100,8 @@ public class GunRegistry
             throw new RuntimeException("Missing property in gun '" + gun.id + "'. Refer to exception above");
         }
 
-        File gunFile = new File(configFolder, id.getPath() + ".json");
-        if(!gunFile.exists())
+        File gunFile = new File(configFolder, id.getResourcePath() + ".json");
+        if (!gunFile.exists())
         {
             writeGunToFile(gun, gunFile);
         }

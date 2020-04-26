@@ -12,8 +12,8 @@ public class ItemAmmo extends Item
 {
     public ItemAmmo(ResourceLocation id)
     {
-        this.setTranslationKey(id.getNamespace() + "." + id.getPath());
         this.setRegistryName(id);
+        this.setUnlocalizedName(id.getResourceDomain() + "." + id.getResourcePath());
         AmmoRegistry.getInstance().register(this);
     }
 }

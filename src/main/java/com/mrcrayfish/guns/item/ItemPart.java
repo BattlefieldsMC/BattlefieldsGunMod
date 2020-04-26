@@ -15,16 +15,16 @@ public class ItemPart extends Item implements ISubItems
 
     public ItemPart()
     {
-        this.setTranslationKey(Reference.MOD_ID + ".part");
         this.setRegistryName(new ResourceLocation(Reference.MOD_ID, "part"));
+        this.setUnlocalizedName(Reference.MOD_ID + ".part");
         this.setHasSubtypes(true);
         this.setMaxDamage(0);
     }
 
     @Override
-    public String getTranslationKey(ItemStack stack)
+    public String getUnlocalizedName(ItemStack stack)
     {
-        return super.getTranslationKey(stack) + "_" + PARTS[stack.getItemDamage()];
+        return super.getUnlocalizedName(stack) + "_" + PARTS[stack.getItemDamage() < 0 || stack.getItemDamage() >= PARTS.length ? 0 : stack.getItemDamage()]; // Battlefields - Fixed crash when given invalid metadata
     }
 
     @Override
