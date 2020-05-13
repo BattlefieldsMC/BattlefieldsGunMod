@@ -78,7 +78,7 @@ public class CommonEvents
                     reloadTrackerMap.put(player.getUniqueID(), new ReloadTracker(player));
                 }
                 ReloadTracker tracker = reloadTrackerMap.get(player.getUniqueID());
-                if(!tracker.isSameWeapon(player) || tracker.isWeaponFull() || !tracker.hasAmmo(player))
+                if(!tracker.isSameWeapon(player) || tracker.isWeaponFull() || tracker.hasNoAmmo(player))
                 {
                     reloadTrackerMap.remove(player.getUniqueID());
                     player.getDataManager().set(RELOADING, false);
@@ -87,7 +87,7 @@ public class CommonEvents
                 if(tracker.canReload(player))
                 {
                     tracker.increaseAmmo(player);
-                    if(tracker.isWeaponFull() || !tracker.hasAmmo(player))
+                    if(tracker.isWeaponFull() || tracker.hasNoAmmo(player))
                     {
                         reloadTrackerMap.remove(player.getUniqueID());
                         player.getDataManager().set(RELOADING, false);
@@ -128,9 +128,9 @@ public class CommonEvents
             return tag.getInteger("AmmoCount") >= gun.general.maxAmmo;
         }
 
-        public boolean hasAmmo(EntityPlayer player)
+        public boolean hasNoAmmo(EntityPlayer player)
         {
-            return ItemGun.findAmmo(player, gun.projectile.item) != null;
+            return ItemGun.findAmmo(player, gun.projectile.item).isEmpty();
         }
 
         public boolean canReload(EntityPlayer player)
