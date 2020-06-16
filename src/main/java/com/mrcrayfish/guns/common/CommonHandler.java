@@ -21,7 +21,6 @@ import com.mrcrayfish.guns.network.message.MessageShoot;
 import com.mrcrayfish.guns.object.Gun;
 import com.mrcrayfish.guns.tileentity.WorkbenchTileEntity;
 import com.mrcrayfish.guns.util.InventoryUtil;
-import com.mrcrayfish.guns.util.ItemStackUtil;
 import com.mrcrayfish.obfuscate.common.data.SyncedPlayerData;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -182,7 +181,7 @@ public class CommonHandler
 
                     if (!player.isCreative())
                     {
-                        CompoundNBT tag = ItemStackUtil.createTagCompound(heldItem);
+                        CompoundNBT tag = heldItem.getOrCreateTag();
                         if (!tag.getBoolean("IgnoreAmmo"))
                         {
                             tag.putInt("AmmoCount", Math.max(0, tag.getInt("AmmoCount") - 1));

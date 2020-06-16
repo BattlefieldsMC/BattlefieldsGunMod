@@ -18,7 +18,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
-import java.awt.*;
 import java.util.List;
 
 @Beta
@@ -48,16 +47,16 @@ public class GunItem extends ColoredItem
 
         String additionalDamageText = "";
         CompoundNBT tagCompound = stack.getTag();
-        if(tagCompound != null)
+        if (tagCompound != null)
         {
-            if(tagCompound.contains("AdditionalDamage", Constants.NBT.TAG_FLOAT))
+            if (tagCompound.contains("AdditionalDamage", Constants.NBT.TAG_FLOAT))
             {
                 float additionalDamage = tagCompound.getFloat("AdditionalDamage");
-                if(additionalDamage > 0)
+                if (additionalDamage > 0)
                 {
                     additionalDamageText = TextFormatting.GREEN + " +" + tagCompound.getFloat("AdditionalDamage");
                 }
-                else if(additionalDamage < 0)
+                else if (additionalDamage < 0)
                 {
                     additionalDamageText = TextFormatting.RED + " " + tagCompound.getFloat("AdditionalDamage");
                 }
@@ -66,9 +65,9 @@ public class GunItem extends ColoredItem
 
         tooltip.add(new StringTextComponent(TextFormatting.GRAY + I18n.format("info.cgm.damage", TextFormatting.RESET + Float.toString(modifiedGun.projectile.damage) + additionalDamageText)));
 
-        if(tagCompound != null)
+        if (tagCompound != null)
         {
-            if(tagCompound.getBoolean("IgnoreAmmo"))
+            if (tagCompound.getBoolean("IgnoreAmmo"))
             {
                 tooltip.add(new StringTextComponent(TextFormatting.AQUA + I18n.format("info.cgm.ignore_ammo")));
             }
@@ -89,10 +88,10 @@ public class GunItem extends ColoredItem
     @Override
     public void fillItemGroup(ItemGroup group, NonNullList<ItemStack> stacks)
     {
-        if(this.isInGroup(group))
+        if (this.isInGroup(group))
         {
             ItemStack stack = new ItemStack(this);
-            ItemStackUtil.createTagCompound(stack).putInt("AmmoCount", this.gun.general.maxAmmo);
+            stack.getOrCreateTag().putInt("AmmoCount", this.gun.general.maxAmmo);
             stacks.add(stack);
         }
     }
@@ -106,31 +105,30 @@ public class GunItem extends ColoredItem
     @Override
     public boolean showDurabilityBar(ItemStack stack)
     {
-        CompoundNBT tagCompound = ItemStackUtil.createTagCompound(stack);
+        CompoundNBT tagCompound = stack.getOrCreateTag();
         Gun modifiedGun = this.getModifiedGun(stack);
-        return !tagCompound.getBoolean("IgnoreAmmo") && tagCompound.getInt("AmmoCount") != modifiedGun.general.maxAmmo;
+        return !tagCompound.getBoolean("IgnoreAmmo") && tagCompound.getInt("AmmoCount") < modifiedGun.general.maxAmmo;
     }
 
     @Override
     public double getDurabilityForDisplay(ItemStack stack)
     {
-        CompoundNBT tagCompound = ItemStackUtil.createTagCompound(stack);
         Gun modifiedGun = this.getModifiedGun(stack);
-        return 1.0 - (tagCompound.getInt("AmmoCount") / (double) modifiedGun.general.maxAmmo);
+        return 1.0 - (stack.getOrCreateTag().getInt("AmmoCount") / (double) modifiedGun.general.maxAmmo);
     }
 
     @Override
     public int getRGBDurabilityForDisplay(ItemStack stack)
     {
-        return Color.CYAN.getRGB();
+        return 0xff00ffff;
     }
 
     public Gun getModifiedGun(ItemStack stack)
     {
         CompoundNBT tagCompound = stack.getTag();
-        if(tagCompound != null && tagCompound.contains("Gun", Constants.NBT.TAG_COMPOUND))
+        if (tagCompound != null && tagCompound.contains("Gun", Constants.NBT.TAG_COMPOUND))
         {
-            if(tagCompound.getBoolean("Custom"))
+            if (tagCompound.getBoolean("Custom"))
             {
                 return Gun.create(tagCompound.getCompound("Gun"));
             }

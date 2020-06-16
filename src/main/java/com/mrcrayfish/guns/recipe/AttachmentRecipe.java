@@ -96,8 +96,7 @@ public class AttachmentRecipe extends SpecialRecipe
         attachments.put(((IAttachment)attachment.getItem()).getType().getId(), attachment.write(new CompoundNBT()));
         itemTag.put("Attachments", attachments);
 
-        CompoundNBT gunTag = ItemStackUtil.createTagCompound(gun);
-        gunTag.merge(itemTag);
+        gun.getOrCreateTag().merge(itemTag);
 
         return gun;
     }

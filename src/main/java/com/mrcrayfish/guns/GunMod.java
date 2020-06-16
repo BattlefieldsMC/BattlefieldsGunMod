@@ -51,7 +51,9 @@ public class GunMod
         @Override
         public ItemStack createIcon()
         {
-            return new ItemStack(ModItems.PISTOL.get());
+            ItemStack stack = new ItemStack(ModItems.PISTOL.get());
+            stack.getOrCreateTag().putInt("AmmoCount", ModItems.PISTOL.get().getModifiedGun(stack).general.maxAmmo);
+            return stack;
         }
 
         @Override
@@ -133,7 +135,7 @@ public class GunMod
         });
         PacketHandler.init();
 
-        if(Config.COMMON.gameplay.improvedHitboxes.get())
+        if (Config.COMMON.gameplay.improvedHitboxes.get())
         {
             MinecraftForge.EVENT_BUS.register(new BoundingBoxTracker());
         }
@@ -150,7 +152,7 @@ public class GunMod
     @OnlyIn(Dist.CLIENT)
     public void onTextureStitch(TextureStitchEvent.Pre event)
     {
-        if(event.getMap().getTextureLocation().equals(PlayerContainer.LOCATION_BLOCKS_TEXTURE))
+        if (event.getMap().getTextureLocation().equals(PlayerContainer.LOCATION_BLOCKS_TEXTURE))
         {
             event.addSprite(BULLET_HOLE_TEXTURE);
         }
@@ -187,7 +189,6 @@ public class GunMod
     }
 
     /**
-     *
      * @return
      */
     @Nullable
@@ -197,7 +198,6 @@ public class GunMod
     }
 
     /**
-     *
      * @return
      */
     public static GunOptions getOptions()

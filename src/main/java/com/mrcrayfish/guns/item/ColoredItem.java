@@ -21,26 +21,22 @@ public class ColoredItem extends Item
 
     public boolean hasColor(ItemStack stack)
     {
-        CompoundNBT tagCompound = ItemStackUtil.createTagCompound(stack);
-        return tagCompound.contains("Color", Constants.NBT.TAG_INT);
+        return stack.getOrCreateTag().contains("Color", Constants.NBT.TAG_INT);
     }
 
     public int getColor(ItemStack stack)
     {
-        CompoundNBT tagCompound = ItemStackUtil.createTagCompound(stack);
-        return tagCompound.getInt("Color");
+        return stack.getOrCreateTag().getInt("Color");
     }
 
     public void setColor(ItemStack stack, int color)
     {
-        CompoundNBT tagCompound = ItemStackUtil.createTagCompound(stack);
-        tagCompound.putInt("Color", color);
+        stack.getOrCreateTag().putInt("Color", color);
     }
 
     public void removeColor(ItemStack stack)
     {
-        CompoundNBT tagCompound = ItemStackUtil.createTagCompound(stack);
-        tagCompound.remove("Color");
+        stack.getOrCreateTag().remove("Color");
     }
 
     public static ItemStack dye(ItemStack stack, List<DyeItem> dyes)

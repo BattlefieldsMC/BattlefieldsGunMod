@@ -107,7 +107,7 @@ public class AttachmentContainer extends Container
             attachments.put(((IAttachment) barrelStack.getItem()).getType().getId(), barrelStack.write(new CompoundNBT()));
         }
 
-        CompoundNBT tag = ItemStackUtil.createTagCompound(this.weapon);
+        CompoundNBT tag = this.weapon.getOrCreateTag();
         tag.put("Attachments", attachments);
         super.detectAndSendChanges();
     }
