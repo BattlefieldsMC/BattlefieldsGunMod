@@ -5,22 +5,20 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.client.util.RenderUtil;
+import com.mrcrayfish.guns.common.trace.GunProjectile;
 import com.mrcrayfish.guns.object.Bullet;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.tileentity.EndPortalTileEntityRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.LightType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -32,22 +30,22 @@ import java.util.List;
 /**
  * Author: MrCrayfish
  */
+@SuppressWarnings("unused")
+@OnlyIn(Dist.CLIENT)
 public class BulletRenderer
 {
     private static final ResourceLocation WHITE_GRADIENT = new ResourceLocation(Reference.MOD_ID, "textures/effect/white_gradient.png");
     private static final RenderState.AlphaState DEFAULT_ALPHA = new RenderState.AlphaState(0.0F);
     private static final RenderState.CullState CULL_DISABLED = new RenderState.CullState(false);
-    private static final RenderState.TransparencyState TRANSLUCENT_TRANSPARENCY = new RenderState.TransparencyState("translucent_transparency", () -> {
+    private static final RenderState.TransparencyState TRANSLUCENT_TRANSPARENCY = new RenderState.TransparencyState("translucent_transparency", () ->
+    {
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-    }, () -> {
-        RenderSystem.disableBlend();
-    });
+    }, RenderSystem::disableBlend);
 
     private List<Bullet> bullets = new ArrayList<>();
 
     /**
-     *
      * @param bullet
      */
     public void addBullet(Bullet bullet)
@@ -58,24 +56,23 @@ public class BulletRenderer
     @SubscribeEvent
     public void onTickBullets(TickEvent.ClientTickEvent event)
     {
-        if(Minecraft.getInstance().world != null && event.phase == TickEvent.Phase.END)
+        if (Minecraft.getInstance().world != null && event.phase == TickEvent.Phase.END)
         {
-            this.bullets.forEach(bullet -> bullet.tick(Minecraft.getInstance().world));
-            this.bullets.removeIf(Bullet::isFinished);
+            this.bullets.forEach(Bullet::tick);
+            this.bullets.removeIf(bullet -> bullet.getProjectile().isComplete());
         }
     }
 
     @SubscribeEvent
     public void onRenderBullets(RenderWorldLastEvent event)
     {
-        for(Bullet bullet : this.bullets)
+        for (Bullet bullet : this.bullets)
         {
             this.renderBullet(bullet, event.getMatrixStack(), event.getPartialTicks());
         }
     }
 
     /**
-     *
      * @param bullet
      * @param matrixStack
      * @param partialTicks
@@ -84,31 +81,32 @@ public class BulletRenderer
     {
         Minecraft mc = Minecraft.getInstance();
         Entity entity = mc.getRenderViewEntity();
-        if(entity == null || bullet.isFinished() || bullet.getProjectile() == null)
+        GunProjectile projectile = bullet.getProjectile();
+        if (entity == null || projectile.isComplete())
             return;
 
         matrixStack.push();
 
         Vec3d view = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
-        double bulletX = bullet.getPosX() + bullet.getMotionX() * partialTicks;
-        double bulletY = bullet.getPosY() + bullet.getMotionY() * partialTicks;
-        double bulletZ = bullet.getPosZ() + bullet.getMotionZ() * partialTicks;
+        double bulletX = projectile.getX() + projectile.getMotionX() * partialTicks;
+        double bulletY = projectile.getY() + projectile.getMotionY() * partialTicks;
+        double bulletZ = projectile.getZ() + projectile.getMotionZ() * partialTicks;
         matrixStack.translate(bulletX - view.getX(), bulletY - view.getY(), bulletZ - view.getZ());
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(bullet.getRotationYaw()));
         matrixStack.rotate(Vector3f.XP.rotationDegrees(-bullet.getRotationPitch() + 90));
 
-        Vec3d motionVec = new Vec3d(bullet.getMotionX(), bullet.getMotionY(), bullet.getMotionZ());
-        float trailLength = (float) ((motionVec.length() / 3.0F) * bullet.getTrailLengthMultiplier());
-        float red = (float)(bullet.getTrailColor() >> 16 & 255) / 255.0F;
-        float green = (float)(bullet.getTrailColor() >> 8 & 255) / 255.0F;
-        float blue = (float)(bullet.getTrailColor() & 255) / 255.0F;
+        double motionLength = MathHelper.sqrt(projectile.getMotionX() * projectile.getMotionX() + projectile.getMotionY() * projectile.getMotionY() + projectile.getMotionZ() * projectile.getMotionZ());
+        float trailLength = (float) ((motionLength / 3.0F) * bullet.getTrailLengthMultiplier());
+        float red = (float) (bullet.getTrailColor() >> 16 & 255) / 255.0F;
+        float green = (float) (bullet.getTrailColor() >> 8 & 255) / 255.0F;
+        float blue = (float) (bullet.getTrailColor() & 255) / 255.0F;
         float alpha = 0.3F;
 
         Matrix4f matrix4f = matrixStack.getLast().getMatrix();
         IRenderTypeBuffer.Impl renderTypeBuffer = mc.getRenderTypeBuffers().getBufferSource();
 
-        if(bullet.getProjectile().getShooterId() != entity.getEntityId())
+        if (projectile.getShooterId() != entity.getEntityId())
         {
             RenderType bulletType = getBulletTrail();
             IVertexBuilder builder = renderTypeBuffer.getBuffer(bulletType);
@@ -124,17 +122,17 @@ public class BulletRenderer
         }
 
         // No point rendering item if empty, so return
-        if(bullet.getProjectile().getItem().isEmpty())
+        if (projectile.getBullet().isEmpty())
         {
             matrixStack.pop();
             return;
         }
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees((bullet.getProjectile().ticksExisted + partialTicks) * (float) 50));
+        matrixStack.rotate(Vector3f.YP.rotationDegrees((projectile.getTicksExisted() + partialTicks) * (float) 50));
         matrixStack.scale(0.275F, 0.275F, 0.275F);
 
         int combinedLight = WorldRenderer.getCombinedLight(entity.world, entity.getPosition());
-        ItemStack stack = bullet.getProjectile().getItem();
+        ItemStack stack = projectile.getBullet();
         RenderType renderType = RenderTypeLookup.getRenderType(stack);
         RenderUtil.renderModel(stack, ItemCameraTransforms.TransformType.NONE, matrixStack, renderTypeBuffer, combinedLight, OverlayTexture.NO_OVERLAY);
         Minecraft.getInstance().getRenderTypeBuffers().getBufferSource().finish(renderType);

@@ -3,20 +3,23 @@ package com.mrcrayfish.guns;
 import com.mrcrayfish.guns.client.ClientHandler;
 import com.mrcrayfish.guns.client.CustomGunManager;
 import com.mrcrayfish.guns.client.settings.GunOptions;
-import com.mrcrayfish.guns.common.BoundingBoxTracker;
-import com.mrcrayfish.guns.common.CustomGunLoader;
-import com.mrcrayfish.guns.common.NetworkGunManager;
+import com.mrcrayfish.guns.common.*;
+import com.mrcrayfish.guns.common.trace.GunProjectile;
 import com.mrcrayfish.guns.entity.GrenadeEntity;
 import com.mrcrayfish.guns.entity.MissileEntity;
 import com.mrcrayfish.guns.init.*;
-import com.mrcrayfish.guns.common.ProjectileManager;
+import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.network.PacketHandler;
+import com.mrcrayfish.guns.object.Gun;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.TextureStitchEvent;
@@ -89,8 +92,45 @@ public class GunMod
 
     private void onCommonSetup(FMLCommonSetupEvent event)
     {
-        ProjectileManager.getInstance().registerFactory(ModItems.GRENADE.get(), (worldIn, entity, item, modifiedGun) -> new GrenadeEntity(ModEntities.GRENADE.get(), worldIn, entity, item, modifiedGun));
-        ProjectileManager.getInstance().registerFactory(ModItems.MISSILE.get(), (worldIn, entity, item, modifiedGun) -> new MissileEntity(ModEntities.MISSILE.get(), worldIn, entity, item, modifiedGun));
+        ProjectileManager.getInstance().registerFactory(ModItems.GRENADE.get(), new ProjectileFactory<GunProjectile>()
+        {
+            @Override
+            public GunProjectile create(World world, LivingEntity entity, GunItem item, Gun modifiedGun)
+            {
+                return new GrenadeEntity(ModEntities.GRENADE.get(), world, entity, item, modifiedGun);
+            }
+
+            @Override
+            public void encode(PacketBuffer buf, GunProjectile projectile)
+            {
+            }
+
+            @Override
+            public GunProjectile decode(PacketBuffer buf)
+            {
+                return null;
+            }
+        });
+        ProjectileManager.getInstance().registerFactory(ModItems.MISSILE.get(), new ProjectileFactory<GunProjectile>()
+        {
+            @Override
+            public GunProjectile create(World world, LivingEntity entity, GunItem item, Gun modifiedGun)
+            {
+                return new MissileEntity(ModEntities.MISSILE.get(), world, entity, item, modifiedGun);
+            }
+
+            @Override
+            public void encode(PacketBuffer buf, GunProjectile projectile)
+            {
+
+            }
+
+            @Override
+            public GunProjectile decode(PacketBuffer buf)
+            {
+                return null;
+            }
+        });
         PacketHandler.init();
 
         if(Config.COMMON.gameplay.improvedHitboxes.get())

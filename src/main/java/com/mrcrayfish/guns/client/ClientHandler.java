@@ -11,33 +11,19 @@ import com.mrcrayfish.guns.client.event.GunRenderer;
 import com.mrcrayfish.guns.client.event.SoundEvents;
 import com.mrcrayfish.guns.client.particle.BloodParticle;
 import com.mrcrayfish.guns.client.particle.BulletHoleParticle;
-import com.mrcrayfish.guns.client.render.entity.ThrowableGrenadeRenderer;
 import com.mrcrayfish.guns.client.render.entity.ProjectileRenderer;
+import com.mrcrayfish.guns.client.render.entity.ThrowableGrenadeRenderer;
 import com.mrcrayfish.guns.client.render.gun.ModelOverrides;
-import com.mrcrayfish.guns.client.render.gun.model.BazookaModel;
-import com.mrcrayfish.guns.client.render.gun.model.GrenadeLauncherModel;
-import com.mrcrayfish.guns.client.render.gun.model.LongScopeModel;
-import com.mrcrayfish.guns.client.render.gun.model.MediumScopeModel;
-import com.mrcrayfish.guns.client.render.gun.model.MiniGunModel;
-import com.mrcrayfish.guns.client.render.gun.model.ShortScopeModel;
+import com.mrcrayfish.guns.client.render.gun.model.*;
 import com.mrcrayfish.guns.client.screen.AttachmentScreen;
 import com.mrcrayfish.guns.client.screen.WorkbenchScreen;
 import com.mrcrayfish.guns.client.settings.GunOptions;
-import com.mrcrayfish.guns.entity.ProjectileEntity;
-import com.mrcrayfish.guns.init.ModBlocks;
-import com.mrcrayfish.guns.init.ModContainers;
-import com.mrcrayfish.guns.init.ModEntities;
-import com.mrcrayfish.guns.init.ModItems;
-import com.mrcrayfish.guns.init.ModParticleTypes;
+import com.mrcrayfish.guns.common.trace.GunTracer;
+import com.mrcrayfish.guns.init.*;
 import com.mrcrayfish.guns.item.ColoredItem;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.network.PacketHandler;
-import com.mrcrayfish.guns.network.message.MessageAttachments;
-import com.mrcrayfish.guns.network.message.MessageBlood;
-import com.mrcrayfish.guns.network.message.MessageBullet;
-import com.mrcrayfish.guns.network.message.MessageBulletHole;
-import com.mrcrayfish.guns.network.message.MessageGunSound;
-import com.mrcrayfish.guns.network.message.MessageStunGrenade;
+import com.mrcrayfish.guns.network.message.*;
 import com.mrcrayfish.guns.object.Bullet;
 import com.mrcrayfish.guns.particles.BulletHoleData;
 import net.minecraft.block.Block;
@@ -55,7 +41,6 @@ import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.IItemColor;
-import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleTypes;
@@ -104,7 +89,7 @@ public class ClientHandler
         MinecraftForge.EVENT_BUS.register(BULLET_RENDERER);
 
         /* Only register controller events if Controllable is loaded otherwise it will crash */
-        if(GunMod.controllableLoaded)
+        if (GunMod.controllableLoaded)
         {
             MinecraftForge.EVENT_BUS.register(new ControllerEvents());
         }
@@ -138,7 +123,7 @@ public class ClientHandler
     {
         IItemColor color = (stack, index) ->
         {
-            if(index == 0 && stack.hasTag() && stack.getTag().contains("Color", Constants.NBT.TAG_INT))
+            if (index == 0 && stack.hasTag() && stack.getTag().contains("Color", Constants.NBT.TAG_INT))
             {
                 return stack.getTag().getInt("Color");
             }
@@ -146,7 +131,7 @@ public class ClientHandler
         };
         ForgeRegistries.ITEMS.forEach(item ->
         {
-            if(item instanceof ColoredItem)
+            if (item instanceof ColoredItem)
             {
                 Minecraft.getInstance().getItemColors().register(color, item);
             }
@@ -179,9 +164,9 @@ public class ClientHandler
     public static void handleMessageGunSound(MessageGunSound message)
     {
         SoundEvent soundEvent = ForgeRegistries.SOUND_EVENTS.getValue(message.getId());
-        if(soundEvent != null)
+        if (soundEvent != null)
         {
-            if(message.isShooter())
+            if (message.isShooter())
             {
                 Minecraft.getInstance().getSoundHandler().play(new SimpleSound(soundEvent.getName(), SoundCategory.PLAYERS, message.getVolume(), message.getPitch(), false, 0, ISound.AttenuationType.NONE, 0, 0, 0, true));
             }
@@ -194,14 +179,14 @@ public class ClientHandler
 
     public static void handleMessageBlood(MessageBlood message)
     {
-        if(!Config.CLIENT.particle.enableBlood.get())
+        if (!Config.CLIENT.particle.enableBlood.get())
         {
             return;
         }
         World world = Minecraft.getInstance().world;
-        if(world != null)
+        if (world != null)
         {
-            for(int i = 0; i < 10; i++)
+            for (int i = 0; i < 10; i++)
             {
                 world.addParticle(ModParticleTypes.BLOOD.get(), true, message.getX(), message.getY(), message.getZ(), 0.5, 0, 0.5);
             }
@@ -211,11 +196,10 @@ public class ClientHandler
     public static void handleMessageBullet(MessageBullet message)
     {
         World world = Minecraft.getInstance().world;
-        if(world != null)
+        if (world != null)
         {
-            Entity entity = world.getEntityByID(message.getEntityId());
-            ProjectileEntity projectile = (ProjectileEntity) entity;
-            BULLET_RENDERER.addBullet(new Bullet(projectile, message));
+            Minecraft.getInstance().execute(() -> GunTracer.get(world).add(message.getProjectile()));
+            BULLET_RENDERER.addBullet(new Bullet(message));
         }
     }
 
@@ -223,7 +207,7 @@ public class ClientHandler
     {
         Minecraft mc = Minecraft.getInstance();
         World world = mc.world;
-        if(world != null)
+        if (world != null)
         {
             world.addParticle(new BulletHoleData(ModParticleTypes.BULLET_HOLE.get(), message.getDirection(), message.getPos()), true, message.getX(), message.getY(), message.getZ(), 0, 0, 0);
         }
@@ -240,13 +224,13 @@ public class ClientHandler
         double z = message.getZ();
 
         /* Spawn lingering smoke particles */
-        for(int i = 0; i < 30; i++)
+        for (int i = 0; i < 30; i++)
         {
             spawnParticle(particleManager, ParticleTypes.CLOUD, x, y, z, world.rand, 0.2);
         }
 
         /* Spawn fast moving smoke/spark particles */
-        for(int i = 0; i < 30; i++)
+        for (int i = 0; i < 30; i++)
         {
             Particle smoke = spawnParticle(particleManager, ParticleTypes.SMOKE, x, y, z, world.rand, 4.0);
             smoke.setMaxAge((int) ((8 / (Math.random() * 0.1 + 0.4)) * 0.5));
@@ -262,9 +246,9 @@ public class ClientHandler
     public static boolean isLookingAtInteractableBlock()
     {
         Minecraft mc = Minecraft.getInstance();
-        if(mc.objectMouseOver != null && mc.world != null)
+        if (mc.objectMouseOver != null && mc.world != null)
         {
-            if(mc.objectMouseOver instanceof BlockRayTraceResult)
+            if (mc.objectMouseOver instanceof BlockRayTraceResult)
             {
                 BlockRayTraceResult result = (BlockRayTraceResult) mc.objectMouseOver;
                 BlockState state = mc.world.getBlockState(result.getPos());
@@ -278,26 +262,26 @@ public class ClientHandler
     public static boolean isAiming()
     {
         Minecraft mc = Minecraft.getInstance();
-        if(!mc.isGameFocused())
+        if (!mc.isGameFocused())
             return false;
 
-        if(mc.player == null)
+        if (mc.player == null)
             return false;
 
-        if(mc.player.isSpectator())
+        if (mc.player.isSpectator())
             return false;
 
-        if(!(mc.player.inventory.getCurrentItem().getItem() instanceof GunItem))
+        if (!(mc.player.inventory.getCurrentItem().getItem() instanceof GunItem))
             return false;
 
-        if(mc.currentScreen != null)
+        if (mc.currentScreen != null)
             return false;
 
         boolean zooming = GLFW.glfwGetMouseButton(mc.getMainWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_RIGHT) == GLFW.GLFW_PRESS;
-        if(GunMod.controllableLoaded)
+        if (GunMod.controllableLoaded)
         {
             Controller controller = Controllable.getController();
-            if(controller != null)
+            if (controller != null)
             {
                 zooming |= controller.getLTriggerValue() >= 0.5;
             }
@@ -309,10 +293,10 @@ public class ClientHandler
     @SubscribeEvent
     public static void onScreenInit(GuiScreenEvent.InitGuiEvent.Post event)
     {
-        if(event.getGui() instanceof MouseSettingsScreen)
+        if (event.getGui() instanceof MouseSettingsScreen)
         {
             MouseSettingsScreen screen = (MouseSettingsScreen) event.getGui();
-            if(mouseOptionsField == null)
+            if (mouseOptionsField == null)
             {
                 mouseOptionsField = ObfuscationReflectionHelper.findField(MouseSettingsScreen.class, "field_213045_b");
                 mouseOptionsField.setAccessible(true);
@@ -322,7 +306,7 @@ public class ClientHandler
                 OptionsRowList list = (OptionsRowList) mouseOptionsField.get(screen);
                 list.addOption(GunOptions.ADS_SENSITIVITY);
             }
-            catch(IllegalAccessException e)
+            catch (IllegalAccessException e)
             {
                 e.printStackTrace();
             }
@@ -333,9 +317,9 @@ public class ClientHandler
     public static void onKeyPressed(InputEvent.KeyInputEvent event)
     {
         Minecraft mc = Minecraft.getInstance();
-        if(mc.player != null && mc.currentScreen == null)
+        if (mc.player != null && mc.currentScreen == null)
         {
-            if(KeyBinds.KEY_ATTACHMENTS.isPressed())
+            if (KeyBinds.KEY_ATTACHMENTS.isPressed())
             {
                 PacketHandler.getPlayChannel().sendToServer(new MessageAttachments());
             }

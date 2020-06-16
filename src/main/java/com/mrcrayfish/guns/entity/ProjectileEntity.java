@@ -4,6 +4,7 @@ import com.google.common.base.Predicate;
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.common.BoundingBoxTracker;
 import com.mrcrayfish.guns.common.SpreadTracker;
+import com.mrcrayfish.guns.common.trace.GunProjectile;
 import com.mrcrayfish.guns.interfaces.IDamageable;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.network.PacketHandler;
@@ -13,17 +14,9 @@ import com.mrcrayfish.guns.object.EntityResult;
 import com.mrcrayfish.guns.object.Gun;
 import com.mrcrayfish.guns.object.Gun.Projectile;
 import com.mrcrayfish.guns.util.ItemStackUtil;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BreakableBlock;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.block.PaneBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntitySize;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.Pose;
+import net.minecraft.entity.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.IFluidState;
@@ -35,19 +28,8 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPlaySoundPacket;
 import net.minecraft.particles.BlockParticleData;
 import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.*;
+import net.minecraft.util.math.*;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -59,11 +41,11 @@ import net.minecraftforge.registries.ForgeRegistries;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-@Deprecated
-public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnData
+public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnData, GunProjectile
 {
     private static final Predicate<Entity> PROJECTILE_TARGETS = input -> input != null && !input.isSpectator() && input.canBeCollidedWith();
     private static final Predicate<BlockState> IGNORE_LEAVES = input -> input != null && Config.COMMON.gameplay.ignoreLeaves.get() && input.getBlock() instanceof LeavesBlock;
@@ -103,7 +85,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         this.setPosition(posX, posY, posZ);
 
         Item ammo = ForgeRegistries.ITEMS.getValue(this.projectile.item);
-        if(ammo != null)
+        if (ammo != null)
         {
             this.item = new ItemStack(ammo);
         }
@@ -125,12 +107,12 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     {
         float gunSpread = modifiedGun.general.spread;
 
-        if(gunSpread == 0F)
+        if (gunSpread == 0F)
         {
             return this.getVectorFromRotation(shooter.rotationPitch, shooter.rotationYaw);
         }
 
-        if(!modifiedGun.general.alwaysSpread)
+        if (!modifiedGun.general.alwaysSpread)
         {
             gunSpread *= SpreadTracker.get(shooter.getUniqueID()).getSpread(item);
         }
@@ -138,34 +120,137 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         return this.getVectorFromRotation(shooter.rotationPitch - (gunSpread / 2.0F) + rand.nextFloat() * gunSpread, shooter.getRotationYawHead() - (gunSpread / 2.0F) + rand.nextFloat() * gunSpread);
     }
 
+    @Override
     public void setWeapon(ItemStack weapon)
     {
         this.weapon = weapon.copy();
     }
 
+    @Override
+    public void setBullet(ItemStack bullet)
+    {
+        this.item = bullet.copy();
+    }
+
+    @Override
     public ItemStack getWeapon()
     {
         return weapon;
     }
 
-    public void setItem(ItemStack item)
+    @Override
+    public ItemStack getBullet()
     {
-        this.item = item;
+        return item;
     }
 
-    public ItemStack getItem()
+    @Override
+    public float getDamageModifier()
     {
-        return this.item;
+        return damageModifier;
     }
 
+    @Override
+    public float getAdditionalDamage()
+    {
+        return additionalDamage;
+    }
+
+    @Override
+    public void setTicksExisted(int ticksExisted)
+    {
+        super.ticksExisted = ticksExisted;
+    }
+
+    @Override
+    public void setLastX(double lastX)
+    {
+        super.lastTickPosX = lastX;
+    }
+
+    @Override
+    public void setLastY(double lastY)
+    {
+        super.lastTickPosY = lastY;
+    }
+
+    @Override
+    public void setLastZ(double lastZ)
+    {
+        super.lastTickPosZ = lastZ;
+    }
+
+    @Override
+    public void setX(double x)
+    {
+        super.setPosition(x, super.getPosY(), super.getPosZ());
+    }
+
+    @Override
+    public void setY(double y)
+    {
+        super.setPosition(super.getPosX(), y, super.getPosZ());
+    }
+
+    @Override
+    public void setZ(double z)
+    {
+        super.setPosition(super.getPosX(), super.getPosY(), z);
+    }
+
+    @Override
+    public void setMotionX(double motionX)
+    {
+        super.setMotion(motionX, super.getMotion().getY(), super.getMotion().getZ());
+    }
+
+    @Override
+    public void setMotionY(double motionY)
+    {
+        super.setMotion(super.getMotion().getX(), motionY, super.getMotion().getZ());
+    }
+
+    @Override
+    public void setMotionZ(double motionZ)
+    {
+        super.setMotion(super.getMotion().getX(), super.getMotion().getY(), motionZ);
+    }
+
+    @Override
+    public void setShooterId(int shooterId)
+    {
+        this.shooterId = shooterId;
+        Entity entity = this.world.getEntityByID(shooterId);
+        this.shooter = entity instanceof LivingEntity ? (LivingEntity) entity : null;
+    }
+
+    @Override
+    public void setShooter(UUID shooterId)
+    {
+        if (this.world instanceof ServerWorld)
+        {
+            Entity shooter = ((ServerWorld) this.world).getEntityByUuid(shooterId);
+            if (shooter instanceof LivingEntity)
+                this.shooter = (LivingEntity) shooter;
+        }
+    }
+
+    @Override
     public void setDamageModifier(float damageModifier)
     {
         this.damageModifier = damageModifier;
     }
 
+    @Override
     public void setAdditionalDamage(float additionalDamage)
     {
         this.additionalDamage = additionalDamage;
+    }
+
+    @Override
+    public void tick(World world)
+    {
+        this.tick();
     }
 
     @Override
@@ -175,33 +260,33 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         this.updateHeading();
         this.onTick();
 
-        if(!this.world.isRemote())
+        if (!this.world.isRemote())
         {
             Vec3d startVec = this.getPositionVec();
             Vec3d endVec = startVec.add(this.getMotion());
             RayTraceResult result = rayTraceBlocks(this.world, new RayTraceContext(startVec, endVec, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, this), IGNORE_LEAVES);
-            if(result.getType() != RayTraceResult.Type.MISS)
+            if (result.getType() != RayTraceResult.Type.MISS)
             {
                 endVec = result.getHitVec();
             }
 
             EntityResult entityResult = this.findEntityOnPath(startVec, endVec);
-            if(entityResult != null)
+            if (entityResult != null)
             {
                 result = new EntityRayTraceResult(entityResult.entity, entityResult.hitVec);
             }
 
-            if(result instanceof EntityRayTraceResult && ((EntityRayTraceResult) result).getEntity() instanceof PlayerEntity)
+            if (result instanceof EntityRayTraceResult && ((EntityRayTraceResult) result).getEntity() instanceof PlayerEntity)
             {
                 PlayerEntity player = (PlayerEntity) ((EntityRayTraceResult) result).getEntity();
 
-                if(this.shooter instanceof PlayerEntity && !((PlayerEntity) this.shooter).canAttackPlayer(player))
+                if (this.shooter instanceof PlayerEntity && !((PlayerEntity) this.shooter).canAttackPlayer(player))
                 {
                     result = null;
                 }
             }
 
-            if(result != null)
+            if (result != null)
             {
                 this.onHit(result);
             }
@@ -212,19 +297,91 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         double nextPosZ = this.getPosZ() + this.getMotion().getZ();
         this.setPosition(nextPosX, nextPosY, nextPosZ);
 
-        if(this.projectile.gravity)
+        if (this.projectile.gravity)
         {
             this.setMotion(this.getMotion().add(0, -0.05, 0));
         }
 
-        if(this.ticksExisted >= this.projectile.life)
+        if (this.ticksExisted >= this.projectile.life)
         {
-            if(this.isAlive())
+            if (this.isAlive())
             {
                 this.onExpired();
             }
             this.remove();
         }
+    }
+
+    @Override
+    public void complete()
+    {
+        super.remove();
+    }
+
+    @Override
+    public int getTicksExisted()
+    {
+        return super.ticksExisted;
+    }
+
+    @Override
+    public boolean isComplete()
+    {
+        return !super.isAlive();
+    }
+
+    @Override
+    public double getLastX()
+    {
+        return super.lastTickPosX;
+    }
+
+    @Override
+    public double getLastY()
+    {
+        return super.lastTickPosY;
+    }
+
+    @Override
+    public double getLastZ()
+    {
+        return super.lastTickPosZ;
+    }
+
+    @Override
+    public double getX()
+    {
+        return super.getPosX();
+    }
+
+    @Override
+    public double getY()
+    {
+        return super.getPosY();
+    }
+
+    @Override
+    public double getZ()
+    {
+        return super.getPosZ();
+    }
+
+    @Override
+    public double getMotionX()
+    {
+        return super.getMotion().x;
+    }
+
+    @Override
+    public double getMotionY()
+    {
+        return super.getMotion().y;
+    }
+
+    @Override
+    public double getMotionZ()
+    {
+        return super.getMotion().z;
     }
 
     protected void onTick()
@@ -242,13 +399,13 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         Entity hitEntity = null;
         List<Entity> entities = this.world.getEntitiesInAABBexcluding(this, this.getBoundingBox().expand(this.getMotion()).grow(1.0), PROJECTILE_TARGETS);
         double closestDistance = Double.MAX_VALUE;
-        for(Entity entity : entities)
+        for (Entity entity : entities)
         {
-            if(!entity.equals(this.shooter))
+            if (!entity.equals(this.shooter))
             {
                 double expandHeight = entity instanceof PlayerEntity && !entity.isCrouching() ? 0.0625 : 0.0;
                 AxisAlignedBB boundingBox = entity.getBoundingBox();
-                if(Config.COMMON.gameplay.improvedHitboxes.get() && entity instanceof ServerPlayerEntity && this.shooter != null)
+                if (Config.COMMON.gameplay.improvedHitboxes.get() && entity instanceof ServerPlayerEntity && this.shooter != null)
                 {
                     int ping = (int) Math.floor((((ServerPlayerEntity) this.shooter).ping / 1000.0) * 20.0 + 0.5);
                     boundingBox = BoundingBoxTracker.getBoundingBox(entity, ping); //TODO this is actually the last position
@@ -256,23 +413,23 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
                 boundingBox = boundingBox.expand(0, expandHeight, 0);
                 Optional<Vec3d> hitPos = boundingBox.rayTrace(startVec, endVec);
                 Optional<Vec3d> grownHitPos = boundingBox.grow(Config.COMMON.gameplay.growBoundingBoxAmount.get(), 0, Config.COMMON.gameplay.growBoundingBoxAmount.get()).rayTrace(startVec, endVec);
-                if(!hitPos.isPresent() && grownHitPos.isPresent())
+                if (!hitPos.isPresent() && grownHitPos.isPresent())
                 {
                     RayTraceResult raytraceresult = rayTraceBlocks(this.world, new RayTraceContext(startVec, grownHitPos.get(), RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, this), IGNORE_LEAVES);
-                    if(raytraceresult.getType() == RayTraceResult.Type.BLOCK)
+                    if (raytraceresult.getType() == RayTraceResult.Type.BLOCK)
                     {
                         continue;
                     }
                     hitPos = grownHitPos;
                 }
 
-                if(!hitPos.isPresent())
+                if (!hitPos.isPresent())
                 {
                     continue;
                 }
 
                 double distanceToHit = startVec.distanceTo(hitPos.get());
-                if(distanceToHit < closestDistance)
+                if (distanceToHit < closestDistance)
                 {
                     hitVec = hitPos.get();
                     hitEntity = entity;
@@ -285,10 +442,10 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
     private void onHit(RayTraceResult result)
     {
-        if(result instanceof BlockRayTraceResult)
+        if (result instanceof BlockRayTraceResult)
         {
             BlockRayTraceResult blockRayTraceResult = (BlockRayTraceResult) result;
-            if(blockRayTraceResult.getType() == RayTraceResult.Type.MISS)
+            if (blockRayTraceResult.getType() == RayTraceResult.Type.MISS)
             {
                 return;
             }
@@ -297,17 +454,17 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             BlockState state = this.world.getBlockState(pos);
             Block block = state.getBlock();
 
-            if(Config.COMMON.gameplay.enableGunGriefing.get() && (block instanceof BreakableBlock || block instanceof PaneBlock) && state.getMaterial() == Material.GLASS)
+            if (Config.COMMON.gameplay.enableGunGriefing.get() && (block instanceof BreakableBlock || block instanceof PaneBlock) && state.getMaterial() == Material.GLASS)
             {
                 this.world.destroyBlock(blockRayTraceResult.getPos(), false);
             }
 
-            if(!state.getMaterial().isReplaceable())
+            if (!state.getMaterial().isReplaceable())
             {
                 this.remove();
             }
 
-            if(block instanceof IDamageable)
+            if (block instanceof IDamageable)
             {
                 ((IDamageable) block).onBlockDamaged(this.world, state, pos, (int) Math.ceil(getDamage() / 2.0) + 1);
             }
@@ -324,11 +481,11 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             return;
         }
 
-        if(result instanceof EntityRayTraceResult)
+        if (result instanceof EntityRayTraceResult)
         {
             EntityRayTraceResult entityRayTraceResult = (EntityRayTraceResult) result;
             Entity entity = entityRayTraceResult.getEntity();
-            if(entity.getEntityId() == this.shooterId)
+            if (entity.getEntityId() == this.shooterId)
             {
                 return;
             }
@@ -342,10 +499,10 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     {
         boolean headShot = false;
         float damage = this.getDamage();
-        if(Config.COMMON.gameplay.enableHeadShots.get() && entity instanceof PlayerEntity)
+        if (Config.COMMON.gameplay.enableHeadShots.get() && entity instanceof PlayerEntity)
         {
             AxisAlignedBB boundingBox = entity.getBoundingBox().expand(0, !entity.isCrouching() ? 0.0625 : 0, 0);
-            if(boundingBox.maxY - y <= 8.0 * 0.0625 && boundingBox.grow(0.001).contains(new Vec3d(x, y, z)))
+            if (boundingBox.maxY - y <= 8.0 * 0.0625 && boundingBox.grow(0.001).contains(new Vec3d(x, y, z)))
             {
                 headShot = true;
                 damage *= Config.COMMON.gameplay.headShotDamageMultiplier.get();
@@ -355,7 +512,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         DamageSource source = new DamageSourceProjectile("bullet", this, shooter, weapon).setProjectile();
         entity.attackEntityFrom(source, damage);
 
-        if(entity instanceof PlayerEntity && this.shooter instanceof ServerPlayerEntity)
+        if (entity instanceof PlayerEntity && this.shooter instanceof ServerPlayerEntity)
         {
             SoundEvent event = headShot ? SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP : SoundEvents.ENTITY_PLAYER_HURT;
             ServerPlayerEntity shooterPlayer = (ServerPlayerEntity) this.shooter;
@@ -433,11 +590,13 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         return new Vec3d((double) (f1 * f2), (double) f3, (double) (f * f2));
     }
 
-    public LivingEntity getShooter()
+    @Override
+    public UUID getShooter()
     {
-        return this.shooter;
+        return this.shooter.getUniqueID();
     }
 
+    @Override
     public int getShooterId()
     {
         return shooterId;
@@ -446,7 +605,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     public float getDamage()
     {
         float damage = (this.projectile.damage + this.additionalDamage) * this.damageModifier;
-        if(this.projectile.damageReduceOverLife)
+        if (this.projectile.damageReduceOverLife)
         {
             float modifier = ((float) this.projectile.life - (float) (this.ticksExisted - 1)) / (float) this.projectile.life;
             damage *= modifier;
@@ -475,11 +634,12 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
      * @param predicate the block state predicate
      * @return a result of the raytrace
      */
-    private static BlockRayTraceResult rayTraceBlocks(World world, RayTraceContext context, Predicate<BlockState> predicate)
+    public static BlockRayTraceResult rayTraceBlocks(World world, RayTraceContext context, Predicate<BlockState> predicate)
     {
-        return func_217300_a(context, (rayTraceContext, blockPos) -> {
+        return func_217300_a(context, (rayTraceContext, blockPos) ->
+        {
             BlockState blockState = world.getBlockState(blockPos);
-            if(predicate.test(blockState)) return null;
+            if (predicate.test(blockState)) return null;
             IFluidState fluidState = world.getFluidState(blockPos);
             Vec3d startVec = rayTraceContext.func_222253_b();
             Vec3d endVec = rayTraceContext.func_222250_a();
@@ -490,7 +650,8 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             double blockDistance = blockResult == null ? Double.MAX_VALUE : rayTraceContext.func_222253_b().squareDistanceTo(blockResult.getHitVec());
             double fluidDistance = fluidResult == null ? Double.MAX_VALUE : rayTraceContext.func_222253_b().squareDistanceTo(fluidResult.getHitVec());
             return blockDistance <= fluidDistance ? blockResult : fluidResult;
-        }, (rayTraceContext) -> {
+        }, (rayTraceContext) ->
+        {
             Vec3d vec3d = rayTraceContext.func_222253_b().subtract(rayTraceContext.func_222250_a());
             return BlockRayTraceResult.createMiss(rayTraceContext.func_222250_a(), Direction.getFacingFromVector(vec3d.x, vec3d.y, vec3d.z), new BlockPos(rayTraceContext.func_222250_a()));
         });
@@ -500,7 +661,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     {
         Vec3d startVec = context.func_222253_b();
         Vec3d endVec = context.func_222250_a();
-        if(startVec.equals(endVec))
+        if (startVec.equals(endVec))
         {
             return p_217300_2_.apply(context);
         }
@@ -517,7 +678,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             int k = MathHelper.floor(d5);
             BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable(i, j, k);
             T t = hitFunction.apply(context, blockpos$mutable);
-            if(t != null)
+            if (t != null)
             {
                 return t;
             }
@@ -536,11 +697,11 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
                 double d13 = d10 * (i1 > 0 ? 1.0D - MathHelper.frac(d4) : MathHelper.frac(d4));
                 double d14 = d11 * (j1 > 0 ? 1.0D - MathHelper.frac(d5) : MathHelper.frac(d5));
 
-                while(d12 <= 1.0D || d13 <= 1.0D || d14 <= 1.0D)
+                while (d12 <= 1.0D || d13 <= 1.0D || d14 <= 1.0D)
                 {
-                    if(d12 < d13)
+                    if (d12 < d13)
                     {
-                        if(d12 < d14)
+                        if (d12 < d14)
                         {
                             i += l;
                             d12 += d9;
@@ -551,7 +712,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
                             d14 += d11;
                         }
                     }
-                    else if(d13 < d14)
+                    else if (d13 < d14)
                     {
                         j += i1;
                         d13 += d10;
@@ -563,7 +724,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
                     }
 
                     T t1 = hitFunction.apply(context, blockpos$mutable.setPos(i, j, k));
-                    if(t1 != null)
+                    if (t1 != null)
                     {
                         return t1;
                     }

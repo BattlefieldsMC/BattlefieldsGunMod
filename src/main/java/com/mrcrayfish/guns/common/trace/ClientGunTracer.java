@@ -14,18 +14,12 @@ public final class ClientGunTracer extends GunTracerImpl
 {
     static ClientGunTracer INSTANCE = new ClientGunTracer();
 
-    @Override
-    protected void tick()
-    {
-        System.out.println("Client");
-    }
-
     @SubscribeEvent
     public static void onEvent(TickEvent.ClientTickEvent event)
     {
         if (Minecraft.getInstance().world == null)
             return;
         if (event.phase == TickEvent.Phase.END)
-            INSTANCE.tick();
+            INSTANCE.tick(Minecraft.getInstance().world);
     }
 }

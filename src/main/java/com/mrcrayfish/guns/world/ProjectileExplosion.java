@@ -34,10 +34,10 @@ public class ProjectileExplosion extends Explosion
 
     public ProjectileExplosion(ProjectileEntity projectile, double x, double y, double z, double radius, Explosion.Mode mode)
     {
-        super(projectile.world, projectile.getShooter(), x, y, z, (float) (radius * 2), false, mode);
+        super(projectile.world, projectile.world.getEntityByID(projectile.getShooterId()), x, y, z, (float) (radius * 2), false, mode);
         this.world = projectile.world;
         this.projectile = projectile;
-        this.shooter = projectile.getShooter();
+        this.shooter = projectile.world.getEntityByID(projectile.getShooterId());
         this.weapon = projectile.getWeapon();
         this.damage = projectile.getDamage();
         this.x = x;

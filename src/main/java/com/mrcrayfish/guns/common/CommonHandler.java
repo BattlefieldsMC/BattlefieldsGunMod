@@ -6,9 +6,10 @@ import com.mrcrayfish.guns.GunMod;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.common.container.AttachmentContainer;
 import com.mrcrayfish.guns.common.container.WorkbenchContainer;
+import com.mrcrayfish.guns.common.trace.GunProjectile;
+import com.mrcrayfish.guns.common.trace.GunTracer;
 import com.mrcrayfish.guns.crafting.WorkbenchRecipe;
 import com.mrcrayfish.guns.crafting.WorkbenchRecipes;
-import com.mrcrayfish.guns.entity.ProjectileEntity;
 import com.mrcrayfish.guns.init.ModItems;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.ColoredItem;
@@ -23,6 +24,7 @@ import com.mrcrayfish.guns.tileentity.WorkbenchTileEntity;
 import com.mrcrayfish.guns.util.InventoryUtil;
 import com.mrcrayfish.guns.util.ItemStackUtil;
 import com.mrcrayfish.obfuscate.common.data.SyncedPlayerData;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -32,15 +34,12 @@ import net.minecraft.item.DyeItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -78,60 +77,75 @@ public class CommonHandler
      */
     public static void fireHeldGun(MessageShoot message, ServerPlayerEntity player)
     {
-        if(!player.isSpectator())
+        if (player.world.isRemote())
+            return;
+
+        if (!player.isSpectator())
         {
             World world = player.world;
             ItemStack heldItem = player.getHeldItem(Hand.MAIN_HAND);
-            if(heldItem.getItem() instanceof GunItem && (Gun.hasAmmo(heldItem) || player.isCreative()))
+            if (heldItem.getItem() instanceof GunItem && (Gun.hasAmmo(heldItem) || player.isCreative()))
             {
                 GunItem item = (GunItem) heldItem.getItem();
                 Gun modifiedGun = item.getModifiedGun(heldItem);
-                if(modifiedGun != null)
+                if (modifiedGun != null)
                 {
                     /* Updates the yaw and pitch with the clients current yaw and pitch */
                     player.rotationYaw = message.getRotationYaw();
                     player.rotationPitch = message.getRotationPitch();
 
                     ShootTracker tracker = getShootTracker(player.getUniqueID());
-                    if(tracker.hasCooldown(item))
+                    if (tracker.hasCooldown(item))
                     {
                         GunMod.LOGGER.warn(player.getName().getUnformattedComponentText() + "(" + player.getUniqueID() + ") tried to fire before cooldown finished or server is lagging? Remaining milliseconds: " + tracker.getRemaining(item));
                         return;
                     }
                     tracker.putCooldown(item, modifiedGun);
 
-                    if(SyncedPlayerData.instance().get(player, ModSyncedDataKeys.RELOADING))
+                    if (SyncedPlayerData.instance().get(player, ModSyncedDataKeys.RELOADING))
                     {
                         SyncedPlayerData.instance().set(player, ModSyncedDataKeys.RELOADING, false);
                     }
 
-                    if(!modifiedGun.general.alwaysSpread && modifiedGun.general.spread > 0.0F)
+                    if (!modifiedGun.general.alwaysSpread && modifiedGun.general.spread > 0.0F)
                     {
                         SpreadTracker.get(player.getUniqueID()).update(item);
                     }
 
                     boolean silenced = Gun.getAttachment(IAttachment.Type.BARREL, heldItem).getItem() == ModItems.SILENCER.get();
-
-                    for(int i = 0; i < modifiedGun.general.projectileAmount; i++)
+                    
+                    for (int i = 0; i < modifiedGun.general.projectileAmount; i++)
                     {
-                        ProjectileFactory factory = ProjectileManager.getInstance().getFactory(modifiedGun.projectile.item);
-                        ProjectileEntity bullet = factory.create(world, player, item, modifiedGun);
-                        bullet.setWeapon(heldItem);
-                        bullet.setAdditionalDamage(Gun.getAdditionalDamage(heldItem));
-                        if(silenced)
+                        ((ServerWorld) world).getServer().execute(() ->
                         {
-                            bullet.setDamageModifier(0.75F);
-                        }
-                        world.addEntity(bullet);
+                            ProjectileFactory<?> factory = ProjectileManager.getInstance().getFactory(modifiedGun.projectile.item);
+                            GunProjectile bullet = factory.create(world, player, item, modifiedGun);
+                            bullet.setWeapon(heldItem);
+                            bullet.setAdditionalDamage(Gun.getAdditionalDamage(heldItem));
+                            bullet.setShooter(player.getUniqueID());
+                            bullet.setShooterId(player.getEntityId());
 
-                        if(!modifiedGun.projectile.visible)
-                        {
-                            MessageBullet messageBullet = new MessageBullet(bullet.getEntityId(), bullet.getPosX(), bullet.getPosY(), bullet.getPosZ(), bullet.getMotion().getX(), bullet.getMotion().getY(), bullet.getMotion().getZ(), modifiedGun.projectile.trailColor, modifiedGun.projectile.trailLengthMultiplier);
-                            PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player.getPosX(), player.getPosY(), player.getPosZ(), Config.COMMON.network.projectileTrackingRange.get(), player.world.getDimension().getType())), messageBullet);
-                        }
+                            if (silenced)
+                                bullet.setDamageModifier(0.75F);
+
+                            if (bullet instanceof Entity)
+                            {
+                                world.addEntity((Entity) bullet);
+                            }
+                            else
+                            {
+                                GunTracer.get(world).add(bullet);
+                            }
+
+                            if (!modifiedGun.projectile.visible)
+                            {
+                                MessageBullet messageBullet = new MessageBullet(modifiedGun.projectile.item, bullet, modifiedGun.projectile.trailColor, modifiedGun.projectile.trailLengthMultiplier);
+                                PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player.getPosX(), player.getPosY(), player.getPosZ(), Config.COMMON.network.projectileTrackingRange.get(), player.world.getDimension().getType())), messageBullet);
+                            }
+                        });
                     }
 
-                    if(Config.COMMON.aggroMobs.enabled.get())
+                    if (Config.COMMON.aggroMobs.enabled.get())
                     {
                         double radius = silenced ? Config.COMMON.aggroMobs.rangeSilenced.get() : Config.COMMON.aggroMobs.rangeUnsilenced.get();
                         double x = player.getPosX();
@@ -140,12 +154,12 @@ public class CommonHandler
                         AxisAlignedBB box = new AxisAlignedBB(x - radius, y - radius, z - radius, x + radius, y + radius, z + radius);
                         radius *= radius;
                         double dx, dy, dz;
-                        for(LivingEntity entity : world.getEntitiesWithinAABB(LivingEntity.class, box, NOT_AGGRO_EXEMPT))
+                        for (LivingEntity entity : world.getEntitiesWithinAABB(LivingEntity.class, box, NOT_AGGRO_EXEMPT))
                         {
                             dx = x - entity.getPosX();
                             dy = y - entity.getPosY();
                             dz = z - entity.getPosZ();
-                            if(dx * dx + dy * dy + dz * dz <= radius)
+                            if (dx * dx + dy * dy + dz * dz <= radius)
                             {
                                 entity.setRevengeTarget(Config.COMMON.aggroMobs.angerHostileMobs.get() ? player : entity);
                             }
@@ -154,7 +168,7 @@ public class CommonHandler
 
                     ResourceLocation fireSound = silenced ? modifiedGun.sounds.silencedFire : modifiedGun.sounds.fire;
                     SoundEvent event = ForgeRegistries.SOUND_EVENTS.getValue(fireSound);
-                    if(event != null)
+                    if (event != null)
                     {
                         double posX = player.prevPosX;
                         double posY = player.prevPosY + player.getEyeHeight();
@@ -166,10 +180,10 @@ public class CommonHandler
                         PacketHandler.getPlayChannel().send(PacketDistributor.PLAYER.with(() -> player), new MessageGunSound(event, SoundCategory.PLAYERS, (float) posX, (float) posY, (float) posZ, volume, pitch, true));
                     }
 
-                    if(!player.isCreative())
+                    if (!player.isCreative())
                     {
                         CompoundNBT tag = ItemStackUtil.createTagCompound(heldItem);
-                        if(!tag.getBoolean("IgnoreAmmo"))
+                        if (!tag.getBoolean("IgnoreAmmo"))
                         {
                             tag.putInt("AmmoCount", Math.max(0, tag.getInt("AmmoCount") - 1));
                         }
@@ -195,29 +209,29 @@ public class CommonHandler
     {
         World world = player.world;
 
-        if(player.openContainer instanceof WorkbenchContainer)
+        if (player.openContainer instanceof WorkbenchContainer)
         {
             WorkbenchContainer workbench = (WorkbenchContainer) player.openContainer;
-            if(workbench.getPos().equals(pos))
+            if (workbench.getPos().equals(pos))
             {
                 WorkbenchRecipe recipe = WorkbenchRecipes.getRecipeById(world, id);
-                if(recipe == null)
+                if (recipe == null)
                 {
                     return;
                 }
 
                 List<ItemStack> materials = recipe.getMaterials();
-                if(materials != null)
+                if (materials != null)
                 {
-                    for(ItemStack stack : materials)
+                    for (ItemStack stack : materials)
                     {
-                        if(!InventoryUtil.hasItemStack(player, stack))
+                        if (!InventoryUtil.hasItemStack(player, stack))
                         {
                             return;
                         }
                     }
 
-                    for(ItemStack stack : materials)
+                    for (ItemStack stack : materials)
                     {
                         InventoryUtil.removeItemStack(player, stack);
                     }
@@ -227,7 +241,7 @@ public class CommonHandler
                     /* Gets the color based on the dye */
                     int color = -1;
                     ItemStack dyeStack = workbenchTileEntity.getInventory().get(0);
-                    if(dyeStack.getItem() instanceof DyeItem)
+                    if (dyeStack.getItem() instanceof DyeItem)
                     {
                         DyeItem dyeItem = (DyeItem) dyeStack.getItem();
                         color = dyeItem.getDyeColor().getColorValue();
@@ -235,7 +249,7 @@ public class CommonHandler
                     }
 
                     ItemStack stack = recipe.getItem();
-                    if(stack.getItem() instanceof ColoredItem)
+                    if (stack.getItem() instanceof ColoredItem)
                     {
                         ColoredItem colored = (ColoredItem) stack.getItem();
                         colored.setColor(stack, color);
@@ -247,16 +261,15 @@ public class CommonHandler
     }
 
     /**
-     *
      * @param player
      */
     public static void unloadHeldGun(ServerPlayerEntity player)
     {
         ItemStack stack = player.getHeldItemMainhand();
-        if(stack.getItem() instanceof GunItem)
+        if (stack.getItem() instanceof GunItem)
         {
             CompoundNBT tag = stack.getTag();
-            if(tag != null && tag.contains("AmmoCount", Constants.NBT.TAG_INT))
+            if (tag != null && tag.contains("AmmoCount", Constants.NBT.TAG_INT))
             {
                 int count = tag.getInt("AmmoCount");
                 tag.putInt("AmmoCount", 0);
@@ -266,20 +279,20 @@ public class CommonHandler
                 ResourceLocation id = gun.projectile.item;
 
                 Item item = ForgeRegistries.ITEMS.getValue(id);
-                if(item == null)
+                if (item == null)
                 {
                     return;
                 }
 
                 int maxStackSize = item.getMaxStackSize();
                 int stacks = count / maxStackSize;
-                for(int i = 0; i < stacks; i++)
+                for (int i = 0; i < stacks; i++)
                 {
                     spawnAmmo(player, new ItemStack(item, maxStackSize));
                 }
 
                 int remaining = count % maxStackSize;
-                if(remaining > 0)
+                if (remaining > 0)
                 {
                     spawnAmmo(player, new ItemStack(item, count));
                 }
@@ -288,27 +301,25 @@ public class CommonHandler
     }
 
     /**
-     *
      * @param player
      * @param stack
      */
     private static void spawnAmmo(ServerPlayerEntity player, ItemStack stack)
     {
         player.inventory.addItemStackToInventory(stack);
-        if(stack.getCount() > 0)
+        if (stack.getCount() > 0)
         {
             player.world.addEntity(new ItemEntity(player.world, player.getPosX(), player.getPosY(), player.getPosZ(), stack.copy()));
         }
     }
 
     /**
-     *
      * @param player
      */
     public static void openAttachmentsScreen(ServerPlayerEntity player)
     {
         ItemStack heldItem = player.getHeldItemMainhand();
-        if(heldItem.getItem() instanceof GunItem)
+        if (heldItem.getItem() instanceof GunItem)
         {
             NetworkHooks.openGui(player, new SimpleNamedContainerProvider((windowId, playerInventory, player1) -> new AttachmentContainer(windowId, playerInventory, heldItem), new TranslationTextComponent("container.cgm.attachments")));
         }
@@ -322,7 +333,7 @@ public class CommonHandler
      */
     public static ShootTracker getShootTracker(UUID uuid)
     {
-        if(!SHOOT_TRACKER_MAP.containsKey(uuid))
+        if (!SHOOT_TRACKER_MAP.containsKey(uuid))
         {
             SHOOT_TRACKER_MAP.put(uuid, new ShootTracker());
         }

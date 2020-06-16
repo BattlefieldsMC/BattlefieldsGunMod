@@ -36,7 +36,7 @@ public class ProjectileRenderer extends EntityRenderer<ProjectileEntity>
         matrixStack.rotate(Vector3f.YP.rotationDegrees(180F));
         matrixStack.rotate(Vector3f.YP.rotationDegrees(entityYaw));
         matrixStack.rotate(Vector3f.XP.rotationDegrees(entity.rotationPitch));
-        Minecraft.getInstance().getItemRenderer().renderItem(entity.getItem(), ItemCameraTransforms.TransformType.NONE, light, OverlayTexture.NO_OVERLAY, matrixStack, renderTypeBuffer);
+        Minecraft.getInstance().getItemRenderer().renderItem(entity.getBullet(), ItemCameraTransforms.TransformType.NONE, light, OverlayTexture.NO_OVERLAY, matrixStack, renderTypeBuffer);
         matrixStack.pop();
     }
 }

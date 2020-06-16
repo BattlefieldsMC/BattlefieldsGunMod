@@ -1,8 +1,5 @@
 package com.mrcrayfish.guns.common.trace;
 
-import com.mrcrayfish.guns.item.GunItem;
-import com.mrcrayfish.guns.object.Gun;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.server.ServerWorld;
 
@@ -14,13 +11,11 @@ import net.minecraft.world.server.ServerWorld;
 public interface GunTracer
 {
     /**
-     * Fires a bullet from the specified living entity
+     * Queues the specified bullet to be traced.
      *
-     * @param shooter     The entity shooting the bullet
-     * @param item        The ammo item (used for rendering tracers)
-     * @param modifiedGun The modified gun used to fire
+     * @param projectile The projectile that was newly fired
      */
-    void fire(LivingEntity shooter, GunItem item, Gun modifiedGun);
+    void add(GunProjectile projectile);
 
     /**
      * Fetches the correct gun tracer for the specified world.
@@ -35,9 +30,7 @@ public interface GunTracer
             ClientGunTracer.INSTANCE.setWorld(world);
             return ClientGunTracer.INSTANCE;
         }
-        if (!(world instanceof ServerWorld))
-            throw new IllegalArgumentException("Server side world is not ServerWorld?");
-        ServerGunTracer.INSTANCE.setWorld((ServerWorld) world);
+        ServerGunTracer.INSTANCE.setWorld(world);
         return ServerGunTracer.INSTANCE;
     }
 }

@@ -1,15 +1,10 @@
 package com.mrcrayfish.guns.common.trace;
 
-import com.mrcrayfish.guns.item.GunItem;
-import com.mrcrayfish.guns.object.Gun;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <p>A common implementation of {@link GunTracer}. Used to share code between the server and client.</p>
@@ -18,7 +13,7 @@ import java.util.Set;
  */
 public class GunTracerImpl implements GunTracer
 {
-    private final Map<DimensionType, Set<GunProjectile>> projectiles;
+    protected final Map<DimensionType, Set<GunProjectile>> projectiles;
     private IWorld world;
 
     protected GunTracerImpl()
@@ -26,14 +21,20 @@ public class GunTracerImpl implements GunTracer
         this.projectiles = new HashMap<>();
     }
 
-    protected void tick()
+    protected void tick(World world)
     {
+        this.projectiles.values().forEach(set ->
+        {
+            set.forEach(projectile -> projectile.tick(world));
+            set.removeIf(GunProjectile::isComplete);
+        });
+        this.projectiles.values().removeIf(Collection::isEmpty);
     }
 
     @Override
-    public void fire(LivingEntity shooter, GunItem item, Gun modifiedGun)
+    public void add(GunProjectile projectile)
     {
-        Set<GunProjectile> projectiles = this.projectiles.computeIfAbsent(this.world.getDimension().getType(), key -> new HashSet<>());
+        this.projectiles.computeIfAbsent(this.world.getDimension().getType(), key -> new HashSet<>()).add(projectile);
     }
 
     void setWorld(IWorld world)
