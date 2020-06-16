@@ -62,6 +62,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+@Deprecated
 public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnData
 {
     private static final Predicate<Entity> PROJECTILE_TARGETS = input -> input != null && !input.isSpectator() && input.canBeCollidedWith();
