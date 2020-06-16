@@ -198,8 +198,11 @@ public class ClientHandler
         World world = Minecraft.getInstance().world;
         if (world != null)
         {
-            Minecraft.getInstance().execute(() -> GunTracer.get(world).add(message.getProjectile()));
-            BULLET_RENDERER.addBullet(new Bullet(message));
+            Minecraft.getInstance().execute(() ->
+            {
+                GunTracer.get(world).add(message.getProjectile());
+                BULLET_RENDERER.addBullet(new Bullet(message));
+            });
         }
     }
 

@@ -43,11 +43,8 @@ public class BulletRenderer
         RenderSystem.defaultBlendFunc();
     }, RenderSystem::disableBlend);
 
-    private List<Bullet> bullets = new ArrayList<>();
+    private final List<Bullet> bullets = new ArrayList<>();
 
-    /**
-     * @param bullet
-     */
     public void addBullet(Bullet bullet)
     {
         this.bullets.add(bullet);
@@ -66,32 +63,38 @@ public class BulletRenderer
     @SubscribeEvent
     public void onRenderBullets(RenderWorldLastEvent event)
     {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.renderViewEntity == null)
+            return;
+
+        Vec3d view = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
+        IRenderTypeBuffer.Impl buffer = mc.getRenderTypeBuffers().getBufferSource();
+        MatrixStack matrixStack = event.getMatrixStack();
+
+        matrixStack.push();
+        matrixStack.translate(-view.getX(), -view.getY(), -view.getZ());
+
         for (Bullet bullet : this.bullets)
         {
-            this.renderBullet(bullet, event.getMatrixStack(), event.getPartialTicks());
+            this.renderBullet(mc.renderViewEntity, bullet, buffer, event.getMatrixStack(), event.getPartialTicks());
         }
+
+        buffer.finish();
+        matrixStack.pop();
     }
 
-    /**
-     * @param bullet
-     * @param matrixStack
-     * @param partialTicks
-     */
-    private void renderBullet(Bullet bullet, MatrixStack matrixStack, float partialTicks)
+    private void renderBullet(Entity entity, Bullet bullet, IRenderTypeBuffer buffer, MatrixStack matrixStack, float partialTicks)
     {
-        Minecraft mc = Minecraft.getInstance();
-        Entity entity = mc.getRenderViewEntity();
         GunProjectile projectile = bullet.getProjectile();
-        if (entity == null || projectile.isComplete())
+        if (projectile.isComplete())
             return;
 
         matrixStack.push();
 
-        Vec3d view = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
         double bulletX = projectile.getX() + projectile.getMotionX() * partialTicks;
         double bulletY = projectile.getY() + projectile.getMotionY() * partialTicks;
         double bulletZ = projectile.getZ() + projectile.getMotionZ() * partialTicks;
-        matrixStack.translate(bulletX - view.getX(), bulletY - view.getY(), bulletZ - view.getZ());
+        matrixStack.translate(bulletX, bulletY, bulletZ);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(bullet.getRotationYaw()));
         matrixStack.rotate(Vector3f.XP.rotationDegrees(-bullet.getRotationPitch() + 90));
@@ -104,12 +107,11 @@ public class BulletRenderer
         float alpha = 0.3F;
 
         Matrix4f matrix4f = matrixStack.getLast().getMatrix();
-        IRenderTypeBuffer.Impl renderTypeBuffer = mc.getRenderTypeBuffers().getBufferSource();
 
         if (projectile.getShooterId() != entity.getEntityId())
         {
             RenderType bulletType = getBulletTrail();
-            IVertexBuilder builder = renderTypeBuffer.getBuffer(bulletType);
+            IVertexBuilder builder = buffer.getBuffer(bulletType);
             builder.pos(matrix4f, 0, 0, -0.035F).color(red, green, blue, alpha).endVertex();
             builder.pos(matrix4f, 0, 0, 0.035F).color(red, green, blue, alpha).endVertex();
             builder.pos(matrix4f, 0, -trailLength, 0.035F).color(red, green, blue, alpha).endVertex();
@@ -118,7 +120,6 @@ public class BulletRenderer
             builder.pos(matrix4f, 0.035F, 0, 0).color(red, green, blue, alpha).endVertex();
             builder.pos(matrix4f, 0.035F, -trailLength, 0).color(red, green, blue, alpha).endVertex();
             builder.pos(matrix4f, -0.035F, -trailLength, 0).color(red, green, blue, alpha).endVertex();
-            Minecraft.getInstance().getRenderTypeBuffers().getBufferSource().finish(bulletType);
         }
 
         // No point rendering item if empty, so return
@@ -133,9 +134,7 @@ public class BulletRenderer
 
         int combinedLight = WorldRenderer.getCombinedLight(entity.world, entity.getPosition());
         ItemStack stack = projectile.getBullet();
-        RenderType renderType = RenderTypeLookup.getRenderType(stack);
-        RenderUtil.renderModel(stack, ItemCameraTransforms.TransformType.NONE, matrixStack, renderTypeBuffer, combinedLight, OverlayTexture.NO_OVERLAY);
-        Minecraft.getInstance().getRenderTypeBuffers().getBufferSource().finish(renderType);
+        RenderUtil.renderModel(stack, ItemCameraTransforms.TransformType.NONE, matrixStack, buffer, combinedLight, OverlayTexture.NO_OVERLAY);
 
         matrixStack.pop();
     }
