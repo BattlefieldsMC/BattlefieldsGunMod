@@ -752,8 +752,7 @@ public class Gun implements INBTSerializable<CompoundNBT>
 
     public static float getAdditionalDamage(ItemStack gunStack)
     {
-        CompoundNBT tag = ItemStackUtil.createTagCompound(gunStack);
-        return tag.getFloat("AdditionalDamage");
+        return gunStack.getOrCreateTag().getFloat("AdditionalDamage");
     }
 
     public static ItemStack findAmmo(PlayerEntity player, ResourceLocation id)
@@ -781,7 +780,7 @@ public class Gun implements INBTSerializable<CompoundNBT>
 
     public static boolean hasAmmo(ItemStack gunStack)
     {
-        CompoundNBT tag = ItemStackUtil.createTagCompound(gunStack);
+        CompoundNBT tag = gunStack.getOrCreateTag();
         return tag.getBoolean("IgnoreAmmo") || tag.getInt("AmmoCount") > 0;
     }
 }

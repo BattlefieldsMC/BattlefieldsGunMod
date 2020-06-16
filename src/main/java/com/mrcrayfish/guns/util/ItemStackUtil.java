@@ -10,15 +10,6 @@ import net.minecraft.nbt.CompoundNBT;
  */
 public class ItemStackUtil
 {
-    public static CompoundNBT createTagCompound(ItemStack stack)
-    {
-        if(!stack.hasTag())
-        {
-            stack.setTag(new CompoundNBT());
-        }
-        return stack.getTag();
-    }
-
     public static boolean areItemStackSameItem(ItemStack source, ItemStack other)
     {
         if(source.getItem() != other.getItem())

@@ -42,7 +42,7 @@ public class CustomGunManager
             {
                 ItemStack stack = new ItemStack(ModItems.PISTOL.get());
                 stack.setDisplayName(new TranslationTextComponent("item." + id.getNamespace() + "." + id.getPath() + ".name"));
-                CompoundNBT tag = ItemStackUtil.createTagCompound(stack);
+                CompoundNBT tag = stack.getOrCreateTag();
                 tag.put("Model", gun.getModel().write(new CompoundNBT()));
                 tag.put("Gun", gun.getGun().serializeNBT());
                 tag.putBoolean("Custom", true);

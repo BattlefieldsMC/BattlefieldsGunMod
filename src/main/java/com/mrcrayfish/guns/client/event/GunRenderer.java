@@ -708,7 +708,7 @@ public class GunRenderer
         if(stack.getItem() instanceof GunItem)
         {
             Gun gun = ((GunItem) stack.getItem()).getModifiedGun(stack);
-            CompoundNBT gunTag = ItemStackUtil.createTagCompound(stack);
+            CompoundNBT gunTag = stack.getOrCreateTag();
             CompoundNBT attachments = gunTag.getCompound("Attachments");
             for(String attachmentKey : attachments.keySet())
             {

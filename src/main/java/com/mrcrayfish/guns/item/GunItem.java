@@ -91,7 +91,7 @@ public class GunItem extends ColoredItem
         if (this.isInGroup(group))
         {
             ItemStack stack = new ItemStack(this);
-            ItemStackUtil.createTagCompound(stack).putInt("AmmoCount", this.gun.general.maxAmmo);
+            stack.getOrCreateTag().putInt("AmmoCount", this.gun.general.maxAmmo);
             stacks.add(stack);
         }
     }
@@ -105,7 +105,7 @@ public class GunItem extends ColoredItem
     @Override
     public boolean showDurabilityBar(ItemStack stack)
     {
-        CompoundNBT tagCompound = ItemStackUtil.createTagCompound(stack);
+        CompoundNBT tagCompound = stack.getOrCreateTag();
         Gun modifiedGun = this.getModifiedGun(stack);
         return !tagCompound.getBoolean("IgnoreAmmo") && tagCompound.getInt("AmmoCount") < modifiedGun.general.maxAmmo;
     }
@@ -113,9 +113,8 @@ public class GunItem extends ColoredItem
     @Override
     public double getDurabilityForDisplay(ItemStack stack)
     {
-        CompoundNBT tagCompound = ItemStackUtil.createTagCompound(stack);
         Gun modifiedGun = this.getModifiedGun(stack);
-        return 1.0 - (tagCompound.getInt("AmmoCount") / (double) modifiedGun.general.maxAmmo);
+        return 1.0 - (stack.getOrCreateTag().getInt("AmmoCount") / (double) modifiedGun.general.maxAmmo);
     }
 
     @Override

@@ -168,7 +168,7 @@ public class CommonHandler
 
                     if(!player.isCreative())
                     {
-                        CompoundNBT tag = ItemStackUtil.createTagCompound(heldItem);
+                        CompoundNBT tag = heldItem.getOrCreateTag();
                         if(!tag.getBoolean("IgnoreAmmo"))
                         {
                             tag.putInt("AmmoCount", Math.max(0, tag.getInt("AmmoCount") - 1));
