@@ -113,7 +113,7 @@ public class CommonHandler
                     }
 
                     boolean silenced = Gun.getAttachment(IAttachment.Type.BARREL, heldItem).getItem() == ModItems.SILENCER.get();
-                    
+
                     for (int i = 0; i < modifiedGun.general.projectileAmount; i++)
                     {
                         ((ServerWorld) world).getServer().execute(() ->
