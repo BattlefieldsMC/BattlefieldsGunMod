@@ -46,7 +46,7 @@ public abstract class AbstractGunProjectile implements GunProjectile, INBTSerial
     private int shooterId;
     private ItemStack weapon = ItemStack.EMPTY;
     private ItemStack bullet = ItemStack.EMPTY;
-    private float damageModifier;
+    private float damageModifier = 1;
     private float additionalDamage;
 
     @Override
