@@ -3,7 +3,6 @@ package com.mrcrayfish.guns.util;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 
 /**
  * Author: MrCrayfish

@@ -41,9 +41,9 @@ public class MissileRenderer extends EntityRenderer<MissileEntity>
         matrixStack.rotate(Vector3f.YP.rotationDegrees(180F));
         matrixStack.rotate(Vector3f.YP.rotationDegrees(entityYaw));
         matrixStack.rotate(Vector3f.XP.rotationDegrees(entity.rotationPitch - 90));
-        Minecraft.getInstance().getItemRenderer().renderItem(entity.getItem(), ItemCameraTransforms.TransformType.NONE, 15728880, OverlayTexture.NO_OVERLAY, matrixStack, renderTypeBuffer);
+        Minecraft.getInstance().getItemRenderer().renderItem(entity.getBullet(), ItemCameraTransforms.TransformType.NONE, 15728880, OverlayTexture.NO_OVERLAY, matrixStack, renderTypeBuffer);
         matrixStack.translate(0, -1, 0);
-        RenderUtil.renderModel(SpecialModels.FLAME.getModel(), entity.getItem(), matrixStack, renderTypeBuffer, 15728880, OverlayTexture.NO_OVERLAY);
+        RenderUtil.renderModel(SpecialModels.FLAME.getModel(), entity.getBullet(), matrixStack, renderTypeBuffer, 15728880, OverlayTexture.NO_OVERLAY);
         matrixStack.pop();
     }
 }

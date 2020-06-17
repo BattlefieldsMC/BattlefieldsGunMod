@@ -4,7 +4,6 @@ import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.common.NetworkGunManager;
 import com.mrcrayfish.guns.init.ModItems;
 import com.mrcrayfish.guns.object.CustomGun;
-import com.mrcrayfish.guns.util.ItemStackUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.NonNullList;

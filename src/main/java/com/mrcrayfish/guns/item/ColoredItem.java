@@ -1,10 +1,8 @@
 package com.mrcrayfish.guns.item;
 
-import com.mrcrayfish.guns.util.ItemStackUtil;
 import net.minecraft.item.DyeItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.List;

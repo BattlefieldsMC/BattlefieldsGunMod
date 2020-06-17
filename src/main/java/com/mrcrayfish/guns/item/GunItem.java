@@ -2,7 +2,6 @@ package com.mrcrayfish.guns.item;
 
 import com.google.common.annotations.Beta;
 import com.mrcrayfish.guns.object.Gun;
-import com.mrcrayfish.guns.util.ItemStackUtil;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
