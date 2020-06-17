@@ -6,7 +6,7 @@ import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -29,9 +29,20 @@ public final class ClientGunTracer implements GunTracer
 
     private void tick(World world)
     {
+        if (this.projectiles.containsKey(world.getDimension().getType()))
+        {
+            Set<GunProjectile> projectiles = this.projectiles.get(world.getDimension().getType());
+            projectiles.forEach(projectile -> projectile.tick(world));
+            projectiles.removeIf(GunProjectile::isComplete);
+        }
+        this.projectiles.values().removeIf(Collection::isEmpty);
+    }
+
+    private void clear()
+    {
         this.projectiles.values().forEach(set ->
         {
-            set.forEach(projectile -> projectile.tick(world));
+            set.forEach(GunProjectile::complete);
             set.removeIf(GunProjectile::isComplete);
         });
         this.projectiles.values().removeIf(Collection::isEmpty);
@@ -53,9 +64,8 @@ public final class ClientGunTracer implements GunTracer
     }
 
     @SubscribeEvent
-    public static void onEvent(PlayerEvent.PlayerLoggedOutEvent event)
+    public static void onEvent(WorldEvent.Unload event)
     {
-        if (event.getPlayer() == Minecraft.getInstance().player)
-            Minecraft.getInstance().execute(() -> INSTANCE.projectiles.clear());
+        Minecraft.getInstance().execute(() -> INSTANCE.clear());
     }
 }

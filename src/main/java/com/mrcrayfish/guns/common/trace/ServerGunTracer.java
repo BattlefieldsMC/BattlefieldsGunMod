@@ -29,12 +29,13 @@ public final class ServerGunTracer implements GunTracer
         if (!(world instanceof ServerWorld))
             return;
 
-        this.projectiles.values().forEach(set ->
+        if (this.projectiles.containsKey(world.getDimension().getType()))
         {
-            set.forEach(projectile -> ((ServerWorld) world).getServer().execute(() -> projectile.tick(world)));
-            set.removeIf(GunProjectile::isComplete);
-        });
-        ((ServerWorld) world).getServer().execute(() -> this.projectiles.values().removeIf(Collection::isEmpty));
+            Set<GunProjectile> projectiles = this.projectiles.get(world.getDimension().getType());
+            projectiles.forEach(projectile -> ((ServerWorld) world).getServer().execute(() -> projectile.tick(world)));
+            ((ServerWorld) world).getServer().execute(() -> projectiles.removeIf(GunProjectile::isComplete));
+        }
+        this.projectiles.values().removeIf(Collection::isEmpty);
     }
 
     @Override
