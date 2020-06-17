@@ -40,6 +40,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("unused")
 @Mod(Reference.MOD_ID)
 public class GunMod
 {
