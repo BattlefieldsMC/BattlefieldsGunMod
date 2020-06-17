@@ -75,7 +75,7 @@ public class Gun implements INBTSerializable<CompoundNBT>
             {
                 this.auto = tag.getBoolean("Auto");
             }
-            if(tag.contains("Rate", Constants.NBT.TAG_INT))
+            if(tag.contains("Rate", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.rate = tag.getInt("Rate");
             }
@@ -83,31 +83,31 @@ public class Gun implements INBTSerializable<CompoundNBT>
             {
                 this.gripType = GripType.getType(ResourceLocation.tryCreate(tag.getString("GripType")));
             }
-            if(tag.contains("MaxAmmo", Constants.NBT.TAG_INT))
+            if(tag.contains("MaxAmmo", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.maxAmmo = tag.getInt("MaxAmmo");
             }
-            if(tag.contains("ReloadSpeed", Constants.NBT.TAG_INT))
+            if(tag.contains("ReloadSpeed", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.reloadSpeed = tag.getInt("ReloadSpeed");
             }
-            if(tag.contains("RecoilAngle", Constants.NBT.TAG_FLOAT))
+            if(tag.contains("RecoilAngle", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.recoilAngle = tag.getFloat("RecoilAngle");
             }
-            if(tag.contains("RecoilKick", Constants.NBT.TAG_FLOAT))
+            if(tag.contains("RecoilKick", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.recoilKick = tag.getFloat("RecoilKick");
             }
-            if(tag.contains("RecoilDurationOffset", Constants.NBT.TAG_FLOAT))
+            if(tag.contains("RecoilDurationOffset", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.recoilDurationOffset = tag.getFloat("RecoilDurationOffset");
             }
-            if(tag.contains("RecoilAdsReduction", Constants.NBT.TAG_FLOAT))
+            if(tag.contains("RecoilAdsReduction", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.recoilAdsReduction = tag.getFloat("RecoilAdsReduction");
             }
-            if(tag.contains("ProjectileAmount", Constants.NBT.TAG_INT))
+            if(tag.contains("ProjectileAmount", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.projectileAmount = tag.getInt("ProjectileAmount");
             }
@@ -115,7 +115,7 @@ public class Gun implements INBTSerializable<CompoundNBT>
             {
                 this.alwaysSpread = tag.getBoolean("AlwaysSpread");
             }
-            if(tag.contains("Spread", Constants.NBT.TAG_FLOAT))
+            if(tag.contains("Spread", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.spread = tag.getFloat("Spread");
             }
@@ -189,19 +189,19 @@ public class Gun implements INBTSerializable<CompoundNBT>
             {
                 this.visible = tag.getBoolean("Visible");
             }
-            if(tag.contains("Damage", Constants.NBT.TAG_FLOAT))
+            if(tag.contains("Damage", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.damage = tag.getFloat("Damage");
             }
-            if(tag.contains("Size", Constants.NBT.TAG_FLOAT))
+            if(tag.contains("Size", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.size = tag.getFloat("Size");
             }
-            if(tag.contains("Speed", Constants.NBT.TAG_DOUBLE))
+            if(tag.contains("Speed", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.speed = tag.getDouble("Speed");
             }
-            if(tag.contains("Life", Constants.NBT.TAG_INT))
+            if(tag.contains("Life", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.life = tag.getInt("Life");
             }
@@ -217,11 +217,11 @@ public class Gun implements INBTSerializable<CompoundNBT>
             {
                 this.damageReduceIfNotZoomed = tag.getBoolean("DamageReduceIfNotZoomed");
             }
-            if(tag.contains("TrailColor", Constants.NBT.TAG_INT))
+            if(tag.contains("TrailColor", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.trailColor = tag.getInt("TrailColor");
             }
-            if(tag.contains("TrailLengthMultiplier", Constants.NBT.TAG_DOUBLE))
+            if(tag.contains("TrailLengthMultiplier", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.trailLengthMultiplier = tag.getDouble("TrailLengthMultiplier");
             }
@@ -337,7 +337,7 @@ public class Gun implements INBTSerializable<CompoundNBT>
             public void deserializeNBT(CompoundNBT tag)
             {
                 super.deserializeNBT(tag);
-                if(tag.contains("Size", Constants.NBT.TAG_DOUBLE))
+                if(tag.contains("Size", Constants.NBT.TAG_ANY_NUMERIC))
                 {
                     this.size = tag.getDouble("Size");
                 }
@@ -411,7 +411,7 @@ public class Gun implements INBTSerializable<CompoundNBT>
             public void deserializeNBT(CompoundNBT tag)
             {
                 super.deserializeNBT(tag);
-                if(tag.contains("FovModifier", Constants.NBT.TAG_FLOAT))
+                if(tag.contains("FovModifier", Constants.NBT.TAG_ANY_NUMERIC))
                 {
                     this.fovModifier = tag.getFloat("FovModifier");
                 }
@@ -571,15 +571,15 @@ public class Gun implements INBTSerializable<CompoundNBT>
         @Override
         public void deserializeNBT(CompoundNBT tag)
         {
-            if(tag.contains("XOffset", Constants.NBT.TAG_DOUBLE))
+            if(tag.contains("XOffset", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.xOffset = tag.getDouble("XOffset");
             }
-            if(tag.contains("YOffset", Constants.NBT.TAG_DOUBLE))
+            if(tag.contains("YOffset", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.yOffset = tag.getDouble("YOffset");
             }
-            if(tag.contains("ZOffset", Constants.NBT.TAG_DOUBLE))
+            if(tag.contains("ZOffset", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.zOffset = tag.getDouble("ZOffset");
             }
@@ -603,7 +603,7 @@ public class Gun implements INBTSerializable<CompoundNBT>
         public void deserializeNBT(CompoundNBT tag)
         {
             super.deserializeNBT(tag);
-            if(tag.contains("Scale", Constants.NBT.TAG_DOUBLE))
+            if(tag.contains("Scale", Constants.NBT.TAG_ANY_NUMERIC))
             {
                 this.scale = tag.getDouble("Scale");
             }
