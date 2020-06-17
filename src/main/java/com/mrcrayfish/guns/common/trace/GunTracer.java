@@ -1,6 +1,5 @@
 package com.mrcrayfish.guns.common.trace;
 
-import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 
 /**
