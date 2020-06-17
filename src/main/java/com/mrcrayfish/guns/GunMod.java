@@ -40,6 +40,8 @@ import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 
+<<<<<<<HEAD
+
 @Mod(Reference.MOD_ID)
 public class GunMod
 {

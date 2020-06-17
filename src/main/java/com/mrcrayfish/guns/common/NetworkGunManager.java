@@ -34,7 +34,8 @@ import java.util.Map;
  */
 public class NetworkGunManager extends ReloadListener<Map<GunItem, Gun>>
 {
-    private static final Gson GSON_INSTANCE = Util.make(() -> {
+    private static final Gson GSON_INSTANCE = Util.make(() ->
+    {
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(ResourceLocation.class, JsonDeserializers.RESOURCE_LOCATION);
         builder.registerTypeAdapter(GripType.class, JsonDeserializers.GRIP_TYPE);
@@ -44,7 +45,8 @@ public class NetworkGunManager extends ReloadListener<Map<GunItem, Gun>>
     /**
      * A fallback gun object for any weapons that haven't added a json yet.
      */
-    static final Gun FALLBACK_GUN = Util.make(() -> {
+    static final Gun FALLBACK_GUN = Util.make(() ->
+    {
         Gun gun = new Gun();
         gun.projectile.item = new ResourceLocation("cgm:basic_ammo");
         return gun;
@@ -59,13 +61,13 @@ public class NetworkGunManager extends ReloadListener<Map<GunItem, Gun>>
         ForgeRegistries.ITEMS.getValues().stream().filter(item -> item instanceof GunItem).forEach(item ->
         {
             ResourceLocation id = item.getRegistryName();
-            if(id != null)
+            if (id != null)
             {
                 ResourceLocation resourceLocation = new ResourceLocation(String.format("%s:guns/%s.json", id.getNamespace(), id.getPath()));
-                try(IResource resource = resourceManager.getResource(resourceLocation); InputStream is = resource.getInputStream(); Reader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)))
+                try (IResource resource = resourceManager.getResource(resourceLocation); InputStream is = resource.getInputStream(); Reader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)))
                 {
                     Gun gun = JSONUtils.fromJson(GSON_INSTANCE, reader, Gun.class);
-                    if(gun != null && Validator.isValidObject(gun))
+                    if (gun != null && Validator.isValidObject(gun))
                     {
                         map.put((GunItem) item, gun);
                     }
@@ -75,16 +77,16 @@ public class NetworkGunManager extends ReloadListener<Map<GunItem, Gun>>
                         map.put((GunItem) item, FALLBACK_GUN);
                     }
                 }
-                catch(InvalidObjectException e)
+                catch (InvalidObjectException e)
                 {
                     GunMod.LOGGER.error("Missing required properties for {}", resourceLocation);
                     e.printStackTrace();
                 }
-                catch(IOException e)
+                catch (IOException e)
                 {
                     GunMod.LOGGER.error("Couldn't parse data file {}", resourceLocation);
                 }
-                catch(IllegalAccessException e)
+                catch (IllegalAccessException e)
                 {
                     e.printStackTrace();
                 }
@@ -97,7 +99,8 @@ public class NetworkGunManager extends ReloadListener<Map<GunItem, Gun>>
     protected void apply(Map<GunItem, Gun> objects, IResourceManager resourceManager, IProfiler profiler)
     {
         ImmutableMap.Builder<ResourceLocation, Gun> builder = ImmutableMap.builder();
-        objects.forEach((item, gun) -> {
+        objects.forEach((item, gun) ->
+        {
             Validate.notNull(item.getRegistryName());
             builder.put(item.getRegistryName(), gun);
             item.setGun(gun);
@@ -113,7 +116,8 @@ public class NetworkGunManager extends ReloadListener<Map<GunItem, Gun>>
     public void writeRegisteredGuns(PacketBuffer buffer)
     {
         buffer.writeVarInt(this.registeredGuns.size());
-        this.registeredGuns.forEach((id, gun) -> {
+        this.registeredGuns.forEach((id, gun) ->
+        {
             buffer.writeResourceLocation(id);
             buffer.writeCompoundTag(gun.serializeNBT());
         });
@@ -128,10 +132,10 @@ public class NetworkGunManager extends ReloadListener<Map<GunItem, Gun>>
     public static ImmutableMap<ResourceLocation, Gun> readRegisteredGuns(PacketBuffer buffer)
     {
         int size = buffer.readVarInt();
-        if(size > 0)
+        if (size > 0)
         {
             ImmutableMap.Builder<ResourceLocation, Gun> builder = ImmutableMap.builder();
-            for(int i = 0; i < size; i++)
+            for (int i = 0; i < size; i++)
             {
                 ResourceLocation id = buffer.readResourceLocation();
                 Gun gun = Gun.create(buffer.readCompoundTag());
@@ -152,12 +156,12 @@ public class NetworkGunManager extends ReloadListener<Map<GunItem, Gun>>
     public static boolean updateRegisteredGuns(IGunProvider message)
     {
         Map<ResourceLocation, Gun> registeredGuns = message.getRegisteredGuns();
-        if(registeredGuns != null)
+        if (registeredGuns != null)
         {
-            for(Map.Entry<ResourceLocation, Gun> entry : registeredGuns.entrySet())
+            for (Map.Entry<ResourceLocation, Gun> entry : registeredGuns.entrySet())
             {
                 Item item = ForgeRegistries.ITEMS.getValue(entry.getKey());
-                if(!(item instanceof GunItem))
+                if (!(item instanceof GunItem))
                 {
                     return false;
                 }
