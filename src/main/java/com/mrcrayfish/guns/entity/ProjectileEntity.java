@@ -31,6 +31,7 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
@@ -53,7 +54,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     protected int shooterId;
     protected LivingEntity shooter;
     protected Gun.General general;
-    protected Gun.Projectile projectile;
+    protected Projectile projectile;
     private ItemStack weapon = ItemStack.EMPTY;
     private ItemStack item = ItemStack.EMPTY;
     protected float damageModifier = 1.0F;
@@ -264,7 +265,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         {
             Vec3d startVec = this.getPositionVec();
             Vec3d endVec = startVec.add(this.getMotion());
-            RayTraceResult result = rayTraceBlocks(this.world, new RayTraceContext(startVec, endVec, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, this), IGNORE_LEAVES);
+            RayTraceResult result = rayTraceBlocks(this.world, new RayTraceContext(startVec, endVec, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, this), IGNORE_LEAVES::test);
             if (result.getType() != RayTraceResult.Type.MISS)
             {
                 endVec = result.getHitVec();
@@ -415,7 +416,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
                 Optional<Vec3d> grownHitPos = boundingBox.grow(Config.COMMON.gameplay.growBoundingBoxAmount.get(), 0, Config.COMMON.gameplay.growBoundingBoxAmount.get()).rayTrace(startVec, endVec);
                 if (!hitPos.isPresent() && grownHitPos.isPresent())
                 {
-                    RayTraceResult raytraceresult = rayTraceBlocks(this.world, new RayTraceContext(startVec, grownHitPos.get(), RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, this), IGNORE_LEAVES);
+                    RayTraceResult raytraceresult = rayTraceBlocks(this.world, new RayTraceContext(startVec, grownHitPos.get(), RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, this), IGNORE_LEAVES::test);
                     if (raytraceresult.getType() == RayTraceResult.Type.BLOCK)
                     {
                         continue;
@@ -533,7 +534,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     @Override
     protected void readAdditional(CompoundNBT compound)
     {
-        this.projectile = new Gun.Projectile();
+        this.projectile = new Projectile();
         this.projectile.deserializeNBT(compound.getCompound("Projectile"));
         this.general = new Gun.General();
         this.general.deserializeNBT(compound.getCompound("General"));
@@ -558,7 +559,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     @Override
     public void readSpawnData(PacketBuffer buffer)
     {
-        this.projectile = new Gun.Projectile();
+        this.projectile = new Projectile();
         this.projectile.deserializeNBT(buffer.readCompoundTag());
         this.general = new Gun.General();
         this.general.deserializeNBT(buffer.readCompoundTag());
@@ -626,7 +627,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     }
 
     /**
-     * A custom implementation of {@link net.minecraft.world.IWorldReader#rayTraceBlocks(RayTraceContext)}
+     * A custom implementation of {@link IWorldReader#rayTraceBlocks(RayTraceContext)}
      * that allows you to pass a predicate to ignore certain blocks when checking for collisions.
      *
      * @param world     the world to perform the ray trace
@@ -634,7 +635,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
      * @param predicate the block state predicate
      * @return a result of the raytrace
      */
-    public static BlockRayTraceResult rayTraceBlocks(World world, RayTraceContext context, Predicate<BlockState> predicate)
+    public static BlockRayTraceResult rayTraceBlocks(World world, RayTraceContext context, java.util.function.Predicate<BlockState> predicate)
     {
         return func_217300_a(context, (rayTraceContext, blockPos) ->
         {

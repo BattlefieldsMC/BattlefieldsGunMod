@@ -133,7 +133,7 @@ public class CommonHandler
                             }
                             else
                             {
-                                GunTracer.get(world).add(bullet);
+                                GunTracer.get(world).add(world, bullet);
                             }
 
                             if (!modifiedGun.projectile.visible)

@@ -200,7 +200,7 @@ public class ClientHandler
         {
             Minecraft.getInstance().execute(() ->
             {
-                GunTracer.get(world).add(message.getProjectile());
+                GunTracer.get(world).add(world, message.getProjectile());
                 BULLET_RENDERER.addBullet(new Bullet(message));
             });
         }

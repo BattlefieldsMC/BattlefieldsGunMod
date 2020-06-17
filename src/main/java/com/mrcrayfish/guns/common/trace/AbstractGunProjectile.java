@@ -1,6 +1,5 @@
 package com.mrcrayfish.guns.common.trace;
 
-import com.google.common.base.Predicate;
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.entity.ProjectileEntity;
 import com.mrcrayfish.guns.object.EntityResult;
@@ -14,19 +13,19 @@ import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 /**
  * <p>An abstract implementation of {@link GunProjectile}.</p>
  *
  * @author Ocelot
  */
-public abstract class AbstractGunProjectile implements GunProjectile, INBTSerializable<CompoundNBT>
+public abstract class AbstractGunProjectile implements GunProjectile
 {
     public static final Predicate<Entity> PROJECTILE_TARGETS = input -> input != null && !input.isSpectator() && input.canBeCollidedWith();
     public static final Predicate<BlockState> IGNORE_LEAVES = input -> input != null && Config.COMMON.gameplay.ignoreLeaves.get() && input.getBlock() instanceof LeavesBlock;
@@ -54,46 +53,6 @@ public abstract class AbstractGunProjectile implements GunProjectile, INBTSerial
     {
         this.setLastPosition(this.getX(), this.getY(), this.getZ());
         this.setTicksExisted(this.getTicksExisted() + 1);
-    }
-
-    @Override
-    public CompoundNBT serializeNBT()
-    {
-        CompoundNBT nbt = new CompoundNBT();
-        nbt.putInt("ticksExisted", this.getTicksExisted());
-        nbt.putBoolean("complete", this.isComplete());
-        nbt.putDouble("lastX", this.getLastX());
-        nbt.putDouble("lastY", this.getLastY());
-        nbt.putDouble("lastZ", this.getLastZ());
-        nbt.putDouble("x", this.getX());
-        nbt.putDouble("y", this.getY());
-        nbt.putDouble("z", this.getZ());
-        nbt.putDouble("motionX", this.getMotionX());
-        nbt.putDouble("motionY", this.getMotionY());
-        nbt.putDouble("motionZ", this.getMotionZ());
-        if (this.getShooter() != null)
-            nbt.putUniqueId("shooter", this.getShooter());
-        nbt.put("weapon", this.getWeapon().serializeNBT());
-        nbt.put("bullet", this.getBullet().serializeNBT());
-        nbt.putFloat("damageModifier", this.getDamageModifier());
-        nbt.putFloat("additionalDamage", this.getAdditionalDamage());
-        return nbt;
-    }
-
-    @Override
-    public void deserializeNBT(CompoundNBT nbt)
-    {
-        this.setTicksExisted(nbt.getInt("ticksExisted"));
-        if (nbt.getBoolean("complete"))
-            this.complete();
-        this.setLastPosition(nbt.getDouble("lastX"), nbt.getDouble("lastY"), nbt.getDouble("lastZ"));
-        this.setPosition(nbt.getDouble("x"), nbt.getDouble("y"), nbt.getDouble("z"));
-        this.setMotion(nbt.getDouble("motionX"), nbt.getDouble("motionY"), nbt.getDouble("motionZ"));
-        this.setShooter(nbt.hasUniqueId("shooter") ? nbt.getUniqueId("shooter") : null);
-        this.setWeapon(ItemStack.read(nbt.getCompound("weapon")));
-        this.setBullet(ItemStack.read(nbt.getCompound("bullet")));
-        this.setDamageModifier(nbt.getFloat("damageModifier"));
-        this.setAdditionalDamage(nbt.getFloat("additionalDamage"));
     }
 
     @Nullable
