@@ -60,6 +60,8 @@ public interface GunProjectile
      */
     default void onHit(World world, float damage, RayTraceResult result)
     {
+        MinecraftForge.EVENT_BUS.post(new GunProjectileHitEvent(result, this));
+
         if (result instanceof BlockRayTraceResult)
         {
             BlockRayTraceResult blockRayTraceResult = (BlockRayTraceResult) result;
@@ -79,7 +81,7 @@ public interface GunProjectile
                 this.complete();
 
             if (block instanceof IDamageable)
-                ((IDamageable) block).onBlockDamaged(world, state, pos, (int) Math.ceil(damage / 2.0) + 1);
+                ((IDamageable) block).onBlockDamaged(world, state, pos, this, damage, (int) Math.ceil(damage / 2.0) + 1);
 
             Vec3d hitVec = blockRayTraceResult.getHitVec();
             if (!world.isRemote())
@@ -107,8 +109,6 @@ public interface GunProjectile
             if (!world.isRemote())
                 entity.hurtResistantTime = 0;
         }
-
-        MinecraftForge.EVENT_BUS.post(new GunProjectileHitEvent(result, this));
     }
 
     /**
