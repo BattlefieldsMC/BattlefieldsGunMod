@@ -56,11 +56,10 @@ public class ThrowableGrenadeEntity extends ThrowableItemEntity
         super.tick();
         this.prevRotation = this.rotation;
         double speed = this.getMotion().length();
-        if(speed > 0.1)
-        {
+        if (speed > 0.1)
             this.rotation += speed * 50;
-        }
-        this.world.addParticle(ParticleTypes.SMOKE, true, this.getPosX(), this.getPosY() + 0.25, this.getPosZ(), 0, 0, 0);
+        if (this.world.isRemote())
+            this.world.addParticle(ParticleTypes.SMOKE, true, this.getPosX(), this.getPosY() + 0.25, this.getPosZ(), 0, 0, 0);
     }
 
     @Override
