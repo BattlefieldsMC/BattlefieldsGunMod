@@ -2,6 +2,7 @@ package com.mrcrayfish.guns.common.trace;
 
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.entity.DamageSourceProjectile;
+import com.mrcrayfish.guns.hook.GunProjectileHitEvent;
 import com.mrcrayfish.guns.interfaces.IDamageable;
 import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.network.message.MessageBlood;
@@ -22,6 +23,7 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nullable;
@@ -105,6 +107,8 @@ public interface GunProjectile
             if (!world.isRemote())
                 entity.hurtResistantTime = 0;
         }
+
+        MinecraftForge.EVENT_BUS.post(new GunProjectileHitEvent(result, this));
     }
 
     /**

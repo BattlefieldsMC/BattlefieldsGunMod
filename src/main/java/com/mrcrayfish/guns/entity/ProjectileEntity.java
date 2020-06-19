@@ -5,6 +5,7 @@ import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.common.BoundingBoxTracker;
 import com.mrcrayfish.guns.common.SpreadTracker;
 import com.mrcrayfish.guns.common.trace.GunProjectile;
+import com.mrcrayfish.guns.hook.GunProjectileHitEvent;
 import com.mrcrayfish.guns.interfaces.IDamageable;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.network.PacketHandler;
@@ -34,6 +35,7 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.fml.network.PacketDistributor;
@@ -494,6 +496,8 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             this.remove();
             entity.hurtResistantTime = 0;
         }
+
+        MinecraftForge.EVENT_BUS.post(new GunProjectileHitEvent(result, this));
     }
 
     protected void onHitEntity(Entity entity, double x, double y, double z)
