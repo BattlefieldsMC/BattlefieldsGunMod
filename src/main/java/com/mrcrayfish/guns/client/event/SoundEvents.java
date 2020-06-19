@@ -90,7 +90,7 @@ public class SoundEvents
                     SOUND_VOLUMES.put(sound, volume);
 
                     entry.runOnSoundExecutor(soundSource -> {
-                        soundSource.func_216423_c(getMutedVolume(effect.getDuration(), volume));
+                        soundSource.setLinearAttenuation(getMutedVolume(effect.getDuration(), volume));
                     });
                 });
             }
@@ -110,7 +110,7 @@ public class SoundEvents
                 if(entry1 != null)
                 {
                     entry1.runOnSoundExecutor(soundSource -> {
-                        soundSource.func_216423_c(entry.getValue());
+                        soundSource.setLinearAttenuation(entry.getValue());
                     });
                 }
             }
