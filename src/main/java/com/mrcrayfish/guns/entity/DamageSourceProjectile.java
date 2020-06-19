@@ -31,6 +31,17 @@ public class DamageSourceProjectile extends IndirectEntityDamageSource
         this.weapon = weapon;
     }
 
+    /**
+     * @return The projectile that caused damage
+     */
+    public GunProjectile getProjectileSource()
+    {
+        return source;
+    }
+
+    /**
+     * @return The weapon used to cause damage
+     */
     public ItemStack getWeapon()
     {
         return weapon;
