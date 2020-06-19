@@ -445,6 +445,8 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
     private void onHit(RayTraceResult result)
     {
+        MinecraftForge.EVENT_BUS.post(new GunProjectileHitEvent(result, this));
+        
         if (result instanceof BlockRayTraceResult)
         {
             BlockRayTraceResult blockRayTraceResult = (BlockRayTraceResult) result;
@@ -496,8 +498,6 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             this.remove();
             entity.hurtResistantTime = 0;
         }
-
-        MinecraftForge.EVENT_BUS.post(new GunProjectileHitEvent(result, this));
     }
 
     protected void onHitEntity(Entity entity, double x, double y, double z)
