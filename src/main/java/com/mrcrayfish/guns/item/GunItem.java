@@ -11,8 +11,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 
@@ -53,27 +53,26 @@ public class GunItem extends ColoredItem
                 float additionalDamage = tagCompound.getFloat("AdditionalDamage");
                 if (additionalDamage > 0)
                 {
-                    additionalDamageText = TextFormatting.GREEN + " +" + tagCompound.getFloat("AdditionalDamage");
+                    additionalDamageText = TextFormatting.GREEN + " +" + ItemStack.DECIMALFORMAT.format(tagCompound.getFloat("AdditionalDamage"));
                 }
                 else if (additionalDamage < 0)
                 {
-                    additionalDamageText = TextFormatting.RED + " " + tagCompound.getFloat("AdditionalDamage");
+                    additionalDamageText = TextFormatting.RED + " " + ItemStack.DECIMALFORMAT.format(tagCompound.getFloat("AdditionalDamage"));
                 }
             }
         }
 
-        tooltip.add(new StringTextComponent(TextFormatting.GRAY + I18n.format("info.cgm.damage", TextFormatting.RESET + Float.toString(modifiedGun.projectile.damage) + additionalDamageText)));
+        tooltip.add(new TranslationTextComponent(I18n.format("info.cgm.damage", ItemStack.DECIMALFORMAT.format(modifiedGun.projectile.damage) + additionalDamageText)));
 
         if (tagCompound != null)
         {
             if (tagCompound.getBoolean("IgnoreAmmo"))
             {
-                tooltip.add(new StringTextComponent(TextFormatting.AQUA + I18n.format("info.cgm.ignore_ammo")));
+                tooltip.add(new TranslationTextComponent("info.cgm.ignore_ammo"));
             }
             else
             {
-                int ammoCount = tagCompound.getInt("AmmoCount");
-                tooltip.add(new StringTextComponent(TextFormatting.GRAY + I18n.format("info.cgm.ammo", TextFormatting.RESET + Integer.toString(ammoCount), modifiedGun.general.maxAmmo)));
+                tooltip.add(new TranslationTextComponent("info.cgm.ammo", tagCompound.getInt("AmmoCount"), modifiedGun.general.maxAmmo));
             }
         }
     }

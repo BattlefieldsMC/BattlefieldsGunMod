@@ -30,9 +30,9 @@
     "death.attack.cgm.bullet.executed": "%1$s was executed by %2$s",
     "death.attack.cgm.bullet.annihilated": "%1$s was annihilated by %2$s",
     "death.attack.cgm.bullet.decimated": "%1$s was decimated by %2$s",
-    "info.cgm.damage": "Damage: %s",
-    "info.cgm.ammo": "Ammo: %s/%s",
-    "info.cgm.ignore_ammo": "Infinite Ammo",
+    "info.cgm.damage": "§7Damage: §r%s",
+    "info.cgm.ammo": "§7Ammo: §r%s/%s",
+    "info.cgm.ignore_ammo": "§bInfinite Ammo",
     "key.categories.gun": "MrCrayfish's Gun Mod",
     "key.cgm.reload": "Reload",
     "key.cgm.unload": "Unload",
@@ -50,7 +50,7 @@
     "cgm.options.adsSensitivity.format": "ADS Sensitivity: %s",
     "container.cgm.attachments": "Modify Attachments",
     "container.cgm.attachments.window_help": "Click to move and rotate",
-    "slot.cgm.attachment.not_applicable": "\u00a7cNot applicable",
+    "slot.cgm.attachment.not_applicable": "§cNot applicable",
     "slot.cgm.attachment.scope": "Scope",
     "slot.cgm.attachment.barrel": "Barrel"
 }
