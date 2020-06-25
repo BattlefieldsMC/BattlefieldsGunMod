@@ -19,12 +19,12 @@ public class ColoredItem extends Item
 
     public boolean hasColor(ItemStack stack)
     {
-        return stack.getOrCreateTag().contains("Color", Constants.NBT.TAG_INT);
+        return stack.getTag() != null && stack.getTag().contains("Color", Constants.NBT.TAG_INT);
     }
 
     public int getColor(ItemStack stack)
     {
-        return stack.getOrCreateTag().getInt("Color");
+        return stack.getTag() != null ? stack.getTag().getInt("Color") : -1;
     }
 
     public void setColor(ItemStack stack, int color)
@@ -44,12 +44,12 @@ public class ColoredItem extends Item
         int maxColor = 0;
         int colorCount = 0;
         ColoredItem coloredItem = null;
-        if(stack.getItem() instanceof ColoredItem)
+        if (stack.getItem() instanceof ColoredItem)
         {
             coloredItem = (ColoredItem) stack.getItem();
             resultStack = stack.copy();
             resultStack.setCount(1);
-            if(coloredItem.hasColor(stack))
+            if (coloredItem.hasColor(stack))
             {
                 int color = coloredItem.getColor(resultStack);
                 float red = (float) (color >> 16 & 255) / 255.0F;
@@ -62,7 +62,7 @@ public class ColoredItem extends Item
                 colorCount++;
             }
 
-            for(DyeItem dyeitem : dyes)
+            for (DyeItem dyeitem : dyes)
             {
                 float[] colorComponents = dyeitem.getDyeColor().getColorComponentValues();
                 int red = (int) (colorComponents[0] * 255.0F);
@@ -76,7 +76,7 @@ public class ColoredItem extends Item
             }
         }
 
-        if(coloredItem == null)
+        if (coloredItem == null)
         {
             return ItemStack.EMPTY;
         }

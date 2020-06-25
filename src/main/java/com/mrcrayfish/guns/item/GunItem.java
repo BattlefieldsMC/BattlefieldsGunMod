@@ -109,16 +109,17 @@ public class GunItem extends ColoredItem
     @Override
     public boolean showDurabilityBar(ItemStack stack)
     {
-        CompoundNBT tagCompound = stack.getOrCreateTag();
+        CompoundNBT tagCompound = stack.getTag();
         Gun modifiedGun = this.getModifiedGun(stack);
-        return !tagCompound.getBoolean("IgnoreAmmo") && tagCompound.getInt("AmmoCount") < modifiedGun.general.maxAmmo;
+        return tagCompound == null || (!tagCompound.getBoolean("IgnoreAmmo") && tagCompound.getInt("AmmoCount") != modifiedGun.general.maxAmmo);
     }
 
     @Override
     public double getDurabilityForDisplay(ItemStack stack)
     {
+        CompoundNBT tagCompound = stack.getTag();
         Gun modifiedGun = this.getModifiedGun(stack);
-        return 1.0 - (stack.getOrCreateTag().getInt("AmmoCount") / (double) modifiedGun.general.maxAmmo);
+        return tagCompound == null ? 0.0 : 1.0 - (tagCompound.getInt("AmmoCount") / (double) modifiedGun.general.maxAmmo);
     }
 
     @Override

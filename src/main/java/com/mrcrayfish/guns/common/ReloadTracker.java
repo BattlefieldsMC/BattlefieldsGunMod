@@ -47,8 +47,7 @@ public class ReloadTracker
 
     private boolean isWeaponFull()
     {
-        CompoundNBT tag = this.stack.getOrCreateTag();
-        return tag.getInt("AmmoCount") >= this.gun.general.maxAmmo;
+        return this.stack.getOrCreateTag().getInt("AmmoCount") >= this.gun.general.maxAmmo;
     }
 
     private boolean hasNoAmmo(PlayerEntity player)

@@ -14,7 +14,6 @@ import com.mrcrayfish.guns.network.message.MessageBulletHole;
 import com.mrcrayfish.guns.object.EntityResult;
 import com.mrcrayfish.guns.object.Gun;
 import com.mrcrayfish.guns.object.Gun.Projectile;
-import com.mrcrayfish.guns.util.ItemStackUtil;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.*;
@@ -557,7 +556,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         buffer.writeCompoundTag(this.projectile.serializeNBT());
         buffer.writeCompoundTag(this.general.serializeNBT());
         buffer.writeInt(this.shooterId);
-        ItemStackUtil.writeItemStackToBufIgnoreTag(buffer, this.item);
+        buffer.writeItemStack(this.item);
     }
 
     @Override
@@ -568,7 +567,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         this.general = new Gun.General();
         this.general.deserializeNBT(buffer.readCompoundTag());
         this.shooterId = buffer.readInt();
-        this.item = ItemStackUtil.readItemStackFromBufIgnoreTag(buffer);
+        this.item = buffer.readItemStack();
         this.entitySize = new EntitySize(this.projectile.size, this.projectile.size, false);
     }
 
