@@ -1,6 +1,7 @@
 package com.mrcrayfish.guns.item;
 
 import com.google.common.annotations.Beta;
+import com.mrcrayfish.guns.client.KeyBinds;
 import com.mrcrayfish.guns.object.Gun;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -82,7 +83,7 @@ public class GunItem extends ColoredItem
             }
         }
 
-        tooltip.add(new TranslationTextComponent("info.cgm.attachment_help"));
+        tooltip.add(new TranslationTextComponent("info.cgm.attachment_help", KeyBinds.KEY_ATTACHMENTS.getLocalizedName()).setStyle(new Style().setColor(TextFormatting.GRAY)));
     }
 
     @Override
