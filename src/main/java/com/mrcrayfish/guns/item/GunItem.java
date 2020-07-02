@@ -20,7 +20,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Objects;
 
 @Beta
 public class GunItem extends ColoredItem
@@ -47,8 +46,9 @@ public class GunItem extends ColoredItem
     {
         Gun modifiedGun = this.getModifiedGun(stack);
 
-        if (ForgeRegistries.ITEMS.containsKey(this.gun.projectile.item))
-            tooltip.add(new TranslationTextComponent("info.cgm.ammoItem", Objects.requireNonNull(ForgeRegistries.ITEMS.getValue(this.gun.projectile.item)).getName()).setStyle(new Style().setColor(TextFormatting.GRAY)));
+        Item ammo = ForgeRegistries.ITEMS.getValue(modifiedGun.projectile.item);
+        if (ammo != null)
+            tooltip.add(new TranslationTextComponent("info.cgm.ammo_type", ammo.getName()).setStyle(new Style().setColor(TextFormatting.GRAY)));
 
         String additionalDamageText = "";
         CompoundNBT tagCompound = stack.getTag();
@@ -81,6 +81,8 @@ public class GunItem extends ColoredItem
                 tooltip.add(new TranslationTextComponent("info.cgm.ammo", tagCompound.getInt("AmmoCount"), modifiedGun.general.maxAmmo).setStyle(new Style().setColor(TextFormatting.GRAY)));
             }
         }
+
+        tooltip.add(new TranslationTextComponent("info.cgm.attachment_help"));
     }
 
     @Override
