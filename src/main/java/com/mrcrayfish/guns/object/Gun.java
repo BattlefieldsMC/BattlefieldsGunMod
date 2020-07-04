@@ -3,6 +3,7 @@ package com.mrcrayfish.guns.object;
 import com.mrcrayfish.guns.annotation.Ignored;
 import com.mrcrayfish.guns.annotation.Optional;
 import com.mrcrayfish.guns.item.IAttachment;
+import com.mrcrayfish.guns.item.IScope;
 import com.mrcrayfish.guns.item.ScopeItem;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -725,9 +726,9 @@ public class Gun implements INBTSerializable<CompoundNBT>
             {
                 ItemStack scopeStack = ItemStack.read(attachment.getCompound("Scope"));
                 Scope scope = null;
-                if(scopeStack.getItem() instanceof ScopeItem)
+                if(scopeStack.getItem() instanceof IScope)
                 {
-                    scope = ((ScopeItem) scopeStack.getItem()).getScope();
+                    scope = ((IScope) scopeStack.getItem()).getScope();
                 }
                 return scope;
             }
