@@ -11,11 +11,15 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * Author: MrCrayfish
  */
+@OnlyIn(Dist.CLIENT)
 public class MissileRenderer extends EntityRenderer<MissileEntity>
 {
     public MissileRenderer(EntityRendererManager renderManager)
@@ -26,7 +30,7 @@ public class MissileRenderer extends EntityRenderer<MissileEntity>
     @Override
     public ResourceLocation getEntityTexture(MissileEntity entity)
     {
-        return null;
+        return PlayerContainer.LOCATION_BLOCKS_TEXTURE;
     }
 
     @Override

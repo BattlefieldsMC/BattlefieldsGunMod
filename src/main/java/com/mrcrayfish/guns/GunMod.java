@@ -18,6 +18,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -59,6 +61,7 @@ public class GunMod
         }
     };
 
+    @OnlyIn(Dist.CLIENT)
     private static GunOptions options;
     private static NetworkGunManager networkGunManager;
     private static CustomGunLoader customGunLoader;
@@ -185,6 +188,7 @@ public class GunMod
     /**
      * @return
      */
+    @OnlyIn(Dist.CLIENT)
     public static GunOptions getOptions()
     {
         return options;

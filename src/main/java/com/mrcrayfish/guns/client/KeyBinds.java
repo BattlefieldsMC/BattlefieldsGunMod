@@ -1,12 +1,15 @@
 package com.mrcrayfish.guns.client;
 
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import org.lwjgl.glfw.GLFW;
 
 /**
  * Author: MrCrayfish
  */
+@OnlyIn(Dist.CLIENT)
 public class KeyBinds
 {
     public static final KeyBinding KEY_RELOAD = new KeyBinding("key.cgm.reload", GLFW.GLFW_KEY_R, "key.categories.cgm");

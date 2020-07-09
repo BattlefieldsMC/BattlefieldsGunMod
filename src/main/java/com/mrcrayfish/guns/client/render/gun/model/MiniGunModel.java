@@ -12,6 +12,8 @@ import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -22,6 +24,7 @@ import java.util.UUID;
 /**
  * Author: MrCrayfish
  */
+@OnlyIn(Dist.CLIENT)
 public class MiniGunModel implements IOverrideModel
 {
     private Map<UUID, Rotations> rotationMap = new HashMap<>();

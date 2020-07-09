@@ -4,10 +4,13 @@ import com.mrcrayfish.guns.GunMod;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.gui.widget.OptionSlider;
 import net.minecraft.client.settings.SliderPercentageOption;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * Author: MrCrayfish
  */
+@OnlyIn(Dist.CLIENT)
 public class GunOptionSlider extends OptionSlider
 {
     private final SliderPercentageOption option;

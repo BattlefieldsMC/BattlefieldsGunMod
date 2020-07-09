@@ -51,6 +51,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -85,6 +86,7 @@ public class ClientHandler
         return BULLET_RENDERER;
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static void setup()
     {
         MinecraftForge.EVENT_BUS.register(GUN_RENDERER);
@@ -107,11 +109,13 @@ public class ClientHandler
         registerScreenFactories();
     }
 
+    @OnlyIn(Dist.CLIENT)
     private static void setupRenderLayers()
     {
         RenderTypeLookup.setRenderLayer(ModBlocks.WORKBENCH.get(), RenderType.getCutout());
     }
 
+    @OnlyIn(Dist.CLIENT)
     private static void registerEntityRenders()
     {
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.PROJECTILE.get(), ProjectileRenderer::new);
@@ -121,6 +125,7 @@ public class ClientHandler
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.THROWABLE_STUN_GRENADE.get(), ThrowableGrenadeRenderer::new);
     }
 
+    @OnlyIn(Dist.CLIENT)
     private static void registerColors()
     {
         IItemColor color = (stack, index) ->
@@ -140,6 +145,7 @@ public class ClientHandler
         });
     }
 
+    @OnlyIn(Dist.CLIENT)
     private static void registerModelOverrides()
     {
         ModelOverrides.register(new ItemStack(ModItems.MINI_GUN.get()), new MiniGunModel());
@@ -150,6 +156,7 @@ public class ClientHandler
         ModelOverrides.register(new ItemStack(ModItems.GRENADE_LAUNCHER.get()), new GrenadeLauncherModel());
     }
 
+    @OnlyIn(Dist.CLIENT)
     private static void registerParticleFactories()
     {
         ParticleManager particleManager = Minecraft.getInstance().particles;
@@ -157,12 +164,14 @@ public class ClientHandler
         particleManager.registerFactory(ModParticleTypes.BLOOD.get(), (typeIn, worldIn, x, y, z, xSpeed, ySpeed, zSpeed) -> new BloodParticle(worldIn, x, y, z));
     }
 
+    @OnlyIn(Dist.CLIENT)
     private static void registerScreenFactories()
     {
         ScreenManager.registerFactory(ModContainers.WORKBENCH.get(), WorkbenchScreen::new);
         ScreenManager.registerFactory(ModContainers.ATTACHMENTS.get(), AttachmentScreen::new);
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static void handleMessageGunSound(MessageGunSound message)
     {
         SoundEvent soundEvent = ForgeRegistries.SOUND_EVENTS.getValue(message.getId());
@@ -179,6 +188,7 @@ public class ClientHandler
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static void handleMessageBlood(MessageBlood message)
     {
         if (!Config.CLIENT.particle.enableBlood.get())
@@ -195,6 +205,7 @@ public class ClientHandler
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static void handleMessageBullet(MessageBullet message)
     {
         World world = Minecraft.getInstance().world;
@@ -208,6 +219,7 @@ public class ClientHandler
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static void handleMessageBulletHole(MessageBulletHole message)
     {
         Minecraft mc = Minecraft.getInstance();
@@ -218,6 +230,7 @@ public class ClientHandler
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static void handleExplosionStunGrenade(MessageStunGrenade message)
     {
         Minecraft mc = Minecraft.getInstance();
@@ -243,11 +256,13 @@ public class ClientHandler
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     private static Particle spawnParticle(ParticleManager manager, IParticleData data, double x, double y, double z, Random rand, double velocityMultiplier)
     {
         return manager.addParticle(data, x, y, z, (rand.nextDouble() - 0.5) * velocityMultiplier, (rand.nextDouble() - 0.5) * velocityMultiplier, (rand.nextDouble() - 0.5) * velocityMultiplier);
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static boolean isLookingAtInteractableBlock()
     {
         Minecraft mc = Minecraft.getInstance();
@@ -264,6 +279,7 @@ public class ClientHandler
         return false;
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static boolean isAiming()
     {
         Minecraft mc = Minecraft.getInstance();
@@ -295,6 +311,7 @@ public class ClientHandler
         return zooming;
     }
 
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void onScreenInit(GuiScreenEvent.InitGuiEvent.Post event)
     {
@@ -318,6 +335,7 @@ public class ClientHandler
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void onKeyPressed(InputEvent.KeyInputEvent event)
     {

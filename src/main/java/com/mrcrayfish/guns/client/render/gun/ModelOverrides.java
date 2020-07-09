@@ -3,6 +3,8 @@ package com.mrcrayfish.guns.client.render.gun;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 
 import javax.annotation.Nullable;
@@ -12,6 +14,7 @@ import java.util.Map;
 /**
  * Author: MrCrayfish
  */
+@OnlyIn(Dist.CLIENT)
 public class ModelOverrides
 {
     private static final Map<Item, IOverrideModel> MODEL_MAP = new HashMap<>();

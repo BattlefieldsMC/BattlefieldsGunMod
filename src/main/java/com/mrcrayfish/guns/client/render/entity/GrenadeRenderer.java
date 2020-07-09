@@ -9,11 +9,15 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * Author: MrCrayfish
  */
+@OnlyIn(Dist.CLIENT)
 public class GrenadeRenderer extends EntityRenderer<GrenadeEntity>
 {
     public GrenadeRenderer(EntityRendererManager renderManager)
@@ -24,7 +28,7 @@ public class GrenadeRenderer extends EntityRenderer<GrenadeEntity>
     @Override
     public ResourceLocation getEntityTexture(GrenadeEntity entity)
     {
-        return null;
+        return PlayerContainer.LOCATION_BLOCKS_TEXTURE;
     }
 
     @Override

@@ -10,6 +10,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -24,12 +25,14 @@ public class CustomGunManager
 {
     private static Map<ResourceLocation, CustomGun> customGunMap;
 
+    @OnlyIn(Dist.CLIENT)
     public static boolean updateCustomGuns(NetworkGunManager.IGunProvider provider)
     {
         CustomGunManager.customGunMap = provider.getCustomGuns();
         return true;
     }
 
+    @OnlyIn(Dist.CLIENT)
     public static void fill(NonNullList<ItemStack> items)
     {
         if(customGunMap != null)
@@ -48,6 +51,7 @@ public class CustomGunManager
         }
     }
 
+    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public static void onClientDisconnect(ClientPlayerNetworkEvent.LoggedOutEvent event)
     {

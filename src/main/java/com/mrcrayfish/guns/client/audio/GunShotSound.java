@@ -6,10 +6,13 @@ import net.minecraft.client.audio.LocatableSound;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * Author: MrCrayfish
  */
+@OnlyIn(Dist.CLIENT)
 public class GunShotSound extends LocatableSound
 {
     public GunShotSound(SoundEvent soundIn, SoundCategory categoryIn, float x, float y, float z, float volume, float pitch)

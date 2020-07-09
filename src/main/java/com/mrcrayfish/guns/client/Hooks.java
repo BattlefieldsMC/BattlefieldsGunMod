@@ -1,8 +1,12 @@
 package com.mrcrayfish.guns.client;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
 /**
  * Author: MrCrayfish
  */
+@OnlyIn(Dist.CLIENT)
 public class Hooks
 {
     /**

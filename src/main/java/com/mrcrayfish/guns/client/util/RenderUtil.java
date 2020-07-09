@@ -9,6 +9,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Direction;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.opengl.GL11;
 
 import javax.annotation.Nullable;
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
+@OnlyIn(Dist.CLIENT)
 public class RenderUtil
 {
     public static void scissor(int x, int y, int width, int height)

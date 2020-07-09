@@ -28,6 +28,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -37,6 +39,7 @@ import java.util.stream.Collectors;
 /**
  * Author: MrCrayfish
  */
+@OnlyIn(Dist.CLIENT)
 public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
 {
     private static final int MAX_TRANSITION_TICKS = 5;

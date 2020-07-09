@@ -24,12 +24,15 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 /**
  * Author: MrCrayfish
  */
+@OnlyIn(Dist.CLIENT)
 public class ControllerEvents
 {
     private int reloadCounter = -1;
@@ -55,11 +58,6 @@ public class ControllerEvents
                     }
                     break;
                 case Buttons.LEFT_TRIGGER:
-                    if(heldItem.getItem() instanceof GunItem)
-                    {
-                        event.setCanceled(true);
-                    }
-                    break;
                 case Buttons.RIGHT_THUMB_STICK:
                     if(heldItem.getItem() instanceof GunItem)
                     {

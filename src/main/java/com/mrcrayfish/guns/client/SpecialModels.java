@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.Mod;
 /**
  * Author: MrCrayfish
  */
+@OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(modid = Reference.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public enum SpecialModels
 {

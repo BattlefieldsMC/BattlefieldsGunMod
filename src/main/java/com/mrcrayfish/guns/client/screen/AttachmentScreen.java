@@ -16,6 +16,8 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -25,6 +27,7 @@ import java.util.Collections;
 /**
  * Author: MrCrayfish
  */
+@OnlyIn(Dist.CLIENT)
 public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
 {
     private static final ResourceLocation GUI_TEXTURES = new ResourceLocation("cgm:textures/gui/attachments.png");

@@ -47,6 +47,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.*;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.TickEvent;
@@ -59,6 +61,7 @@ import org.lwjgl.opengl.GL11;
 import java.lang.reflect.Field;
 import java.util.Random;
 
+@OnlyIn(Dist.CLIENT)
 public class GunRenderer
 {
     private static final ResourceLocation MUZZLE_FLASH = new ResourceLocation(Reference.MOD_ID, "textures/effect/muzzle_flash.png");

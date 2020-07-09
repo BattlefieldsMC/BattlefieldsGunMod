@@ -11,13 +11,17 @@ import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.Pose;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 
 /**
  * Author: MrCrayfish
  */
+@OnlyIn(Dist.CLIENT)
 public class ThrowableGrenadeRenderer extends EntityRenderer<ThrowableGrenadeEntity>
 {
     public ThrowableGrenadeRenderer(EntityRendererManager renderManager)
@@ -25,11 +29,10 @@ public class ThrowableGrenadeRenderer extends EntityRenderer<ThrowableGrenadeEnt
         super(renderManager);
     }
 
-    @Nullable
     @Override
     public ResourceLocation getEntityTexture(ThrowableGrenadeEntity entity)
     {
-        return null;
+        return PlayerContainer.LOCATION_BLOCKS_TEXTURE;
     }
 
     @Override

@@ -10,8 +10,12 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+@OnlyIn(Dist.CLIENT)
 public class ProjectileRenderer extends EntityRenderer<ProjectileEntity>
 {
     public ProjectileRenderer(EntityRendererManager renderManager)
@@ -22,7 +26,7 @@ public class ProjectileRenderer extends EntityRenderer<ProjectileEntity>
     @Override
     public ResourceLocation getEntityTexture(ProjectileEntity entity)
     {
-        return null;
+        return PlayerContainer.LOCATION_BLOCKS_TEXTURE;
     }
 
     @Override
