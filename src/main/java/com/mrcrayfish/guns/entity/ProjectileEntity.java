@@ -7,6 +7,7 @@ import com.mrcrayfish.guns.common.SpreadTracker;
 import com.mrcrayfish.guns.common.trace.GunProjectile;
 import com.mrcrayfish.guns.hook.GunProjectileHitEvent;
 import com.mrcrayfish.guns.interfaces.IDamageable;
+import com.mrcrayfish.guns.interfaces.IExplosionDamageable;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.network.message.MessageBlood;
@@ -43,6 +44,7 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -755,14 +757,20 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
         Explosion explosion = new Explosion(world, entity, entity.getPosX(), entity.getPosY(), entity.getPosZ(), radius, false, Explosion.Mode.NONE);
         explosion.doExplosionA();
+        explosion.getPlayerKnockbackMap().clear();
         explosion.doExplosionB(true);
+        explosion.getAffectedBlockPositions().forEach(pos ->
+        {
+            if (world.getBlockState(pos).getBlock() instanceof IExplosionDamageable)
+                ((IExplosionDamageable) world.getBlockState(pos).getBlock()).onProjectileExploded(world, world.getBlockState(pos), pos, entity);
+        });
         explosion.clearAffectedBlockPositions();
 
         for (ServerPlayerEntity serverplayerentity : ((ServerWorld) world).getPlayers())
         {
             if (serverplayerentity.getDistanceSq(entity.getPosX(), entity.getPosY(), entity.getPosZ()) < 4096.0D)
             {
-                serverplayerentity.connection.sendPacket(new SExplosionPacket(entity.getPosX(), entity.getPosY(), entity.getPosZ(), radius / 5f, explosion.getAffectedBlockPositions(), explosion.getPlayerKnockbackMap().get(serverplayerentity)));
+                serverplayerentity.connection.sendPacket(new SExplosionPacket(entity.getPosX(), entity.getPosY(), entity.getPosZ(), radius / 5f, Collections.emptyList(), null));
             }
         }
     }
