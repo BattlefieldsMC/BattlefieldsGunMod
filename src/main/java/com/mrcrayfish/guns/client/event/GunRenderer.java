@@ -3,8 +3,6 @@ package com.mrcrayfish.guns.client.event;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.GunMod;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.client.AimTracker;
@@ -12,9 +10,11 @@ import com.mrcrayfish.guns.client.ClientHandler;
 import com.mrcrayfish.guns.client.render.gun.IOverrideModel;
 import com.mrcrayfish.guns.client.render.gun.ModelOverrides;
 import com.mrcrayfish.guns.client.util.RenderUtil;
-import com.mrcrayfish.guns.init.ModEffects;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
-import com.mrcrayfish.guns.item.*;
+import com.mrcrayfish.guns.item.GrenadeItem;
+import com.mrcrayfish.guns.item.GunItem;
+import com.mrcrayfish.guns.item.IAttachment;
+import com.mrcrayfish.guns.item.IBarrel;
 import com.mrcrayfish.guns.object.Barrel;
 import com.mrcrayfish.guns.object.GripType;
 import com.mrcrayfish.guns.object.Gun;
@@ -24,10 +24,12 @@ import com.mrcrayfish.obfuscate.client.event.RenderItemEvent;
 import com.mrcrayfish.obfuscate.common.data.SyncedPlayerData;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
@@ -41,7 +43,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.CooldownTracker;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
@@ -775,7 +776,7 @@ public class GunRenderer
             matrixStack.translate(0, -0.5, 0);
 
             ItemStack barrelStack = Gun.getAttachment(IAttachment.Type.BARREL, weapon);
-            if(!barrelStack.isEmpty() && barrelStack.getItem() instanceof IBarrel)
+            if (!barrelStack.isEmpty() && barrelStack.getItem() instanceof IBarrel)
             {
                 Barrel barrel = ((IBarrel) barrelStack.getItem()).getBarrel();
                 Gun.ScaledPositioned positioned = modifiedGun.getAttachmentPosition(IAttachment.Type.BARREL);
@@ -854,8 +855,7 @@ public class GunRenderer
             matrixStack.rotate(Vector3f.XP.rotationDegrees(-35F));
             matrixStack.scale(0.5F, 0.5F, 0.5F);
 
-            IVertexBuilder builder = buffer.getBuffer(RenderType.getEntitySolid(player.getLocationSkin()));
-            this.renderArm(matrixStack, builder, light, hand.opposite());
+            this.renderArm(player, matrixStack, buffer, light, hand.opposite());
         }
         else if (modifiedGun.general.gripType == GripType.ONE_HANDED)
         {
@@ -873,8 +873,7 @@ public class GunRenderer
             matrixStack.rotate(Vector3f.XP.rotationDegrees(75F));
             matrixStack.scale(0.5F, 0.5F, 0.5F);
 
-            IVertexBuilder builder = buffer.getBuffer(RenderType.getEntitySolid(player.getLocationSkin()));
-            this.renderArm(matrixStack, builder, light, hand);
+            this.renderArm(player, matrixStack, buffer, light, hand);
         }
 
         matrixStack.pop();
@@ -916,8 +915,7 @@ public class GunRenderer
         matrixStack.rotate(Vector3f.XP.rotationDegrees(-75F * percent));
         matrixStack.scale(0.5F, 0.5F, 0.5F);
 
-        IVertexBuilder builder = buffer.getBuffer(RenderType.getEntitySolid(mc.player.getLocationSkin()));
-        this.renderArm(matrixStack, builder, light, hand.opposite());
+        this.renderArm(Minecraft.getInstance().player, matrixStack, buffer, light, hand.opposite());
 
         if (reload < 0.5F)
         {
@@ -932,25 +930,20 @@ public class GunRenderer
         matrixStack.pop();
     }
 
-    private void renderArm(MatrixStack matrixStack, IVertexBuilder builder, int light, HandSide hand)
+    private void renderArm(ClientPlayerEntity player, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, HandSide hand)
     {
-        ClientPlayerEntity clientPlayerEntity = Minecraft.getInstance().player;
-        Minecraft.getInstance().getTextureManager().bindTexture(clientPlayerEntity.getLocationSkin());
-        PlayerRenderer renderPlayer = (PlayerRenderer) Minecraft.getInstance().getRenderManager().getRenderer(clientPlayerEntity);
+        Minecraft mc = Minecraft.getInstance();
+        EntityRendererManager renderManager = mc.getRenderManager();
 
+        mc.getTextureManager().bindTexture(player.getLocationSkin());
+        PlayerRenderer playerrenderer = (PlayerRenderer) renderManager.<AbstractClientPlayerEntity>getRenderer(player);
         if (hand == HandSide.RIGHT)
         {
-            renderPlayer.getEntityModel().bipedRightArm.rotateAngleX = 0F;
-            renderPlayer.getEntityModel().bipedRightArm.rotateAngleY = 0F;
-            renderPlayer.getEntityModel().bipedRightArm.rotateAngleZ = 0F;
-            renderPlayer.getEntityModel().bipedRightArm.render(matrixStack, builder, light, OverlayTexture.NO_OVERLAY);
+            playerrenderer.renderRightArm(matrixStack, buffer, combinedLight, player);
         }
         else
         {
-            renderPlayer.getEntityModel().bipedLeftArm.rotateAngleX = 0F;
-            renderPlayer.getEntityModel().bipedLeftArm.rotateAngleY = 0F;
-            renderPlayer.getEntityModel().bipedLeftArm.rotateAngleZ = 0F;
-            renderPlayer.getEntityModel().bipedLeftArm.render(matrixStack, builder, light, OverlayTexture.NO_OVERLAY);
+            playerrenderer.renderLeftArm(matrixStack, buffer, combinedLight, player);
         }
     }
 
