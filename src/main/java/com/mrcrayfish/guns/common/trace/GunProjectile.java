@@ -328,13 +328,6 @@ public interface GunProjectile
     float getAdditionalDamage();
 
     /**
-     * Sets the amount of ticks this projectile existed for.
-     *
-     * @param ticksExisted The new amount of ticks existed
-     */
-    void setTicksExisted(int ticksExisted);
-
-    /**
      * Sets the last x position of this projectile
      *
      * @param lastX The new last x position

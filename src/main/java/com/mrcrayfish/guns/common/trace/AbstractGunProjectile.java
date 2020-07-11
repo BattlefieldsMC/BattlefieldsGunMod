@@ -160,8 +160,7 @@ public abstract class AbstractGunProjectile implements GunProjectile
         return additionalDamage;
     }
 
-    @Override
-    public void setTicksExisted(int ticksExisted)
+    protected void setTicksExisted(int ticksExisted)
     {
         this.ticksExisted = ticksExisted;
     }

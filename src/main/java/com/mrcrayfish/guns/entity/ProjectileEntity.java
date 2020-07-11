@@ -6,21 +6,17 @@ import com.mrcrayfish.guns.interfaces.IExplosionDamageable;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.object.Gun;
 import com.mrcrayfish.guns.object.Gun.Projectile;
-import net.minecraft.block.BlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.fluid.IFluidState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SExplosionPacket;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.*;
-import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
-import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
@@ -29,8 +25,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collections;
 import java.util.UUID;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnData, GunProjectile
 {
@@ -140,12 +134,6 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     }
 
     @Override
-    public void setTicksExisted(int ticksExisted)
-    {
-        super.ticksExisted = ticksExisted;
-    }
-
-    @Override
     public void setLastX(double lastX)
     {
         super.lastTickPosX = lastX;
@@ -236,6 +224,13 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         if (!this.world.isRemote())
         {
             this.tickStep(this.world, this.projectile.size, this.projectile.life, this.projectile.gravity, this.projectile.spawnBulletHole);
+        }
+        else
+        {
+            this.setPosition(this.getX() + this.getMotionX(), this.getY() + this.getMotionY(), this.getZ() + this.getMotionZ());
+
+            if (this.projectile.gravity)
+                this.setMotionY(this.getMotionY() - 0.05);
         }
     }
 
