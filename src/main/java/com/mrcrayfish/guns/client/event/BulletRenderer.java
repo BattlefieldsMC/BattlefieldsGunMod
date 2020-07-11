@@ -72,15 +72,15 @@ public class BulletRenderer
         matrixStack.translate(-view.getX(), -view.getY(), -view.getZ());
 
         for (Bullet bullet : this.bullets)
-        {
-            this.renderBullet(mc.renderViewEntity, bullet, buffer, event.getMatrixStack(), event.getPartialTicks());
-        }
+            this.renderBullet(mc.renderViewEntity, bullet, buffer, matrixStack, false, event.getPartialTicks());
+        for (Bullet bullet : this.bullets)
+            this.renderBullet(mc.renderViewEntity, bullet, buffer, matrixStack, true, event.getPartialTicks());
 
         buffer.finish();
         matrixStack.pop();
     }
 
-    private void renderBullet(Entity entity, Bullet bullet, IRenderTypeBuffer buffer, MatrixStack matrixStack, float partialTicks)
+    private void renderBullet(Entity entity, Bullet bullet, IRenderTypeBuffer buffer, MatrixStack matrixStack, boolean renderBullet, float partialTicks)
     {
         GunProjectile projectile = bullet.getProjectile();
         if (projectile.isComplete())
@@ -120,7 +120,7 @@ public class BulletRenderer
         }
 
         // No point rendering item if empty, so return
-        if (projectile.getBullet().isEmpty())
+        if (!renderBullet || projectile.getBullet().isEmpty())
         {
             matrixStack.pop();
             return;
