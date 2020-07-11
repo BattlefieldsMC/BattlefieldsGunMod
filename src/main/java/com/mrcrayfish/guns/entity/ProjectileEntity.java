@@ -223,7 +223,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     {
         if (!this.world.isRemote())
         {
-            this.tickStep(this.world, this.projectile.size, this.projectile.life, this.projectile.gravity, this.projectile.spawnBulletHole);
+            this.tickStep(this.world, this.projectile.size, this.projectile.life, this.projectile.gravity, this.projectile.spawnBulletHole, false);
         }
         else
         {
@@ -424,20 +424,19 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
         Explosion explosion = new Explosion(world, entity, entity.getPosX(), entity.getPosY(), entity.getPosZ(), radius, false, Explosion.Mode.NONE);
         explosion.doExplosionA();
-        explosion.getPlayerKnockbackMap().clear();
-        explosion.doExplosionB(true);
         explosion.getAffectedBlockPositions().forEach(pos ->
         {
             if (world.getBlockState(pos).getBlock() instanceof IExplosionDamageable)
                 ((IExplosionDamageable) world.getBlockState(pos).getBlock()).onProjectileExploded(world, world.getBlockState(pos), pos, entity);
         });
+        explosion.doExplosionB(true);
         explosion.clearAffectedBlockPositions();
 
         for (ServerPlayerEntity serverplayerentity : ((ServerWorld) world).getPlayers())
         {
             if (serverplayerentity.getDistanceSq(entity.getPosX(), entity.getPosY(), entity.getPosZ()) < 4096.0D)
             {
-                serverplayerentity.connection.sendPacket(new SExplosionPacket(entity.getPosX(), entity.getPosY(), entity.getPosZ(), radius / 5f, Collections.emptyList(), null));
+                serverplayerentity.connection.sendPacket(new SExplosionPacket(entity.getPosX(), entity.getPosY(), entity.getPosZ(), radius / 5f, Collections.emptyList(), explosion.getPlayerKnockbackMap().get(serverplayerentity)));
             }
         }
     }

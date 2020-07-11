@@ -54,7 +54,7 @@ public class GunProjectileImpl extends AbstractGunProjectile
     public void tick(World world)
     {
         super.tick(world);
-        this.tickStep(world, this.modifiedGun.projectile.size, this.modifiedGun.projectile.life, this.modifiedGun.projectile.gravity, this.modifiedGun.projectile.spawnBulletHole);
+        this.tickStep(world, this.modifiedGun.projectile.size, this.modifiedGun.projectile.life, this.modifiedGun.projectile.gravity, this.modifiedGun.projectile.spawnBulletHole, true);
     }
 
     @Override

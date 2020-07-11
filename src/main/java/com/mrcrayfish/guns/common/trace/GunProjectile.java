@@ -2,7 +2,6 @@ package com.mrcrayfish.guns.common.trace;
 
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.entity.DamageSourceProjectile;
-import com.mrcrayfish.guns.entity.ProjectileEntity;
 import com.mrcrayfish.guns.hook.GunProjectileHitEvent;
 import com.mrcrayfish.guns.interfaces.IDamageable;
 import com.mrcrayfish.guns.network.PacketHandler;
@@ -62,8 +61,9 @@ public interface GunProjectile
      * @param life            The amount of ticks the projectile lives for
      * @param gravity         Whether or not the projectile is affected by gravity
      * @param spawnBulletHole Whether or not a bullet hole should be spawned by this projectile
+     * @param dealShotDamage  Whether or not the bullet itself should deal damage to the world
      */
-    default void tickStep(World world, float size, int life, boolean gravity, boolean spawnBulletHole)
+    default void tickStep(World world, float size, int life, boolean gravity, boolean spawnBulletHole, boolean dealShotDamage)
     {
         Entity shooter = world.getEntityByID(this.getShooterId());
 
@@ -93,7 +93,7 @@ public interface GunProjectile
 
         if (result != null)
         {
-            this.onHit(world, this.getDamage(), spawnBulletHole, result);
+            this.onHit(world, this.getDamage(), dealShotDamage, spawnBulletHole, result);
         }
 
         this.setPosition(this.getX() + this.getMotionX(), this.getY() + this.getMotionY(), this.getZ() + this.getMotionZ());
@@ -126,7 +126,7 @@ public interface GunProjectile
      * @param spawnBulletHole Whether or not a bullet hole should be spawned by this projectile
      * @param result          The block trace result
      */
-    default void onHit(World world, float damage, boolean spawnBulletHole, RayTraceResult result)
+    default void onHit(World world, float damage, boolean spawnBulletHole, boolean dealShotDamage, RayTraceResult result)
     {
         MinecraftForge.EVENT_BUS.post(new GunProjectileHitEvent(result, this));
 
@@ -142,13 +142,13 @@ public interface GunProjectile
             BlockState state = world.getBlockState(pos);
             Block block = state.getBlock();
 
-            if (!world.isRemote() && Config.COMMON.gameplay.enableGunGriefing.get() && (block instanceof BreakableBlock || block instanceof PaneBlock) && state.getMaterial() == Material.GLASS)
+            if (dealShotDamage && !world.isRemote() && Config.COMMON.gameplay.enableGunGriefing.get() && (block instanceof BreakableBlock || block instanceof PaneBlock) && state.getMaterial() == Material.GLASS)
                 world.destroyBlock(blockRayTraceResult.getPos(), false);
 
             if (!state.getMaterial().isReplaceable())
                 this.complete();
 
-            if (block instanceof IDamageable)
+            if (dealShotDamage && block instanceof IDamageable)
                 ((IDamageable) block).onBlockDamaged(world, state, pos, this, damage, (int) Math.ceil(damage / 2.0) + 1);
 
             Vec3d hitVec = blockRayTraceResult.getHitVec();
