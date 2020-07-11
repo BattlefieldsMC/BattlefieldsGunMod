@@ -78,125 +78,122 @@ public class CommonHandler
      */
     public static void fireHeldGun(MessageShoot message, ServerPlayerEntity player)
     {
-        if (player.world.isRemote())
+        World world = player.world;
+        if (world.isRemote() || player.isSpectator())
             return;
 
-        if (!player.isSpectator())
+        ItemStack heldItem = player.getHeldItem(Hand.MAIN_HAND);
+        if (heldItem.getItem() instanceof GunItem && (Gun.hasAmmo(heldItem) || player.isCreative()))
         {
-            World world = player.world;
-            ItemStack heldItem = player.getHeldItem(Hand.MAIN_HAND);
-            if (heldItem.getItem() instanceof GunItem && (Gun.hasAmmo(heldItem) || player.isCreative()))
+            GunItem item = (GunItem) heldItem.getItem();
+            Gun modifiedGun = item.getModifiedGun(heldItem);
+            if (modifiedGun != null)
             {
-                GunItem item = (GunItem) heldItem.getItem();
-                Gun modifiedGun = item.getModifiedGun(heldItem);
-                if (modifiedGun != null)
+                /* Updates the yaw and pitch with the clients current yaw and pitch */
+                player.rotationYaw = message.getRotationYaw();
+                player.rotationPitch = message.getRotationPitch();
+
+                ShootTracker tracker = getShootTracker(player.getUniqueID());
+                if (tracker.hasCooldown(item))
                 {
-                    /* Updates the yaw and pitch with the clients current yaw and pitch */
-                    player.rotationYaw = message.getRotationYaw();
-                    player.rotationPitch = message.getRotationPitch();
+                    GunMod.LOGGER.warn(player.getName().getUnformattedComponentText() + "(" + player.getUniqueID() + ") tried to fire before cooldown finished or server is lagging? Remaining milliseconds: " + tracker.getRemaining(item));
+                    return;
+                }
+                tracker.putCooldown(item, modifiedGun);
 
-                    ShootTracker tracker = getShootTracker(player.getUniqueID());
-                    if (tracker.hasCooldown(item))
+                if (SyncedPlayerData.instance().get(player, ModSyncedDataKeys.RELOADING))
+                {
+                    SyncedPlayerData.instance().set(player, ModSyncedDataKeys.RELOADING, false);
+                }
+
+                if (!modifiedGun.general.alwaysSpread && modifiedGun.general.spread > 0.0F)
+                {
+                    SpreadTracker.get(player.getUniqueID()).update(item);
+                }
+
+                boolean silenced = Gun.getAttachment(IAttachment.Type.BARREL, heldItem).getItem() == ModItems.SILENCER.get();
+
+                for (int i = 0; i < modifiedGun.general.projectileAmount; i++)
+                {
+                    ((ServerWorld) world).getServer().execute(() ->
                     {
-                        GunMod.LOGGER.warn(player.getName().getUnformattedComponentText() + "(" + player.getUniqueID() + ") tried to fire before cooldown finished or server is lagging? Remaining milliseconds: " + tracker.getRemaining(item));
-                        return;
-                    }
-                    tracker.putCooldown(item, modifiedGun);
+                        ProjectileFactory<?> factory = ProjectileManager.getInstance().getFactory(modifiedGun.projectile.item);
+                        GunProjectile bullet = factory.create(world, player, item, modifiedGun);
+                        bullet.setWeapon(heldItem);
+                        bullet.setAdditionalDamage(Gun.getAdditionalDamage(heldItem));
+                        bullet.setShooter(player.getUniqueID());
+                        bullet.setShooterId(player.getEntityId());
 
-                    if (SyncedPlayerData.instance().get(player, ModSyncedDataKeys.RELOADING))
-                    {
-                        SyncedPlayerData.instance().set(player, ModSyncedDataKeys.RELOADING, false);
-                    }
+                        if (silenced)
+                            bullet.setDamageModifier(0.75F);
 
-                    if (!modifiedGun.general.alwaysSpread && modifiedGun.general.spread > 0.0F)
-                    {
-                        SpreadTracker.get(player.getUniqueID()).update(item);
-                    }
-
-                    boolean silenced = Gun.getAttachment(IAttachment.Type.BARREL, heldItem).getItem() == ModItems.SILENCER.get();
-
-                    for (int i = 0; i < modifiedGun.general.projectileAmount; i++)
-                    {
-                        ((ServerWorld) world).getServer().execute(() ->
+                        if (bullet instanceof Entity)
                         {
-                            ProjectileFactory<?> factory = ProjectileManager.getInstance().getFactory(modifiedGun.projectile.item);
-                            GunProjectile bullet = factory.create(world, player, item, modifiedGun);
-                            bullet.setWeapon(heldItem);
-                            bullet.setAdditionalDamage(Gun.getAdditionalDamage(heldItem));
-                            bullet.setShooter(player.getUniqueID());
-                            bullet.setShooterId(player.getEntityId());
-
-                            if (silenced)
-                                bullet.setDamageModifier(0.75F);
-
-                            if (bullet instanceof Entity)
-                            {
-                                world.addEntity((Entity) bullet);
-                            }
-                            else
-                            {
-                                GunTracer.get(world).add(world, bullet);
-                            }
-
-                            if (!modifiedGun.projectile.visible)
-                            {
-                                MessageBullet messageBullet = new MessageBullet(modifiedGun.projectile.item, bullet, modifiedGun.projectile.trailColor, modifiedGun.projectile.trailLengthMultiplier);
-                                PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player.getPosX(), player.getPosY(), player.getPosZ(), Config.COMMON.network.projectileTrackingRange.get(), player.world.getDimension().getType())), messageBullet);
-                            }
-                        });
-                    }
-
-                    MinecraftForge.EVENT_BUS.post(new GunFireEvent(player, heldItem));
-
-                    if (Config.COMMON.aggroMobs.enabled.get())
-                    {
-                        double radius = silenced ? Config.COMMON.aggroMobs.rangeSilenced.get() : Config.COMMON.aggroMobs.rangeUnsilenced.get();
-                        double x = player.getPosX();
-                        double y = player.getPosY() + 0.5;
-                        double z = player.getPosZ();
-                        AxisAlignedBB box = new AxisAlignedBB(x - radius, y - radius, z - radius, x + radius, y + radius, z + radius);
-                        radius *= radius;
-                        double dx, dy, dz;
-                        for (LivingEntity entity : world.getEntitiesWithinAABB(LivingEntity.class, box, NOT_AGGRO_EXEMPT))
-                        {
-                            dx = x - entity.getPosX();
-                            dy = y - entity.getPosY();
-                            dz = z - entity.getPosZ();
-                            if (dx * dx + dy * dy + dz * dz <= radius)
-                            {
-                                entity.setRevengeTarget(Config.COMMON.aggroMobs.angerHostileMobs.get() ? player : entity);
-                            }
+                            world.addEntity((Entity) bullet);
                         }
-                    }
-
-                    ResourceLocation fireSound = silenced ? modifiedGun.sounds.silencedFire : modifiedGun.sounds.fire;
-                    SoundEvent event = ForgeRegistries.SOUND_EVENTS.getValue(fireSound);
-                    if (event != null)
-                    {
-                        double posX = player.prevPosX;
-                        double posY = player.prevPosY + player.getEyeHeight();
-                        double posZ = player.prevPosZ;
-                        float volume = silenced ? 0.75F : 1.0F;
-                        float pitch = 0.8F + world.rand.nextFloat() * 0.2F;
-                        MessageGunSound messageSound = new MessageGunSound(event, SoundCategory.PLAYERS, (float) posX, (float) posY, (float) posZ, volume, pitch, false);
-                        PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player, player.getPosX(), player.getPosY() + player.getEyeHeight(), player.getPosZ(), Config.SERVER.gunShotMaxDistance.get(), player.world.getDimension().getType())), messageSound);
-                        PacketHandler.getPlayChannel().send(PacketDistributor.PLAYER.with(() -> player), new MessageGunSound(event, SoundCategory.PLAYERS, (float) posX, (float) posY, (float) posZ, volume, pitch, true));
-                    }
-
-                    if (!player.isCreative())
-                    {
-                        CompoundNBT tag = heldItem.getOrCreateTag();
-                        if (!tag.getBoolean("IgnoreAmmo"))
+                        else
                         {
-                            tag.putInt("AmmoCount", Math.max(0, tag.getInt("AmmoCount") - 1));
+                            GunTracer.get(world).add(world, bullet);
+                        }
+
+                        if (!modifiedGun.projectile.visible)
+                        {
+                            MessageBullet messageBullet = new MessageBullet(modifiedGun.projectile.item, bullet, modifiedGun.projectile.trailColor, modifiedGun.projectile.trailLengthMultiplier);
+                            PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player.getPosX(), player.getPosY(), player.getPosZ(), Config.COMMON.network.projectileTrackingRange.get(), player.world.getDimension().getType())), messageBullet);
+                        }
+                    });
+                }
+
+                MinecraftForge.EVENT_BUS.post(new GunFireEvent(player, heldItem));
+
+                if (Config.COMMON.aggroMobs.enabled.get())
+                {
+                    double radius = silenced ? Config.COMMON.aggroMobs.rangeSilenced.get() : Config.COMMON.aggroMobs.rangeUnsilenced.get();
+                    double x = player.getPosX();
+                    double y = player.getPosY() + 0.5;
+                    double z = player.getPosZ();
+                    AxisAlignedBB box = new AxisAlignedBB(x - radius, y - radius, z - radius, x + radius, y + radius, z + radius);
+                    radius *= radius;
+                    double dx, dy, dz;
+                    for (LivingEntity entity : world.getEntitiesWithinAABB(LivingEntity.class, box, NOT_AGGRO_EXEMPT))
+                    {
+                        dx = x - entity.getPosX();
+                        dy = y - entity.getPosY();
+                        dz = z - entity.getPosZ();
+                        if (dx * dx + dy * dy + dz * dz <= radius)
+                        {
+                            entity.setRevengeTarget(Config.COMMON.aggroMobs.angerHostileMobs.get() ? player : entity);
                         }
                     }
                 }
+
+                ResourceLocation fireSound = silenced ? modifiedGun.sounds.silencedFire : modifiedGun.sounds.fire;
+                SoundEvent event = ForgeRegistries.SOUND_EVENTS.getValue(fireSound);
+                if (event != null)
+                {
+                    double posX = player.prevPosX;
+                    double posY = player.prevPosY + player.getEyeHeight();
+                    double posZ = player.prevPosZ;
+                    float volume = silenced ? 0.75F : 1.0F;
+                    float pitch = 0.8F + world.rand.nextFloat() * 0.2F;
+                    MessageGunSound messageSound = new MessageGunSound(event, SoundCategory.PLAYERS, (float) posX, (float) posY, (float) posZ, volume, pitch, false);
+                    PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player, player.getPosX(), player.getPosY() + player.getEyeHeight(), player.getPosZ(), Config.SERVER.gunShotMaxDistance.get(), player.world.getDimension().getType())), messageSound);
+                    PacketHandler.getPlayChannel().send(PacketDistributor.PLAYER.with(() -> player), new MessageGunSound(event, SoundCategory.PLAYERS, (float) posX, (float) posY, (float) posZ, volume, pitch, true));
+                }
+
+                if (!player.isCreative())
+                {
+                    CompoundNBT tag = heldItem.getOrCreateTag();
+                    if (!tag.getBoolean("IgnoreAmmo"))
+                    {
+                        tag.putInt("AmmoCount", Math.max(0, tag.getInt("AmmoCount") - 1));
+                    }
+                }
             }
-            else
-            {
-                world.playSound(null, player.getPosition(), SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, 0.8F);
-            }
+        }
+        else
+        {
+            world.playSound(null, player.getPosition(), SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, 0.8F);
         }
     }
 

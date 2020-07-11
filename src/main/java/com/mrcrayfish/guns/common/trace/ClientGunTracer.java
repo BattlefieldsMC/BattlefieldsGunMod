@@ -1,6 +1,8 @@
 package com.mrcrayfish.guns.common.trace;
 
 import com.mrcrayfish.guns.Reference;
+import com.mrcrayfish.guns.client.ClientHandler;
+import com.mrcrayfish.guns.object.Bullet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
@@ -43,9 +45,9 @@ public final class ClientGunTracer implements GunTracer
         this.projectiles.values().forEach(set ->
         {
             set.forEach(GunProjectile::complete);
-            set.removeIf(GunProjectile::isComplete);
+            set.clear();
         });
-        this.projectiles.values().removeIf(Collection::isEmpty);
+        this.projectiles.values().clear();
     }
 
     @Override
@@ -66,6 +68,6 @@ public final class ClientGunTracer implements GunTracer
     @SubscribeEvent
     public static void onEvent(WorldEvent.Unload event)
     {
-        Minecraft.getInstance().execute(() -> INSTANCE.clear());
+        Minecraft.getInstance().execute(INSTANCE::clear);
     }
 }
