@@ -28,9 +28,10 @@ public class MissileEntity extends ProjectileEntity
     }
 
     @Override
-    protected void onTick()
+    public void tick(World world)
     {
-        if (this.world.isRemote)
+        super.tick(world);
+        if (this.world.isRemote())
         {
             for (int i = 5; i > 0; i--)
             {
@@ -45,19 +46,19 @@ public class MissileEntity extends ProjectileEntity
     }
 
     @Override
-    protected void onHitEntity(Entity entity, double x, double y, double z)
+    public void onHitEntity(World world, float damage, Entity entity, double x, double y, double z)
     {
         createExplosion(this);
     }
 
     @Override
-    protected void onHitBlock(BlockState state, BlockPos pos, double x, double y, double z)
+    public void onHitBlock(World world, float damage, BlockState state, BlockPos pos, double x, double y, double z)
     {
         createExplosion(this);
     }
 
     @Override
-    public void onExpired()
+    public void onExpired(World world)
     {
         createExplosion(this);
     }

@@ -25,19 +25,19 @@ public class GrenadeEntity extends ProjectileEntity
     }
 
     @Override
-    protected void onHitEntity(Entity entity, double x, double y, double z)
+    public void onHitEntity(World world, float damage, Entity entity, double x, double y, double z)
     {
         createExplosion(this, this.getDamage() / 5f);
     }
 
     @Override
-    protected void onHitBlock(BlockState state, BlockPos pos, double x, double y, double z)
+    public void onHitBlock(World world, float damage, BlockState state, BlockPos pos, double x, double y, double z)
     {
         createExplosion(this, this.getDamage() / 5f);
     }
 
     @Override
-    public void onExpired()
+    public void onExpired(World world)
     {
         createExplosion(this, this.getDamage() / 5f);
     }

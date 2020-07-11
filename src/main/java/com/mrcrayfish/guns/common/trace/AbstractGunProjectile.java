@@ -26,9 +26,6 @@ import java.util.function.Predicate;
  */
 public abstract class AbstractGunProjectile implements GunProjectile
 {
-    public static final Predicate<Entity> PROJECTILE_TARGETS = input -> input != null && !input.isSpectator() && input.canBeCollidedWith();
-    public static final Predicate<BlockState> IGNORE_LEAVES = input -> input != null && Config.COMMON.gameplay.ignoreLeaves.get() && input.getBlock() instanceof LeavesBlock;
-
     private int ticksExisted;
     private boolean complete;
     private double lastX;
@@ -52,51 +49,6 @@ public abstract class AbstractGunProjectile implements GunProjectile
     {
         this.setLastPosition(this.getX(), this.getY(), this.getZ());
         this.setTicksExisted(this.getTicksExisted() + 1);
-    }
-
-    @Nullable
-    protected EntityResult findEntityOnPath(World world, float bulletSize, Vec3d startVec, Vec3d endVec)
-    {
-        Entity shooter = world.getEntityByID(this.getShooterId());
-        if (shooter == null)
-            return null;
-
-        Vec3d hitVec = null;
-        Entity hitEntity = null;
-        List<Entity> entities = world.getEntitiesInAABBexcluding(null, new AxisAlignedBB(this.getX() - bulletSize / 2, this.getY() - bulletSize / 2, this.getZ() - bulletSize / 2, this.getX() + bulletSize / 2, this.getY() + bulletSize / 2, this.getZ() + bulletSize / 2).expand(this.getMotionX(), this.getMotionY(), this.getMotionZ()).grow(1.0), PROJECTILE_TARGETS);
-        double closestDistance = Double.MAX_VALUE;
-        for (Entity entity : entities)
-        {
-            if (entity.getEntityId() != this.getShooterId())
-            {
-                AxisAlignedBB boundingBox = entity.getBoundingBox();
-                Optional<Vec3d> hitPos = boundingBox.rayTrace(startVec, endVec);
-                Optional<Vec3d> grownHitPos = boundingBox.grow(Config.COMMON.gameplay.growBoundingBoxAmount.get(), 0, Config.COMMON.gameplay.growBoundingBoxAmount.get()).rayTrace(startVec, endVec);
-                if (!hitPos.isPresent() && grownHitPos.isPresent())
-                {
-                    RayTraceResult raytraceresult = ProjectileEntity.rayTraceBlocks(world, new RayTraceContext(startVec, grownHitPos.get(), RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, shooter), IGNORE_LEAVES);
-                    if (raytraceresult.getType() == RayTraceResult.Type.BLOCK)
-                    {
-                        continue;
-                    }
-                    hitPos = grownHitPos;
-                }
-
-                if (!hitPos.isPresent())
-                {
-                    continue;
-                }
-
-                double distanceToHit = startVec.distanceTo(hitPos.get());
-                if (distanceToHit < closestDistance)
-                {
-                    hitVec = hitPos.get();
-                    hitEntity = entity;
-                    closestDistance = distanceToHit;
-                }
-            }
-        }
-        return hitEntity != null ? new EntityResult(hitEntity, hitVec) : null;
     }
 
     @Override

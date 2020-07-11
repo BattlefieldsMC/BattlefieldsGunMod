@@ -152,6 +152,8 @@ public class Gun implements INBTSerializable<CompoundNBT>
         @Optional
         public boolean gravity;
         @Optional
+        public boolean spawnBulletHole = true;
+        @Optional
         public boolean damageReduceOverLife;
         @Optional
         public boolean damageReduceIfNotZoomed;
@@ -171,6 +173,7 @@ public class Gun implements INBTSerializable<CompoundNBT>
             tag.putDouble("Speed", this.speed);
             tag.putInt("Life", this.life);
             tag.putBoolean("Gravity", this.gravity);
+            tag.putBoolean("SpawnBulletHole", this.spawnBulletHole);
             tag.putBoolean("DamageReduceOverLife", this.damageReduceOverLife);
             tag.putBoolean("DamageReduceIfNotZoomed", this.damageReduceIfNotZoomed);
             tag.putInt("TrailColor", this.trailColor);
@@ -209,6 +212,10 @@ public class Gun implements INBTSerializable<CompoundNBT>
             {
                 this.gravity = tag.getBoolean("Gravity");
             }
+            if(tag.contains("SpawnBulletHole", Constants.NBT.TAG_BYTE))
+            {
+                this.spawnBulletHole = tag.getBoolean("SpawnBulletHole");
+            }
             if(tag.contains("DamageReduceOverLife", Constants.NBT.TAG_BYTE))
             {
                 this.damageReduceOverLife = tag.getBoolean("DamageReduceOverLife");
@@ -237,6 +244,7 @@ public class Gun implements INBTSerializable<CompoundNBT>
             projectile.speed = this.speed;
             projectile.life = this.life;
             projectile.gravity = this.gravity;
+            projectile.spawnBulletHole = this.spawnBulletHole;
             projectile.damageReduceOverLife = this.damageReduceOverLife;
             projectile.damageReduceIfNotZoomed = this.damageReduceIfNotZoomed;
             projectile.trailColor = this.trailColor;

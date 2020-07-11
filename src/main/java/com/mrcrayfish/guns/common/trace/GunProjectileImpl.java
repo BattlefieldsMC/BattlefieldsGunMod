@@ -17,6 +17,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Random;
 
+/**
+ * @author Ocelot
+ */
 public class GunProjectileImpl extends AbstractGunProjectile
 {
     private final Gun modifiedGun;
@@ -51,59 +54,10 @@ public class GunProjectileImpl extends AbstractGunProjectile
     public void tick(World world)
     {
         super.tick(world);
-
-        Entity entity = world.getEntityByID(this.getShooterId());
-
-        if (entity == null)
-        {
-            this.complete();
-            return;
-        }
-
-        Vec3d startVec = new Vec3d(this.getX(), this.getY(), this.getZ());
-        Vec3d endVec = startVec.add(this.getMotionX(), this.getMotionY(), this.getMotionZ());
-        RayTraceResult result = ProjectileEntity.rayTraceBlocks(world, new RayTraceContext(startVec, endVec, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, entity), IGNORE_LEAVES);
-        if (result.getType() != RayTraceResult.Type.MISS)
-        {
-            endVec = result.getHitVec();
-        }
-
-        EntityResult entityResult = this.findEntityOnPath(world, this.modifiedGun.projectile.size, startVec, endVec);
-        if (entityResult != null)
-        {
-            result = new EntityRayTraceResult(entityResult.entity, entityResult.hitVec);
-        }
-
-        if (result instanceof EntityRayTraceResult && ((EntityRayTraceResult) result).getEntity() instanceof PlayerEntity)
-        {
-            PlayerEntity player = (PlayerEntity) ((EntityRayTraceResult) result).getEntity();
-
-            if (world.getEntityByID(this.getShooterId()) instanceof PlayerEntity && !((PlayerEntity) world.getEntityByID(this.getShooterId())).canAttackPlayer(player))
-            {
-                result = null;
-            }
-        }
-
-        if (result != null)
-        {
-            this.onHit(world, this.getDamage(), result);
-        }
-
-        this.setPosition(this.getX() + this.getMotionX(), this.getY() + this.getMotionY(), this.getZ() + this.getMotionZ());
-
-        if (this.modifiedGun.projectile.gravity)
-            this.setMotionY(this.getMotionY() - 0.05);
-
-        if (this.getTicksExisted() >= this.modifiedGun.projectile.life)
-        {
-            if (!this.isComplete())
-            {
-                this.onExpired(world);
-            }
-            this.complete();
-        }
+        this.tickStep(world, this.modifiedGun.projectile.size, this.modifiedGun.projectile.life, this.modifiedGun.projectile.gravity, this.modifiedGun.projectile.spawnBulletHole);
     }
 
+    @Override
     public float getDamage()
     {
         float damage = (this.modifiedGun.projectile.damage + this.getAdditionalDamage()) * this.getDamageModifier();
