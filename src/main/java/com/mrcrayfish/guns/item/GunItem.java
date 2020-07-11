@@ -1,9 +1,9 @@
 package com.mrcrayfish.guns.item;
 
 import com.google.common.annotations.Beta;
+import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.object.Gun;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
@@ -66,7 +66,17 @@ public class GunItem extends ColoredItem
             }
         }
 
-        tooltip.add(new TranslationTextComponent(I18n.format("info.cgm.damage", ItemStack.DECIMALFORMAT.format(modifiedGun.projectile.damage) + additionalDamageText)).setStyle(new Style().setColor(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("info.cgm.damage", ItemStack.DECIMALFORMAT.format(modifiedGun.projectile.damage) + additionalDamageText).setStyle(new Style().setColor(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("info.cgm.fire_rate", modifiedGun.general.rate).setStyle(new Style().setColor(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("info.cgm.reload_speed", modifiedGun.general.reloadSpeed).setStyle(new Style().setColor(TextFormatting.GRAY)));
+        if (modifiedGun.general.spread == 0 || modifiedGun.general.alwaysSpread)
+        {
+            tooltip.add(new TranslationTextComponent("info.cgm.always_spread", ItemStack.DECIMALFORMAT.format(modifiedGun.general.spread)).setStyle(new Style().setColor(TextFormatting.GRAY)));
+        }
+        else
+        {
+            tooltip.add(new TranslationTextComponent("info.cgm.spread", ItemStack.DECIMALFORMAT.format((1.0 / Config.COMMON.projectileSpread.maxCount.get().doubleValue()) * modifiedGun.general.spread)).setStyle(new Style().setColor(TextFormatting.GRAY)));
+        }
 
         if (tagCompound != null)
         {
