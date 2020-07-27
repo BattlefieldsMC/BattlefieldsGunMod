@@ -1,31 +1,24 @@
 package com.mrcrayfish.guns.object;
 
+import com.mrcrayfish.guns.interfaces.IGunModifier;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 /**
  * Author: MrCrayfish
  */
-public class Scope
+public class Scope extends Attachment
 {
     private float additionalZoom;
     private double centerOffset;
     private boolean stable;
     private double viewFinderOffset;
 
-    private Scope(float additionalZoom, double centerOffset)
+    private Scope(float additionalZoom, double centerOffset, IGunModifier ... modifier)
     {
+        super(modifier);
         this.additionalZoom = additionalZoom;
         this.centerOffset = centerOffset;
-    }
-
-    /**
-     * @return
-     */
-    public Scope stabilise()
-    {
-        this.stable = true;
-        return this;
     }
 
     /**
@@ -34,6 +27,7 @@ public class Scope
      * @param offset the view finder offset
      * @return this scope instance
      */
+    @OnlyIn(Dist.CLIENT)
     public Scope viewFinderOffset(double offset)
     {
         this.viewFinderOffset = offset;
@@ -45,6 +39,7 @@ public class Scope
      *
      * @return the scopes additional zoom
      */
+    @OnlyIn(Dist.CLIENT)
     public float getAdditionalZoom()
     {
         return this.additionalZoom;
@@ -62,6 +57,10 @@ public class Scope
         return this.centerOffset;
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isStable()
     {
         return this.stable;
@@ -70,11 +69,11 @@ public class Scope
     @OnlyIn(Dist.CLIENT)
     public double getViewFinderOffset()
     {
-        return viewFinderOffset;
+        return this.viewFinderOffset;
     }
 
-    public static Scope create(float additionalZoom, double centerOffset)
+    public static Scope create(float additionalZoom, double centerOffset, IGunModifier ... modifier)
     {
-        return new Scope(additionalZoom, centerOffset);
+        return new Scope(additionalZoom, centerOffset, modifier);
     }
 }

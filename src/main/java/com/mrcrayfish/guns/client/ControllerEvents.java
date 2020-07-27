@@ -12,12 +12,12 @@ import com.mrcrayfish.guns.client.event.ReloadHandler;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.item.IScope;
-import com.mrcrayfish.guns.item.ScopeItem;
 import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.network.message.MessageAttachments;
 import com.mrcrayfish.guns.network.message.MessageUnload;
 import com.mrcrayfish.guns.object.Gun;
 import com.mrcrayfish.guns.object.Scope;
+import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import com.mrcrayfish.obfuscate.common.data.SyncedPlayerData;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
@@ -126,8 +126,9 @@ public class ControllerEvents
                 event.getActions().put(Buttons.RIGHT_TRIGGER, new Action("Shoot", Action.Side.RIGHT));
 
                 GunItem gunItem = (GunItem) heldItem.getItem();
+                Gun modifiedGun = gunItem.getModifiedGun(heldItem);
                 CompoundNBT tag = heldItem.getTag();
-                if(tag != null && tag.getInt("AmmoCount") < gunItem.getModifiedGun(heldItem).general.maxAmmo)
+                if(tag != null && tag.getInt("AmmoCount") < GunEnchantmentHelper.getAmmoCapacity(heldItem, modifiedGun))
                 {
                     event.getActions().put(Buttons.X, new Action("Reload", Action.Side.LEFT));
                 }
@@ -136,7 +137,7 @@ public class ControllerEvents
                 if(scopeStack.getItem() instanceof IScope && ClientHandler.isAiming())
                 {
                     IScope iscope = (IScope) scopeStack.getItem();
-                    Scope scope = iscope.getScope();
+                    Scope scope = iscope.getProperties();
                     if(scope.isStable())
                     {
                         event.getActions().put(Buttons.RIGHT_THUMB_STICK, new Action("Hold Breath", Action.Side.RIGHT));

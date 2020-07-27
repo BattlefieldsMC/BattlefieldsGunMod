@@ -13,6 +13,8 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 
+import java.util.Arrays;
+
 /**
  * Author: MrCrayfish
  */
@@ -20,7 +22,7 @@ public class AttachmentContainer extends Container
 {
     private ItemStack weapon;
     private IInventory playerInventory;
-    private IInventory weaponInventory = new Inventory(2)
+    private IInventory weaponInventory = new Inventory(IAttachment.Type.values().length)
     {
         @Override
         public void markDirty()
@@ -34,10 +36,15 @@ public class AttachmentContainer extends Container
     public AttachmentContainer(int windowId, PlayerInventory playerInventory, ItemStack stack)
     {
         this(windowId, playerInventory);
-        ItemStack scopeStack = Gun.getAttachment(IAttachment.Type.SCOPE, stack);
-        ItemStack barrelStack = Gun.getAttachment(IAttachment.Type.BARREL, stack);
-        this.weaponInventory.setInventorySlotContents(0, scopeStack);
-        this.weaponInventory.setInventorySlotContents(1, barrelStack);
+        ItemStack[] attachments = new ItemStack[IAttachment.Type.values().length];
+        for(int i = 0; i < attachments.length; i++)
+        {
+            attachments[i] = Gun.getAttachment(IAttachment.Type.values()[i], stack);
+        }
+        for(int i = 0; i < attachments.length; i++)
+        {
+            this.weaponInventory.setInventorySlotContents(i, attachments[i]);
+        }
         this.loaded = true;
     }
 
@@ -47,8 +54,10 @@ public class AttachmentContainer extends Container
         this.weapon = playerInventory.getCurrentItem();
         this.playerInventory = playerInventory;
 
-        this.addSlot(new AttachmentSlot(this, this.weaponInventory, this.weapon, IAttachment.Type.SCOPE, playerInventory.player, 0, 8, 17));
-        this.addSlot(new AttachmentSlot(this, this.weaponInventory, this.weapon, IAttachment.Type.BARREL, playerInventory.player, 1, 8, 35));
+        for(int i = 0; i < IAttachment.Type.values().length; i++)
+        {
+            this.addSlot(new AttachmentSlot(this, this.weaponInventory, this.weapon, IAttachment.Type.values()[i], playerInventory.player, i, 8, 17 + i * 18));
+        }
 
         for(int i = 0; i < 3; i++)
         {
@@ -94,16 +103,13 @@ public class AttachmentContainer extends Container
     {
         CompoundNBT attachments = new CompoundNBT();
 
-        ItemStack scopeStack = this.getSlot(0).getStack();
-        if(scopeStack.getItem() instanceof IAttachment && ((IAttachment) scopeStack.getItem()).getType() == IAttachment.Type.SCOPE)
+        for(int i = 0; i < this.getWeaponInventory().getSizeInventory(); i++)
         {
-            attachments.put(((IAttachment) scopeStack.getItem()).getType().getId(), scopeStack.write(new CompoundNBT()));
-        }
-
-        ItemStack barrelStack = this.getSlot(1).getStack();
-        if(barrelStack.getItem() instanceof IAttachment && ((IAttachment) barrelStack.getItem()).getType() == IAttachment.Type.BARREL)
-        {
-            attachments.put(((IAttachment) barrelStack.getItem()).getType().getId(), barrelStack.write(new CompoundNBT()));
+            ItemStack attachment = this.getSlot(i).getStack();
+            if(attachment.getItem() instanceof IAttachment)
+            {
+                attachments.put(((IAttachment) attachment.getItem()).getType().getTagKey(), attachment.write(new CompoundNBT()));
+            }
         }
 
         this.weapon.getOrCreateTag().put("Attachments", attachments);

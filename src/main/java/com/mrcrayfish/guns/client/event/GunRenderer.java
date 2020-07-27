@@ -19,6 +19,8 @@ import com.mrcrayfish.guns.object.Barrel;
 import com.mrcrayfish.guns.object.GripType;
 import com.mrcrayfish.guns.object.Gun;
 import com.mrcrayfish.guns.object.Scope;
+import com.mrcrayfish.guns.util.GunEnchantmentHelper;
+import com.mrcrayfish.guns.util.GunModifierHelper;
 import com.mrcrayfish.obfuscate.client.event.PlayerModelEvent;
 import com.mrcrayfish.obfuscate.client.event.RenderItemEvent;
 import com.mrcrayfish.obfuscate.common.data.SyncedPlayerData;
@@ -75,8 +77,8 @@ public class GunRenderer
     private double muzzleFlashSize;
     private float muzzleFlashRoll;
     private int muzzleFlashYaw;
-    private int zoomProgress;
-    private int lastZoomProgress;
+    private double zoomProgress;
+    private double lastZoomProgress;
     public double normalZoomProgress;
     public double recoilNormal;
     public double recoilAngle;
@@ -109,7 +111,7 @@ public class GunRenderer
                         {
                             newFov -= scope.getAdditionalZoom();
                         }
-                        event.setNewfov(newFov + (1.0F - newFov) * (1.0F - (zoomProgress / (float) ZOOM_TICKS)));
+                        event.setNewfov(newFov + (1.0F - newFov) * (1.0F - ((float) zoomProgress / (float) ZOOM_TICKS)));
                     }
                 }
             }
@@ -129,18 +131,37 @@ public class GunRenderer
         }
 
         PlayerEntity player = Minecraft.getInstance().player;
+        if (player == null)
+        {
+            return;
+        }
+
         if (isZooming(player) && !SyncedPlayerData.instance().get(player, ModSyncedDataKeys.RELOADING))
         {
             if (this.zoomProgress < ZOOM_TICKS)
             {
-                this.zoomProgress++;
+                ItemStack weapon = player.getHeldItem(Hand.MAIN_HAND);
+                double speed = GunEnchantmentHelper.getAimDownSightSpeed(weapon);
+                speed = GunModifierHelper.getModifiedAimDownSightSpeed(weapon, speed);
+                this.zoomProgress += speed;
+                if (this.zoomProgress > ZOOM_TICKS)
+                {
+                    this.zoomProgress = (int) ZOOM_TICKS;
+                }
             }
         }
         else
         {
             if (this.zoomProgress > 0)
             {
-                this.zoomProgress--;
+                ItemStack weapon = player.getHeldItem(Hand.MAIN_HAND);
+                double speed = GunEnchantmentHelper.getAimDownSightSpeed(weapon);
+                speed = GunModifierHelper.getModifiedAimDownSightSpeed(weapon, speed);
+                this.zoomProgress -= speed;
+                if (this.zoomProgress < 0)
+                {
+                    this.zoomProgress = 0;
+                }
             }
         }
     }
@@ -330,7 +351,7 @@ public class GunRenderer
         matrixStack.translate(0.56, -0.52, -0.72);
 
         /* Applies recoil and reload rotations */
-        this.applyRecoil(matrixStack, heldItem.getItem(), modifiedGun);
+        this.applyRecoil(matrixStack, heldItem, modifiedGun);
         this.applyReload(matrixStack, event.getPartialTicks());
 
         /* Render offhand arm so it is holding the weapon. Only applies if it's a two handed weapon */
@@ -353,10 +374,10 @@ public class GunRenderer
         matrixStack.rotate(Vector3f.XP.rotationDegrees(45F * reloadProgress));
     }
 
-    private void applyRecoil(MatrixStack matrixStack, Item item, Gun gun)
+    private void applyRecoil(MatrixStack matrixStack, ItemStack item, Gun gun)
     {
         CooldownTracker tracker = Minecraft.getInstance().player.getCooldownTracker();
-        float cooldown = tracker.getCooldown(item, Minecraft.getInstance().getRenderPartialTicks());
+        float cooldown = tracker.getCooldown(item.getItem(), Minecraft.getInstance().getRenderPartialTicks());
         cooldown = cooldown >= gun.general.recoilDurationOffset ? (cooldown - gun.general.recoilDurationOffset) / (1.0F - gun.general.recoilDurationOffset) : 0.0F;
 
         if (cooldown >= 0.8)
@@ -372,9 +393,13 @@ public class GunRenderer
 
         this.recoilAngle = gun.general.recoilAngle;
 
-        matrixStack.translate(0, 0, gun.general.recoilKick * 0.0625 * this.recoilNormal * (float) (1.0 - (gun.general.recoilAdsReduction * this.normalZoomProgress)));
+        float kickReduction = 1.0F - GunModifierHelper.getKickReduction(item);
+        float recoilReduction = 1.0F - GunModifierHelper.getRecoilModifier(item);
+        double kick = gun.general.recoilKick * 0.0625 * this.recoilNormal * (float) (1.0 - (gun.general.recoilAdsReduction * this.normalZoomProgress));
+        float recoil = (float) (gun.general.recoilAngle * this.recoilNormal) * (float) (1.0 - (gun.general.recoilAdsReduction * this.normalZoomProgress));
+        matrixStack.translate(0, 0, kick * kickReduction);
         matrixStack.translate(0, 0, 0.35);
-        matrixStack.rotate(Vector3f.XP.rotationDegrees((float) (gun.general.recoilAngle * this.recoilNormal) * (float) (1.0 - (gun.general.recoilAdsReduction * this.normalZoomProgress))));
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(recoil * recoilReduction));
         matrixStack.translate(0, 0, -0.35);
     }
 
@@ -714,10 +739,9 @@ public class GunRenderer
             CompoundNBT attachments = stack.getChildTag("Attachments");
             if (attachments == null)
                 return;
-
-            for (String attachmentKey : attachments.keySet())
+            for (String tagKey : attachments.keySet())
             {
-                IAttachment.Type type = IAttachment.Type.getType(attachmentKey);
+                IAttachment.Type type = IAttachment.Type.byTagKey(tagKey);
                 if (gun.canAttachType(type))
                 {
                     ItemStack attachmentStack = Gun.getAttachment(type, stack);
@@ -778,7 +802,7 @@ public class GunRenderer
             ItemStack barrelStack = Gun.getAttachment(IAttachment.Type.BARREL, weapon);
             if (!barrelStack.isEmpty() && barrelStack.getItem() instanceof IBarrel)
             {
-                Barrel barrel = ((IBarrel) barrelStack.getItem()).getBarrel();
+                Barrel barrel = ((IBarrel) barrelStack.getItem()).getProperties();
                 Gun.ScaledPositioned positioned = modifiedGun.getAttachmentPosition(IAttachment.Type.BARREL);
                 if (positioned != null)
                 {
@@ -798,6 +822,7 @@ public class GunRenderer
 
                 double partialSize = modifiedGun.display.flash.size / 5.0;
                 double size = modifiedGun.display.flash.size - partialSize + partialSize * this.muzzleFlashSize;
+                size = GunModifierHelper.getMuzzleFlashSize(weapon, size);
                 RenderSystem.rotatef(360F * this.muzzleFlashRoll, 0, 0, 1);
                 RenderSystem.rotatef(180F * this.muzzleFlashYaw, 1, 0, 0);
                 RenderSystem.translated(-size / 2, -size / 2, 0);
@@ -828,7 +853,8 @@ public class GunRenderer
         dest.rotateAngleZ = source.rotateAngleZ;
     }
 
-    private void renderHeldArm(MatrixStack matrixStack, IRenderTypeBuffer buffer, int light, ClientPlayerEntity player, ItemStack stack, HandSide hand, float partialTicks)
+    private void renderHeldArm(MatrixStack matrixStack, IRenderTypeBuffer buffer, int light, ClientPlayerEntity
+            player, ItemStack stack, HandSide hand, float partialTicks)
     {
         matrixStack.push();
 
@@ -879,7 +905,8 @@ public class GunRenderer
         matrixStack.pop();
     }
 
-    private void renderReloadArm(MatrixStack matrixStack, IRenderTypeBuffer buffer, int light, ItemStack stack, HandSide hand)
+    private void renderReloadArm(MatrixStack matrixStack, IRenderTypeBuffer buffer, int light, ItemStack
+            stack, HandSide hand)
     {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.player.ticksExisted < startReloadTick || reloadTimer != 5)
@@ -896,7 +923,8 @@ public class GunRenderer
 
         matrixStack.push();
 
-        float reload = ((mc.player.ticksExisted - this.startReloadTick + mc.getRenderPartialTicks()) % 10F) / 10F;
+        float interval = GunEnchantmentHelper.getReloadInterval(stack);
+        float reload = ((mc.player.ticksExisted - this.startReloadTick + mc.getRenderPartialTicks()) % interval) / interval;
         float percent = 1.0F - reload;
         if (percent >= 0.5F)
         {
@@ -930,7 +958,8 @@ public class GunRenderer
         matrixStack.pop();
     }
 
-    private void renderArm(ClientPlayerEntity player, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, HandSide hand)
+    private void renderArm(ClientPlayerEntity player, MatrixStack matrixStack, IRenderTypeBuffer buffer,
+                           int combinedLight, HandSide hand)
     {
         Minecraft mc = Minecraft.getInstance();
         EntityRendererManager renderManager = mc.getRenderManager();

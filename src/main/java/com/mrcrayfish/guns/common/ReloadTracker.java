@@ -1,10 +1,14 @@
 package com.mrcrayfish.guns.common;
 
 import com.mrcrayfish.guns.Reference;
+import com.mrcrayfish.guns.init.ModEnchantments;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.object.Gun;
+import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import com.mrcrayfish.obfuscate.common.data.SyncedPlayerData;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -47,7 +51,7 @@ public class ReloadTracker
 
     private boolean isWeaponFull()
     {
-        return this.stack.getOrCreateTag().getInt("AmmoCount") >= this.gun.general.maxAmmo;
+        return this.stack.getTag() != null && this.stack.getTag().getInt("AmmoCount") >= GunEnchantmentHelper.getAmmoCapacity(this.stack, this.gun);
     }
 
     private boolean hasNoAmmo(PlayerEntity player)
@@ -58,7 +62,8 @@ public class ReloadTracker
     private boolean canReload(PlayerEntity player)
     {
         int deltaTicks = player.ticksExisted - this.startTick;
-        return deltaTicks > 0 && deltaTicks % 10 == 0;
+        int interval = GunEnchantmentHelper.getReloadInterval(this.stack);
+        return deltaTicks > 0 && deltaTicks % interval == 0;
     }
 
     private void increaseAmmo(PlayerEntity player)
@@ -70,7 +75,8 @@ public class ReloadTracker
             CompoundNBT tag = this.stack.getTag();
             if(tag != null)
             {
-                amount = Math.min(amount, this.gun.general.maxAmmo - tag.getInt("AmmoCount"));
+                int maxAmmo = GunEnchantmentHelper.getAmmoCapacity(this.stack, this.gun);
+                amount = Math.min(amount, maxAmmo - tag.getInt("AmmoCount"));
                 tag.putInt("AmmoCount", tag.getInt("AmmoCount") + amount);
             }
             ammo.shrink(amount);

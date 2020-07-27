@@ -135,7 +135,7 @@ public class Config
                 this.enableGunGriefing = builder.comment("If enable, allows guns to shoot out glass and remove blocks on explosions").define("enableGunGriefing", true);
                 this.growBoundingBoxAmount = builder.comment("The extra amount to expand an entity's bounding box when checking for projectile collision. Setting this value higher will make it easier to hit players").defineInRange("growBoundingBoxAmount", 0.3, 0.0, 1.0);
                 this.enableHeadShots = builder.comment("Enables the check for head shots for players. Projectiles that hit the head of a player will have increased damage.").define("enableHeadShots", true);
-                this.headShotDamageMultiplier = builder.comment("The value to multiply the damage by if projectile hit the players head").defineInRange("headShotDamageMultiplier", 1.0, 1.0, Double.MAX_VALUE);
+                this.headShotDamageMultiplier = builder.comment("The value to multiply the damage by if projectile hit the players head").defineInRange("headShotDamageMultiplier", 1.25, 1.0, Double.MAX_VALUE);
                 this.ignoreLeaves = builder.comment("If true, projectiles will ignore leaves when checking for collision").define("ignoreLeaves", true);
                 this.enableKnockback = builder.comment("If true, projectiles will cause knockback when an entity is hit. By default this is set to true to match the behaviour of Minecraft.").define("enableKnockback", true);
                 this.improvedHitboxes = builder.comment("If true, improves the accuracy of weapons by considering the ping of the player. This has no affect on singleplayer. This will add a little overhead if enabled.").define("improvedHitboxes", false);
@@ -168,8 +168,7 @@ public class Config
     {
         public final ForgeConfigSpec.BooleanValue enabled;
         public final ForgeConfigSpec.BooleanValue angerHostileMobs;
-        public final ForgeConfigSpec.DoubleValue rangeSilenced;
-        public final ForgeConfigSpec.DoubleValue rangeUnsilenced;
+        public final ForgeConfigSpec.DoubleValue range;
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> exemptEntities;
 
         public AggroMobs(ForgeConfigSpec.Builder builder)
@@ -178,8 +177,7 @@ public class Config
             {
                 this.enabled = builder.comment("If true, nearby mobs are angered and/or scared by the firing of guns.").define("enabled", true);
                 this.angerHostileMobs = builder.comment("If true, in addition to causing peaceful mobs to panic, firing a gun will also cause nearby hostile mobs to target the shooter.").define("angerHostileMobs", true);
-                this.rangeSilenced = builder.comment("Any mobs within a sphere of this radius will aggro on the shooter of a silenced gun.").defineInRange("silencedRange", 5.0, 0.0, Double.MAX_VALUE);
-                this.rangeUnsilenced = builder.comment("Any mobs within a sphere of this radius will aggro on the shooter of an unsilenced gun.").defineInRange("unsilencedRange", 20.0, 0.0, Double.MAX_VALUE);
+                this.range = builder.comment("Any mobs within a sphere of this radius will aggro on the shooter of an unsilenced gun.").defineInRange("unsilencedRange", 20.0, 0.0, Double.MAX_VALUE);
                 this.exemptEntities = builder.comment("Any mobs of defined will not aggro on shooters").defineList("exemptClasses", Collections.singletonList("minecraft:villager"), o -> true);
             }
             builder.pop();
@@ -356,7 +354,7 @@ public class Config
                 }
                 builder.pop();
 
-                this.enableCameraRecoil = builder.comment("If true, enables camera recoil when firing a weapon").define("enableCameraRecoil", false);
+                this.enableCameraRecoil = builder.comment("If true, enables camera recoil when firing a weapon").define("enableCameraRecoil", true);
             }
             builder.pop();
         }

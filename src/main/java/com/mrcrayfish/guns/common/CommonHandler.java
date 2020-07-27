@@ -10,19 +10,20 @@ import com.mrcrayfish.guns.common.trace.GunTracer;
 import com.mrcrayfish.guns.crafting.WorkbenchRecipe;
 import com.mrcrayfish.guns.crafting.WorkbenchRecipes;
 import com.mrcrayfish.guns.hook.GunFireEvent;
-import com.mrcrayfish.guns.init.ModItems;
+import com.mrcrayfish.guns.init.ModEnchantments;
 import com.mrcrayfish.guns.init.ModSyncedDataKeys;
-import com.mrcrayfish.guns.item.ColoredItem;
 import com.mrcrayfish.guns.item.GunItem;
-import com.mrcrayfish.guns.item.IAttachment;
+import com.mrcrayfish.guns.item.IColored;
 import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.network.message.MessageBullet;
 import com.mrcrayfish.guns.network.message.MessageGunSound;
 import com.mrcrayfish.guns.network.message.MessageShoot;
 import com.mrcrayfish.guns.object.Gun;
 import com.mrcrayfish.guns.tileentity.WorkbenchTileEntity;
+import com.mrcrayfish.guns.util.GunModifierHelper;
 import com.mrcrayfish.guns.util.InventoryUtil;
 import com.mrcrayfish.obfuscate.common.data.SyncedPlayerData;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -36,6 +37,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -99,7 +101,7 @@ public class CommonHandler
                     GunMod.LOGGER.warn(player.getName().getUnformattedComponentText() + "(" + player.getUniqueID() + ") tried to fire before cooldown finished or server is lagging? Remaining milliseconds: " + tracker.getRemaining(item));
                     return;
                 }
-                tracker.putCooldown(item, modifiedGun);
+                tracker.putCooldown(heldItem, item, modifiedGun);
 
                 if (SyncedPlayerData.instance().get(player, ModSyncedDataKeys.RELOADING))
                 {
@@ -111,21 +113,18 @@ public class CommonHandler
                     SpreadTracker.get(player.getUniqueID()).update(item);
                 }
 
-                boolean silenced = Gun.getAttachment(IAttachment.Type.BARREL, heldItem).getItem() == ModItems.SILENCER.get();
+                boolean silenced = GunModifierHelper.isSilencedFire(heldItem);
 
                 for (int i = 0; i < modifiedGun.general.projectileAmount; i++)
                 {
                     ((ServerWorld) world).getServer().execute(() ->
                     {
                         ProjectileFactory<?> factory = ProjectileManager.getInstance().getFactory(modifiedGun.projectile.item);
-                        GunProjectile bullet = factory.create(world, player, item, modifiedGun);
+                        GunProjectile bullet = factory.create(world, player, heldItem, item, modifiedGun);
                         bullet.setWeapon(heldItem);
                         bullet.setAdditionalDamage(Gun.getAdditionalDamage(heldItem));
                         bullet.setShooter(player.getUniqueID());
                         bullet.setShooterId(player.getEntityId());
-
-                        if (silenced)
-                            bullet.setDamageModifier(0.75F);
 
                         if (bullet instanceof Entity)
                         {
@@ -148,22 +147,15 @@ public class CommonHandler
 
                 if (Config.COMMON.aggroMobs.enabled.get())
                 {
-                    double radius = silenced ? Config.COMMON.aggroMobs.rangeSilenced.get() : Config.COMMON.aggroMobs.rangeUnsilenced.get();
+                    double radius = GunModifierHelper.getModifiedFireSoundRadius(heldItem, Config.COMMON.aggroMobs.range.get());
                     double x = player.getPosX();
                     double y = player.getPosY() + 0.5;
                     double z = player.getPosZ();
                     AxisAlignedBB box = new AxisAlignedBB(x - radius, y - radius, z - radius, x + radius, y + radius, z + radius);
                     radius *= radius;
-                    double dx, dy, dz;
                     for (LivingEntity entity : world.getEntitiesWithinAABB(LivingEntity.class, box, NOT_AGGRO_EXEMPT))
                     {
-                        dx = x - entity.getPosX();
-                        dy = y - entity.getPosY();
-                        dz = z - entity.getPosZ();
-                        if (dx * dx + dy * dy + dz * dz <= radius)
-                        {
-                            entity.setRevengeTarget(Config.COMMON.aggroMobs.angerHostileMobs.get() ? player : entity);
-                        }
+                        entity.setRevengeTarget(Config.COMMON.aggroMobs.angerHostileMobs.get() ? player : entity);
                     }
                 }
 
@@ -174,10 +166,11 @@ public class CommonHandler
                     double posX = player.prevPosX;
                     double posY = player.prevPosY + player.getEyeHeight();
                     double posZ = player.prevPosZ;
-                    float volume = silenced ? 0.75F : 1.0F;
+                    float volume = GunModifierHelper.getFireSoundVolume(heldItem);
                     float pitch = 0.8F + world.rand.nextFloat() * 0.2F;
+                    double radius = GunModifierHelper.getModifiedFireSoundRadius(heldItem, Config.SERVER.gunShotMaxDistance.get());
                     MessageGunSound messageSound = new MessageGunSound(event, SoundCategory.PLAYERS, (float) posX, (float) posY, (float) posZ, volume, pitch, false);
-                    PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player, player.getPosX(), player.getPosY() + player.getEyeHeight(), player.getPosZ(), Config.SERVER.gunShotMaxDistance.get(), player.world.getDimension().getType())), messageSound);
+                    PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player, player.getPosX(), player.getPosY() + player.getEyeHeight(), player.getPosZ(), radius, player.world.getDimension().getType())), messageSound);
                     PacketHandler.getPlayChannel().send(PacketDistributor.PLAYER.with(() -> player), new MessageGunSound(event, SoundCategory.PLAYERS, (float) posX, (float) posY, (float) posZ, volume, pitch, true));
                 }
 
@@ -186,7 +179,11 @@ public class CommonHandler
                     CompoundNBT tag = heldItem.getOrCreateTag();
                     if (!tag.getBoolean("IgnoreAmmo"))
                     {
-                        tag.putInt("AmmoCount", Math.max(0, tag.getInt("AmmoCount") - 1));
+                        int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.RECLAIMED.get(), heldItem);
+                        if (level == 0 || player.world.rand.nextInt(4 - MathHelper.clamp(level, 1, 2)) != 0)
+                        {
+                            tag.putInt("AmmoCount", Math.max(0, tag.getInt("AmmoCount") - 1));
+                        }
                     }
                 }
             }
@@ -249,9 +246,9 @@ public class CommonHandler
                     }
 
                     ItemStack stack = recipe.getItem();
-                    if (stack.getItem() instanceof ColoredItem)
+                    if (stack.getItem() instanceof IColored)
                     {
-                        ColoredItem colored = (ColoredItem) stack.getItem();
+                        IColored colored = (IColored) stack.getItem();
                         colored.setColor(stack, color);
                     }
                     world.addEntity(new ItemEntity(world, pos.getX() + 0.5, pos.getY() + 1.125, pos.getZ() + 0.5, stack));

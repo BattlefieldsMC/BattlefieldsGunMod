@@ -6,13 +6,12 @@
         "maxAmmo": 60,
         "reloadSpeed": 10,
         "recoilKick": 0.25,
-        "recoilAngle": 3.0,
-        "recoilAdsReduction": 0.85
+        "recoilAngle": 3.0
     },
     "projectile": {
         "item": "cgm:basic_bullet",
         "visible": false,
-        "damage": 7.0,
+        "damage": 5.0,
         "size": 0.2,
         "speed": 30.0,
         "life": 10
@@ -44,6 +43,14 @@
                 "yOffset": 3.6,
                 "zOffset": -5.9,
                 "scale": 0.5
+            },
+            "stock": {
+                "yOffset": 3.6,
+                "zOffset": 8.2
+            },
+            "underBarrel": {
+                "yOffset": 2.8,
+                "zOffset": -1.0
             }
         }
     }

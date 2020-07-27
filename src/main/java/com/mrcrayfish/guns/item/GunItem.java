@@ -3,8 +3,11 @@ package com.mrcrayfish.guns.item;
 import com.google.common.annotations.Beta;
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.Reference;
+import com.mrcrayfish.guns.enchantment.EnchantmentTypes;
 import com.mrcrayfish.guns.object.Gun;
+import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -20,7 +23,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 @Beta
-public class GunItem extends ColoredItem
+public class GunItem extends Item implements IColored
 {
     private Gun gun = new Gun();
 
@@ -121,7 +124,7 @@ public class GunItem extends ColoredItem
     {
         CompoundNBT tagCompound = stack.getTag();
         Gun modifiedGun = this.getModifiedGun(stack);
-        return tagCompound == null || (!tagCompound.getBoolean("IgnoreAmmo") && tagCompound.getInt("AmmoCount") != modifiedGun.general.maxAmmo);
+        return tagCompound == null || (!tagCompound.getBoolean("IgnoreAmmo") && tagCompound.getInt("AmmoCount") != GunEnchantmentHelper.getAmmoCapacity(stack, modifiedGun));
     }
 
     @Override
@@ -129,7 +132,7 @@ public class GunItem extends ColoredItem
     {
         CompoundNBT tagCompound = stack.getTag();
         Gun modifiedGun = this.getModifiedGun(stack);
-        return tagCompound == null ? 0.0 : 1.0 - (tagCompound.getInt("AmmoCount") / (double) modifiedGun.general.maxAmmo);
+        return tagCompound == null ? 0.0 : 1.0 - (tagCompound.getInt("AmmoCount") / (double) GunEnchantmentHelper.getAmmoCapacity(stack, modifiedGun));
     }
 
     @Override
@@ -155,5 +158,16 @@ public class GunItem extends ColoredItem
             }
         }
         return this.gun;
+    }
+
+    @Override
+    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment)
+    {
+        if (enchantment.type == EnchantmentTypes.SEMI_AUTO_GUN)
+        {
+            Gun modifiedGun = this.getModifiedGun(stack);
+            return !modifiedGun.general.auto;
+        }
+        return super.canApplyAtEnchantingTable(stack, enchantment);
     }
 }

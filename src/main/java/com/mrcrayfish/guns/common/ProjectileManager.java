@@ -7,6 +7,7 @@ import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.object.Gun;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
@@ -34,7 +35,7 @@ public class ProjectileManager
     private final ProjectileFactory<GunProjectileImpl> DEFAULT_FACTORY = new ProjectileFactory<GunProjectileImpl>()
     {
         @Override
-        public GunProjectileImpl create(World world, LivingEntity entity, GunItem item, Gun modifiedGun)
+        public GunProjectileImpl create(World world, LivingEntity entity, ItemStack weapon, GunItem item, Gun modifiedGun)
         {
             return new GunProjectileImpl(entity, item, modifiedGun);
         }
@@ -52,6 +53,7 @@ public class ProjectileManager
         }
     };
     private final Map<ResourceLocation, ProjectileFactory<?>> projectileFactoryMap = new HashMap<>();
+
 
     public void registerFactory(Item ammo, ProjectileFactory<? extends GunProjectile> factory)
     {

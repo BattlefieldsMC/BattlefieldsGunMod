@@ -1,7 +1,6 @@
 package com.mrcrayfish.guns.item;
 
 import net.minecraft.item.DyeItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.util.Constants;
 
@@ -10,43 +9,38 @@ import java.util.List;
 /**
  * Author: MrCrayfish
  */
-public class ColoredItem extends Item
+public interface IColored
 {
-    public ColoredItem(Item.Properties properties)
-    {
-        super(properties);
-    }
-
-    public boolean hasColor(ItemStack stack)
+    default boolean hasColor(ItemStack stack)
     {
         return stack.getTag() != null && stack.getTag().contains("Color", Constants.NBT.TAG_INT);
     }
 
-    public int getColor(ItemStack stack)
+    default int getColor(ItemStack stack)
     {
         return stack.getTag() != null ? stack.getTag().getInt("Color") : -1;
     }
 
-    public void setColor(ItemStack stack, int color)
+    default void setColor(ItemStack stack, int color)
     {
         stack.getOrCreateTag().putInt("Color", color);
     }
 
-    public void removeColor(ItemStack stack)
+    default void removeColor(ItemStack stack)
     {
         stack.getOrCreateTag().remove("Color");
     }
 
-    public static ItemStack dye(ItemStack stack, List<DyeItem> dyes)
+    static ItemStack dye(ItemStack stack, List<DyeItem> dyes)
     {
         ItemStack resultStack = ItemStack.EMPTY;
         int[] combinedColors = new int[3];
         int maxColor = 0;
         int colorCount = 0;
-        ColoredItem coloredItem = null;
-        if (stack.getItem() instanceof ColoredItem)
+        IColored coloredItem = null;
+        if(stack.getItem() instanceof IColored)
         {
-            coloredItem = (ColoredItem) stack.getItem();
+            coloredItem = (IColored) stack.getItem();
             resultStack = stack.copy();
             resultStack.setCount(1);
             if (coloredItem.hasColor(stack))

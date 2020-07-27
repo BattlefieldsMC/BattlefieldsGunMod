@@ -22,8 +22,8 @@ import com.mrcrayfish.guns.client.screen.WorkbenchScreen;
 import com.mrcrayfish.guns.client.settings.GunOptions;
 import com.mrcrayfish.guns.common.trace.GunTracer;
 import com.mrcrayfish.guns.init.*;
-import com.mrcrayfish.guns.item.ColoredItem;
 import com.mrcrayfish.guns.item.GunItem;
+import com.mrcrayfish.guns.item.IColored;
 import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.network.message.*;
 import com.mrcrayfish.guns.object.Bullet;
@@ -138,7 +138,7 @@ public class ClientHandler
         };
         ForgeRegistries.ITEMS.forEach(item ->
         {
-            if (item instanceof ColoredItem)
+            if (item instanceof IColored)
             {
                 Minecraft.getInstance().getItemColors().register(color, item);
             }

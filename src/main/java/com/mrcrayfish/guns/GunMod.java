@@ -5,6 +5,11 @@ import com.mrcrayfish.guns.client.CustomGunManager;
 import com.mrcrayfish.guns.client.settings.GunOptions;
 import com.mrcrayfish.guns.common.*;
 import com.mrcrayfish.guns.common.trace.GunProjectile;
+import com.mrcrayfish.guns.common.BoundingBoxManager;
+import com.mrcrayfish.guns.common.CustomGunLoader;
+import com.mrcrayfish.guns.common.NetworkGunManager;
+import com.mrcrayfish.guns.common.ProjectileManager;
+import com.mrcrayfish.guns.enchantment.EnchantmentTypes;
 import com.mrcrayfish.guns.entity.GrenadeEntity;
 import com.mrcrayfish.guns.entity.MissileEntity;
 import com.mrcrayfish.guns.init.*;
@@ -13,6 +18,7 @@ import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.object.Gun;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
@@ -59,7 +65,7 @@ public class GunMod
             super.fill(items);
             CustomGunManager.fill(items);
         }
-    };
+    }.setRelevantEnchantmentTypes(EnchantmentTypes.GUN, EnchantmentTypes.SEMI_AUTO_GUN);
 
     @OnlyIn(Dist.CLIENT)
     private static GunOptions options;
@@ -77,6 +83,7 @@ public class GunMod
         ModBlocks.REGISTER.register(bus);
         ModContainers.REGISTER.register(bus);
         ModEffects.REGISTER.register(bus);
+        ModEnchantments.REGISTER.register(bus);
         ModEntities.REGISTER.register(bus);
         ModItems.REGISTER.register(bus);
         ModParticleTypes.REGISTER.register(bus);
@@ -95,9 +102,9 @@ public class GunMod
         ProjectileManager.getInstance().registerFactory(ModItems.GRENADE.get(), new ProjectileFactory<GunProjectile>()
         {
             @Override
-            public GunProjectile create(World world, LivingEntity entity, GunItem item, Gun modifiedGun)
+            public GunProjectile create(World world, LivingEntity entity, ItemStack weapon, GunItem item, Gun modifiedGun)
             {
-                return new GrenadeEntity(ModEntities.GRENADE.get(), world, entity, item, modifiedGun);
+                return new GrenadeEntity(ModEntities.GRENADE.get(), world, entity, weapon, item, modifiedGun);
             }
 
             @Override
@@ -114,9 +121,9 @@ public class GunMod
         ProjectileManager.getInstance().registerFactory(ModItems.MISSILE.get(), new ProjectileFactory<GunProjectile>()
         {
             @Override
-            public GunProjectile create(World world, LivingEntity entity, GunItem item, Gun modifiedGun)
+            public GunProjectile create(World world, LivingEntity entity, ItemStack weapon, GunItem item, Gun modifiedGun)
             {
-                return new MissileEntity(ModEntities.MISSILE.get(), world, entity, item, modifiedGun);
+                return new MissileEntity(ModEntities.MISSILE.get(), world, entity, weapon, item, modifiedGun);
             }
 
             @Override
@@ -131,11 +138,12 @@ public class GunMod
                 return null;
             }
         });
+
         PacketHandler.init();
 
         if (Config.COMMON.gameplay.improvedHitboxes.get())
         {
-            MinecraftForge.EVENT_BUS.register(new BoundingBoxTracker());
+            MinecraftForge.EVENT_BUS.register(new BoundingBoxManager());
         }
     }
 

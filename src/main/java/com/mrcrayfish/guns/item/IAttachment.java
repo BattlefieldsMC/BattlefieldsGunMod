@@ -1,6 +1,7 @@
 package com.mrcrayfish.guns.item;
 
 import com.google.common.annotations.Beta;
+import com.mrcrayfish.guns.object.Attachment;
 
 import javax.annotation.Nullable;
 
@@ -8,32 +9,47 @@ import javax.annotation.Nullable;
  * Author: MrCrayfish
  */
 @Beta
-public interface IAttachment
+public interface IAttachment<T extends Attachment>
 {
     Type getType();
 
+    /**
+     * @return The additional properties about this attachment
+     */
+    T getProperties();
+
     enum Type
     {
-        SCOPE("Scope"), BARREL("Barrel");
+        SCOPE("scope", "Scope"),
+        BARREL("barrel", "Barrel"),
+        STOCK("stock", "Stock"),
+        UNDER_BARREL("under_barrel", "Under_Barrel");
 
-        private String id;
+        private String translationKey;
+        private String tagKey;
 
-        Type(String id)
+        Type(String translationKey, String tagKey)
         {
-            this.id = id;
+            this.translationKey = translationKey;
+            this.tagKey = tagKey;
         }
 
-        public String getId()
+        public String getTranslationKey()
         {
-            return this.id;
+            return this.translationKey;
+        }
+
+        public String getTagKey()
+        {
+            return this.tagKey;
         }
 
         @Nullable
-        public static Type getType(String s)
+        public static Type byTagKey(String s)
         {
             for(Type type : values())
             {
-                if(type.id.equalsIgnoreCase(s))
+                if(type.tagKey.equalsIgnoreCase(s))
                 {
                     return type;
                 }

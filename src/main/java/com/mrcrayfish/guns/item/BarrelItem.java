@@ -1,13 +1,12 @@
 package com.mrcrayfish.guns.item;
 
 import com.mrcrayfish.guns.object.Barrel;
-import com.mrcrayfish.guns.object.Scope;
 import net.minecraft.item.Item;
 
 /**
  * Author: MrCrayfish
  */
-public class BarrelItem extends ColoredItem implements IBarrel
+public class BarrelItem extends Item implements IBarrel, IColored
 {
     private final Barrel barrel;
 
@@ -18,7 +17,7 @@ public class BarrelItem extends ColoredItem implements IBarrel
     }
 
     @Override
-    public Barrel getBarrel()
+    public Barrel getProperties()
     {
         return this.barrel;
     }
