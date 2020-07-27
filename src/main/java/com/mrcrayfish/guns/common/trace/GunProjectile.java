@@ -181,6 +181,18 @@ public interface GunProjectile
 
             this.onHitBlock(world, damage, state, pos, result.getHitVec().x, result.getHitVec().y, result.getHitVec().z);
 
+            int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.FIRE_STARTER.get(), this.getWeapon());
+            if(level > 0 && state.isSolidSide(world, pos, blockRayTraceResult.getFace()))
+            {
+                BlockPos offsetPos = pos.offset(blockRayTraceResult.getFace());
+                BlockState offsetState = world.getBlockState(offsetPos);
+                if(offsetState.isAir(world, offsetPos))
+                {
+                    BlockState fireState = ((FireBlock) Blocks.FIRE).getStateForPlacement(world, offsetPos);
+                    world.setBlockState(offsetPos, fireState, 11);
+                }
+            }
+
             return;
         }
 
