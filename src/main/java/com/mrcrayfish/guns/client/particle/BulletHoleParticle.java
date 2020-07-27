@@ -114,9 +114,9 @@ public class BulletHoleParticle extends SpriteTexturedParticle
     {
         super.tick();
         if (this.world.getBlockState(this.pos).isAir(this.world, this.pos))
-        {
-            this.setExpired();
-        }
+    {
+        this.setExpired();
+    }
     }
 
     @Override
