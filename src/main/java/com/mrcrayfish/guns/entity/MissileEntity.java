@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SExplosionPacket;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -51,7 +52,7 @@ public class MissileEntity extends ProjectileEntity
     }
 
     @Override
-    public void onHitEntity(World world, float damage, Entity entity, double x, double y, double z)
+    public void onHitEntity(World world, float damage, Entity entity, double x, double y, double z, Vec3d startVec, Vec3d endVec)
     {
         createExplosion(this);
     }

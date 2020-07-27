@@ -22,7 +22,7 @@ import java.util.UUID;
 public class BoundingBoxManager
 {
     private static Map<EntityType<?>, IHeadshotBox<?>> headshotBoxes = new HashMap<>();
-    private static Map<UUID, LinkedList<AxisAlignedBB>> playerBoxes = new HashMap<>();
+//    private static Map<UUID, LinkedList<AxisAlignedBB>> playerBoxes = new HashMap<>();
 
     static
     {
@@ -72,39 +72,39 @@ public class BoundingBoxManager
         return (IHeadshotBox<T>) headshotBoxes.get(type);
     }
 
-    @SubscribeEvent(receiveCanceled = true)
-    public void onPlayerTick(TickEvent.PlayerTickEvent event)
-    {
-        if(event.side == LogicalSide.SERVER && event.phase == TickEvent.Phase.END)
-        {
-            if(event.player.isSpectator())
-            {
-                playerBoxes.remove(event.player.getUniqueID());
-                return;
-            }
-            LinkedList<AxisAlignedBB> boxes = playerBoxes.computeIfAbsent(event.player.getUniqueID(), uuid -> new LinkedList<>());
-            boxes.addFirst(event.player.getBoundingBox());
-            if(boxes.size() > 20)
-            {
-                boxes.removeLast();
-            }
-        }
-    }
-
-    @SubscribeEvent(receiveCanceled = true)
-    public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event)
-    {
-        playerBoxes.remove(event.getPlayer().getUniqueID());
-    }
-
-    public static AxisAlignedBB getBoundingBox(Entity entity, int ping)
-    {
-        if(playerBoxes.containsKey(entity.getUniqueID()))
-        {
-            LinkedList<AxisAlignedBB> boxes = playerBoxes.get(entity.getUniqueID());
-            int index = MathHelper.clamp(ping, 0, boxes.size() - 1);
-            return boxes.get(index);
-        }
-        return entity.getBoundingBox();
-    }
+//    @SubscribeEvent(receiveCanceled = true)
+//    public void onPlayerTick(TickEvent.PlayerTickEvent event)
+//    {
+//        if(event.side == LogicalSide.SERVER && event.phase == TickEvent.Phase.END)
+//        {
+//            if(event.player.isSpectator())
+//            {
+//                playerBoxes.remove(event.player.getUniqueID());
+//                return;
+//            }
+//            LinkedList<AxisAlignedBB> boxes = playerBoxes.computeIfAbsent(event.player.getUniqueID(), uuid -> new LinkedList<>());
+//            boxes.addFirst(event.player.getBoundingBox());
+//            if(boxes.size() > 20)
+//            {
+//                boxes.removeLast();
+//            }
+//        }
+//    }
+//
+//    @SubscribeEvent(receiveCanceled = true)
+//    public void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event)
+//    {
+//        playerBoxes.remove(event.getPlayer().getUniqueID());
+//    }
+//
+//    public static AxisAlignedBB getBoundingBox(Entity entity, int ping)
+//    {
+//        if(playerBoxes.containsKey(entity.getUniqueID()))
+//        {
+//            LinkedList<AxisAlignedBB> boxes = playerBoxes.get(entity.getUniqueID());
+//            int index = MathHelper.clamp(ping, 0, boxes.size() - 1);
+//            return boxes.get(index);
+//        }
+//        return entity.getBoundingBox();
+//    }
 }

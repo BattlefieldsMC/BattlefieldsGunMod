@@ -1,10 +1,12 @@
 package com.mrcrayfish.guns.common.trace;
 
 import com.mrcrayfish.guns.Config;
+import com.mrcrayfish.guns.common.BoundingBoxManager;
 import com.mrcrayfish.guns.entity.DamageSourceProjectile;
 import com.mrcrayfish.guns.hook.GunProjectileHitEvent;
 import com.mrcrayfish.guns.init.ModEnchantments;
 import com.mrcrayfish.guns.interfaces.IDamageable;
+import com.mrcrayfish.guns.interfaces.IHeadshotBox;
 import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.network.message.MessageBlood;
 import com.mrcrayfish.guns.network.message.MessageBulletHole;
@@ -13,6 +15,7 @@ import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.IFluidState;
@@ -105,13 +108,13 @@ public interface GunProjectile
                 }
                 if (result != null)
                 {
-                    this.onHit(world, this.getDamage(), spawnBulletHole, dealShotDamage, result);
+                    this.onHit(world, this.getDamage(), spawnBulletHole, dealShotDamage, result, startVec, endVec);
                 }
             }
         }
         else
         {
-            this.onHit(world, this.getDamage(), spawnBulletHole, dealShotDamage, result);
+            this.onHit(world, this.getDamage(), spawnBulletHole, dealShotDamage, result, startVec, endVec);
         }
 
         this.setPosition(this.getX() + this.getMotionX(), this.getY() + this.getMotionY(), this.getZ() + this.getMotionZ());
@@ -142,9 +145,12 @@ public interface GunProjectile
      * @param world           The world this bullet hit in
      * @param damage          The damage this bullet deals
      * @param spawnBulletHole Whether or not a bullet hole should be spawned by this projectile
+     * @param dealShotDamage  Whether or not the bullet should damage blocks
      * @param result          The block trace result
+     * @param startVec        The ray trace start position
+     * @param endVec          The ray trace end position
      */
-    default void onHit(World world, float damage, boolean spawnBulletHole, boolean dealShotDamage, RayTraceResult result)
+    default void onHit(World world, float damage, boolean spawnBulletHole, boolean dealShotDamage, RayTraceResult result, Vec3d startVec, Vec3d endVec)
     {
         MinecraftForge.EVENT_BUS.post(new GunProjectileHitEvent(result, this));
 
@@ -182,11 +188,11 @@ public interface GunProjectile
             this.onHitBlock(world, damage, state, pos, result.getHitVec().x, result.getHitVec().y, result.getHitVec().z);
 
             int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.FIRE_STARTER.get(), this.getWeapon());
-            if(level > 0 && state.isSolidSide(world, pos, blockRayTraceResult.getFace()))
+            if (level > 0 && state.isSolidSide(world, pos, blockRayTraceResult.getFace()))
             {
                 BlockPos offsetPos = pos.offset(blockRayTraceResult.getFace());
                 BlockState offsetState = world.getBlockState(offsetPos);
-                if(offsetState.isAir(world, offsetPos))
+                if (offsetState.isAir(world, offsetPos))
                 {
                     BlockState fireState = ((FireBlock) Blocks.FIRE).getStateForPlacement(world, offsetPos);
                     world.setBlockState(offsetPos, fireState, 11);
@@ -202,7 +208,7 @@ public interface GunProjectile
             Entity entity = entityRayTraceResult.getEntity();
             if (entity.getEntityId() == this.getShooterId())
                 return;
-            this.onHitEntity(world, damage, entity, result.getHitVec().x, result.getHitVec().y, result.getHitVec().z);
+            this.onHitEntity(world, damage, entity, result.getHitVec().x, result.getHitVec().y, result.getHitVec().z, startVec, endVec);
             this.complete();
             if (!world.isRemote())
                 entity.hurtResistantTime = 0;
@@ -219,19 +225,25 @@ public interface GunProjectile
      * @param y      The y position hit on the entity
      * @param z      The z position hit on the entity
      */
-    default void onHitEntity(World world, float damage, Entity entity, double x, double y, double z)
+    @SuppressWarnings("unchecked")
+    default void onHitEntity(World world, float damage, Entity entity, double x, double y, double z, Vec3d startVec, Vec3d endVec)
     {
         if (world.isRemote())
             return;
 
         boolean headShot = false;
-        if (Config.COMMON.gameplay.enableHeadShots.get() && entity instanceof PlayerEntity)
+        if (Config.COMMON.gameplay.enableHeadShots.get() && entity instanceof LivingEntity)
         {
-            AxisAlignedBB boundingBox = entity.getBoundingBox().expand(0, !entity.isCrouching() ? 0.0625 : 0, 0);
-            if (boundingBox.maxY - y <= 8.0 * 0.0625 && boundingBox.grow(0.001).contains(new Vec3d(x, y, z)))
+            IHeadshotBox<LivingEntity> headshotBox = (IHeadshotBox<LivingEntity>) BoundingBoxManager.getHeadshotBoxes(entity.getType());
+            if (headshotBox != null)
             {
-                headShot = true;
-                damage *= Config.COMMON.gameplay.headShotDamageMultiplier.get();
+                AxisAlignedBB box = headshotBox.getHeadshotBox((LivingEntity) entity);
+                box = box.offset(entity.getPosX(), entity.getPosY(), entity.getPosZ());
+                if (box.rayTrace(startVec, endVec).isPresent())
+                {
+                    headShot = true;
+                    damage *= Config.COMMON.gameplay.headShotDamageMultiplier.get();
+                }
             }
         }
 
