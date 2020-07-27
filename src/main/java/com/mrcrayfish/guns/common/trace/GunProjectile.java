@@ -3,6 +3,7 @@ package com.mrcrayfish.guns.common.trace;
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.entity.DamageSourceProjectile;
 import com.mrcrayfish.guns.hook.GunProjectileHitEvent;
+import com.mrcrayfish.guns.init.ModEnchantments;
 import com.mrcrayfish.guns.interfaces.IDamageable;
 import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.network.message.MessageBlood;
@@ -10,6 +11,7 @@ import com.mrcrayfish.guns.network.message.MessageBulletHole;
 import com.mrcrayfish.guns.object.EntityResult;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -28,10 +30,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -75,25 +74,44 @@ public interface GunProjectile
             endVec = result.getHitVec();
         }
 
-        EntityResult entityResult = GunProjectile.findEntityOnPath(this, world, size, startVec, endVec);
-        if (entityResult != null)
+        List<EntityResult> hitEntities = null;
+        int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.COLLATERAL.get(), this.getWeapon());
+        if (level == 0)
         {
-            result = new EntityRayTraceResult(entityResult.entity, entityResult.hitVec);
-        }
-
-        if (result instanceof EntityRayTraceResult && ((EntityRayTraceResult) result).getEntity() instanceof PlayerEntity)
-        {
-            PlayerEntity player = (PlayerEntity) ((EntityRayTraceResult) result).getEntity();
-
-            if (shooter instanceof PlayerEntity && !((PlayerEntity) shooter).canAttackPlayer(player))
+            EntityResult entityResult = findEntityOnPath(this, world, size, startVec, endVec);
+            if (entityResult != null)
             {
-                result = null;
+                hitEntities = Collections.singletonList(entityResult);
             }
         }
-
-        if (result != null)
+        else
         {
-            this.onHit(world, this.getDamage(), dealShotDamage, spawnBulletHole, result);
+            hitEntities = findEntitiesOnPath(this, world, size, startVec, endVec);
+        }
+
+        if (hitEntities != null && hitEntities.size() > 0)
+        {
+            for (EntityResult entityResult : hitEntities)
+            {
+                result = new EntityRayTraceResult(entityResult.entity, entityResult.hitVec);
+                if (((EntityRayTraceResult) result).getEntity() instanceof PlayerEntity)
+                {
+                    PlayerEntity player = (PlayerEntity) ((EntityRayTraceResult) result).getEntity();
+
+                    if (this.getShooter() != null && world.getPlayerByUuid(this.getShooter()) != null && !world.getPlayerByUuid(this.getShooter()).canAttackPlayer(player))
+                    {
+                        result = null;
+                    }
+                }
+                if (result != null)
+                {
+                    this.onHit(world, this.getDamage(), spawnBulletHole, dealShotDamage, result);
+                }
+            }
+        }
+        else
+        {
+            this.onHit(world, this.getDamage(), spawnBulletHole, dealShotDamage, result);
         }
 
         this.setPosition(this.getX() + this.getMotionX(), this.getY() + this.getMotionY(), this.getZ() + this.getMotionZ());
@@ -318,11 +336,6 @@ public interface GunProjectile
     float getDamage();
 
     /**
-     * @return The damage factor for when dealing damage
-     */
-    float getDamageModifier();
-
-    /**
      * @return The amount of damage added on top of the core damage
      */
     float getAdditionalDamage();
@@ -461,13 +474,6 @@ public interface GunProjectile
     void setBullet(ItemStack bullet);
 
     /**
-     * Sets the damage factor.
-     *
-     * @param damageModifier The new damage factor
-     */
-    void setDamageModifier(float damageModifier);
-
-    /**
      * Sets the amount of additional damage this projectile should deal.
      *
      * @param additionalDamage The new amount of damage added on top of the core damage
@@ -493,11 +499,11 @@ public interface GunProjectile
 
         Vec3d hitVec = null;
         Entity hitEntity = null;
-        List<Entity> entities = world.getEntitiesInAABBexcluding(null, new AxisAlignedBB(projectile.getX() - bulletSize / 2, projectile.getY() - bulletSize / 2, projectile.getZ() - bulletSize / 2, projectile.getX() + bulletSize / 2, projectile.getY() + bulletSize / 2, projectile.getZ() + bulletSize / 2).expand(projectile.getMotionX(), projectile.getMotionY(), projectile.getMotionZ()).grow(1.0), PROJECTILE_TARGETS);
+        List<Entity> entities = world.getEntitiesInAABBexcluding(shooter, new AxisAlignedBB(projectile.getX() - bulletSize / 2, projectile.getY() - bulletSize / 2, projectile.getZ() - bulletSize / 2, projectile.getX() + bulletSize / 2, projectile.getY() + bulletSize / 2, projectile.getZ() + bulletSize / 2).expand(projectile.getMotionX(), projectile.getMotionY(), projectile.getMotionZ()).grow(1.0), PROJECTILE_TARGETS);
         double closestDistance = Double.MAX_VALUE;
         for (Entity entity : entities)
         {
-            if (entity.getEntityId() != projectile.getShooterId())
+            if (!(entity instanceof GunProjectile))
             {
                 AxisAlignedBB boundingBox = entity.getBoundingBox();
                 Optional<Vec3d> hitPos = boundingBox.rayTrace(startVec, endVec);
@@ -527,6 +533,52 @@ public interface GunProjectile
             }
         }
         return hitEntity != null ? new EntityResult(hitEntity, hitVec) : null;
+    }
+
+    /**
+     * Ray traces for the specified projectile at the start vec to the end vec and collects all entities hit.
+     *
+     * @param projectile The projectile to ray trace
+     * @param world      The world the projectile is in
+     * @param bulletSize The size of the bullet
+     * @param startVec   The starting position of the movement
+     * @param endVec     The ending position of the movement
+     * @return The list of results collected by the ray trace
+     */
+    static List<EntityResult> findEntitiesOnPath(GunProjectile projectile, World world, float bulletSize, Vec3d startVec, Vec3d endVec)
+    {
+        Entity shooter = world.getEntityByID(projectile.getShooterId());
+        if (shooter == null)
+            return null;
+
+        List<EntityResult> hitEntities = new ArrayList<>();
+        List<Entity> entities = world.getEntitiesInAABBexcluding(shooter, new AxisAlignedBB(projectile.getX() - bulletSize / 2, projectile.getY() - bulletSize / 2, projectile.getZ() - bulletSize / 2, projectile.getX() + bulletSize / 2, projectile.getY() + bulletSize / 2, projectile.getZ() + bulletSize / 2).expand(projectile.getMotionX(), projectile.getMotionY(), projectile.getMotionZ()).grow(1.0), PROJECTILE_TARGETS);
+        for (Entity entity : entities)
+        {
+            if (!(entity instanceof GunProjectile))
+            {
+                AxisAlignedBB boundingBox = entity.getBoundingBox();
+                Optional<Vec3d> hitPos = boundingBox.rayTrace(startVec, endVec);
+                Optional<Vec3d> grownHitPos = boundingBox.grow(Config.COMMON.gameplay.growBoundingBoxAmount.get(), 0, Config.COMMON.gameplay.growBoundingBoxAmount.get()).rayTrace(startVec, endVec);
+                if (!hitPos.isPresent() && grownHitPos.isPresent())
+                {
+                    RayTraceResult raytraceresult = rayTraceBlocks(world, new RayTraceContext(startVec, grownHitPos.get(), RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, shooter), IGNORE_LEAVES);
+                    if (raytraceresult.getType() == RayTraceResult.Type.BLOCK)
+                    {
+                        continue;
+                    }
+                    hitPos = grownHitPos;
+                }
+
+                if (!hitPos.isPresent())
+                {
+                    continue;
+                }
+
+                hitEntities.add(new EntityResult(entity, hitPos.get()));
+            }
+        }
+        return hitEntities;
     }
 
     /**

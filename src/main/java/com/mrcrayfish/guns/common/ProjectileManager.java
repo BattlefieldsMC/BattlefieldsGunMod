@@ -37,7 +37,7 @@ public class ProjectileManager
         @Override
         public GunProjectileImpl create(World world, LivingEntity entity, ItemStack weapon, GunItem item, Gun modifiedGun)
         {
-            return new GunProjectileImpl(entity, item, modifiedGun);
+            return new GunProjectileImpl(entity, weapon, item, modifiedGun);
         }
 
         @Override

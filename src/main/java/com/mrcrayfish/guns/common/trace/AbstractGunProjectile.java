@@ -41,7 +41,6 @@ public abstract class AbstractGunProjectile implements GunProjectile
     private int shooterId;
     private ItemStack weapon = ItemStack.EMPTY;
     private ItemStack bullet = ItemStack.EMPTY;
-    private float damageModifier = 1;
     private float additionalDamage;
 
     @Override
@@ -149,12 +148,6 @@ public abstract class AbstractGunProjectile implements GunProjectile
     }
 
     @Override
-    public float getDamageModifier()
-    {
-        return damageModifier;
-    }
-
-    @Override
     public float getAdditionalDamage()
     {
         return additionalDamage;
@@ -241,12 +234,6 @@ public abstract class AbstractGunProjectile implements GunProjectile
     public void setBullet(ItemStack bullet)
     {
         this.bullet = bullet.copy();
-    }
-
-    @Override
-    public void setDamageModifier(float damageModifier)
-    {
-        this.damageModifier = damageModifier;
     }
 
     @Override
