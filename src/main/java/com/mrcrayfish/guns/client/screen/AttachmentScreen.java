@@ -56,9 +56,9 @@ public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
     public void tick()
     {
         super.tick();
-        if(this.minecraft != null && this.minecraft.player != null)
+        if (this.minecraft != null && this.minecraft.player != null)
         {
-            if(!(this.minecraft.player.getHeldItemMainhand().getItem() instanceof GunItem))
+            if (!(this.minecraft.player.getHeldItemMainhand().getItem() instanceof GunItem))
             {
                 Minecraft.getInstance().displayGuiScreen(null);
             }
@@ -75,16 +75,16 @@ public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
         int startX = (this.width - this.xSize) / 2;
         int startY = (this.height - this.ySize) / 2;
 
-        for(int i = 0; i < IAttachment.Type.values().length; i++)
+        for (int i = 0; i < IAttachment.Type.values().length; i++)
         {
-            if(RenderUtil.isMouseWithin(mouseX, mouseY, startX + 7, startY + 16 + i * 18, 18, 18))
+            if (RenderUtil.isMouseWithin(mouseX, mouseY, startX + 7, startY + 16 + i * 18, 18, 18))
             {
                 IAttachment.Type type = IAttachment.Type.values()[i];
-                if(!this.container.getSlot(i).isEnabled())
+                if (!this.container.getSlot(i).isEnabled())
                 {
                     this.renderTooltip(Arrays.asList(I18n.format("slot.cgm.attachment." + type.getTranslationKey()), I18n.format("slot.cgm.attachment.not_applicable")), mouseX, mouseY, this.minecraft.fontRenderer);
                 }
-                else if(this.weaponInventory.getStackInSlot(i).isEmpty())
+                else if (this.weaponInventory.getStackInSlot(i).isEmpty())
                 {
                     this.renderTooltip(Collections.singletonList(I18n.format("slot.cgm.attachment." + type.getTranslationKey())), mouseX, mouseY, this.minecraft.fontRenderer);
                 }
@@ -137,10 +137,11 @@ public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
 
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
 
-        if(this.showHelp)
+        if (this.showHelp)
         {
+            float scale = 1f / Math.min(2, (float) Minecraft.getInstance().getMainWindow().getGuiScaleFactor());
             RenderSystem.pushMatrix();
-            RenderSystem.scalef(0.5F, 0.5F, 0.5F);
+            RenderSystem.scalef(scale, scale, scale);
             minecraft.fontRenderer.drawString(I18n.format("container.cgm.attachments.window_help"), 56, 38, 0xFFFFFF);
             RenderSystem.popMatrix();
         }
@@ -158,13 +159,13 @@ public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
 
         /* Draws the icons for each attachment slot. If not applicable
          * for the weapon, it will draw a cross instead. */
-        for(int i = 0; i < IAttachment.Type.values().length; i++)
+        for (int i = 0; i < IAttachment.Type.values().length; i++)
         {
-            if(!this.container.getSlot(i).isEnabled())
+            if (!this.container.getSlot(i).isEnabled())
             {
                 this.blit(left + 8, top + 17 + i * 18, 176, 0, 16, 16);
             }
-            else if(this.weaponInventory.getStackInSlot(i).isEmpty())
+            else if (this.weaponInventory.getStackInSlot(i).isEmpty())
             {
                 this.blit(left + 8, top + 17 + i * 18, 176, 16 + i * 16, 16, 16);
             }
@@ -176,14 +177,14 @@ public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
     {
         int startX = (this.width - this.xSize) / 2;
         int startY = (this.height - this.ySize) / 2;
-        if(RenderUtil.isMouseWithin((int) mouseX, (int) mouseY, startX + 26, startY + 17, 142, 70))
+        if (RenderUtil.isMouseWithin((int) mouseX, (int) mouseY, startX + 26, startY + 17, 142, 70))
         {
-            if(scroll < 0 && this.windowZoom > 0)
+            if (scroll < 0 && this.windowZoom > 0)
             {
                 this.showHelp = false;
                 this.windowZoom--;
             }
-            else if(scroll > 0)
+            else if (scroll > 0)
             {
                 this.showHelp = false;
                 this.windowZoom++;
@@ -198,9 +199,9 @@ public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
         int startX = (this.width - this.xSize) / 2;
         int startY = (this.height - this.ySize) / 2;
 
-        if(RenderUtil.isMouseWithin((int) mouseX, (int) mouseY, startX + 26, startY + 17, 142, 70))
+        if (RenderUtil.isMouseWithin((int) mouseX, (int) mouseY, startX + 26, startY + 17, 142, 70))
         {
-            if(!this.mouseGrabbed && (button == GLFW.GLFW_MOUSE_BUTTON_LEFT || button == GLFW.GLFW_MOUSE_BUTTON_RIGHT))
+            if (!this.mouseGrabbed && (button == GLFW.GLFW_MOUSE_BUTTON_LEFT || button == GLFW.GLFW_MOUSE_BUTTON_RIGHT))
             {
                 this.mouseGrabbed = true;
                 this.mouseGrabbedButton = button == GLFW.GLFW_MOUSE_BUTTON_RIGHT ? 1 : 0;
@@ -216,15 +217,15 @@ public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button)
     {
-        if(this.mouseGrabbed)
+        if (this.mouseGrabbed)
         {
-            if(this.mouseGrabbedButton == 0 && button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
+            if (this.mouseGrabbedButton == 0 && button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
             {
                 this.mouseGrabbed = false;
                 this.windowX += (mouseX - this.mouseClickedX - 1);
                 this.windowY += (mouseY - this.mouseClickedY);
             }
-            else if(mouseGrabbedButton == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+            else if (mouseGrabbedButton == 1 && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
             {
                 this.mouseGrabbed = false;
                 this.windowRotationX += (mouseX - this.mouseClickedX);
