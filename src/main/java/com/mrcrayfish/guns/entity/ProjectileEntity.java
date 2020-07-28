@@ -2,13 +2,16 @@ package com.mrcrayfish.guns.entity;
 
 import com.mrcrayfish.guns.common.SpreadTracker;
 import com.mrcrayfish.guns.common.trace.GunProjectile;
+import com.mrcrayfish.guns.init.ModSyncedDataKeys;
 import com.mrcrayfish.guns.interfaces.IExplosionDamageable;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.object.Gun;
 import com.mrcrayfish.guns.object.Gun.Projectile;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import com.mrcrayfish.guns.util.GunModifierHelper;
+import com.mrcrayfish.obfuscate.common.data.SyncedPlayerData;
 import net.minecraft.entity.*;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -56,7 +59,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         this.general = modifiedGun.general;
         this.projectile = modifiedGun.projectile;
         this.entitySize = new EntitySize(this.projectile.size, this.projectile.size, false);
-        this.modifiedGravity = GunModifierHelper.getModifiedProjectileGravity(weapon, -0.05);
+        this.modifiedGravity = GunModifierHelper.getModifiedProjectileGravity(weapon, 0.05);
         this.life = GunModifierHelper.getModifiedProjectileLife(weapon, this.projectile.life);
 
         Vec3d dir = this.getDirection(shooter, weapon, item, modifiedGun);
@@ -98,9 +101,17 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             return this.getVectorFromRotation(shooter.rotationPitch, shooter.rotationYaw);
         }
 
-        if (!modifiedGun.general.alwaysSpread)
+        if (shooter instanceof PlayerEntity)
         {
-            gunSpread *= SpreadTracker.get(shooter.getUniqueID()).getSpread(item);
+            if (!modifiedGun.general.alwaysSpread)
+            {
+                gunSpread *= SpreadTracker.get(shooter.getUniqueID()).getSpread(item);
+            }
+
+            if (SyncedPlayerData.instance().get((PlayerEntity) shooter, ModSyncedDataKeys.AIMING))
+            {
+                gunSpread *= 0.5F;
+            }
         }
 
         return this.getVectorFromRotation(shooter.rotationPitch - (gunSpread / 2.0F) + rand.nextFloat() * gunSpread, shooter.getRotationYawHead() - (gunSpread / 2.0F) + rand.nextFloat() * gunSpread);
@@ -220,14 +231,14 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     {
         if (!this.world.isRemote())
         {
-            this.tickStep(this.world, this.projectile.size, this.projectile.life, this.projectile.gravity, this.projectile.spawnBulletHole, false);
+            this.tickStep(this.world, this.projectile.size, this.projectile.life, this.modifiedGravity, this.projectile.spawnBulletHole, false);
         }
         else
         {
             this.setPosition(this.getX() + this.getMotionX(), this.getY() + this.getMotionY(), this.getZ() + this.getMotionZ());
 
             if (this.projectile.gravity)
-                this.setMotionY(this.getMotionY() - 0.05);
+                this.setMotionY(this.getMotionY() - GunModifierHelper.getModifiedProjectileGravity(this.getWeapon(), 0.04));
         }
     }
 
@@ -286,65 +297,6 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     {
         return super.getPosY();
     }
-//=======
-//            int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.FIRE_STARTER.get(), this.weapon);
-//            if(level > 0 && state.isSolidSide(this.world, pos, blockRayTraceResult.getFace()))
-//            {
-//                BlockPos offsetPos = pos.offset(blockRayTraceResult.getFace());
-//                BlockState offsetState = this.world.getBlockState(offsetPos);
-//                if(offsetState.isAir(this.world, offsetPos))
-//                {
-//                    BlockState fireState = ((FireBlock) Blocks.FIRE).getStateForPlacement(this.world, offsetPos);
-//                    this.world.setBlockState(offsetPos, fireState, 11);
-//                }
-//            }
-//            return;
-//        }
-//
-//        if(result instanceof EntityRayTraceResult)
-//        {
-//            EntityRayTraceResult entityRayTraceResult = (EntityRayTraceResult) result;
-//            Entity entity = entityRayTraceResult.getEntity();
-//            if(entity.getEntityId() == this.shooterId)
-//            {
-//                return;
-//            }
-//            this.onHitEntity(entity, result.getHitVec().x, result.getHitVec().y, result.getHitVec().z, startVec, endVec);
-//
-//            int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.COLLATERAL.get(), weapon);
-//            if(level == 0)
-//            {
-//                this.remove();
-//            }
-//
-//            entity.hurtResistantTime = 0;
-//        }
-//    }
-//
-//    @SuppressWarnings("unchecked")
-//    protected void onHitEntity(Entity entity, double x, double y, double z, Vec3d startVec, Vec3d endVec)
-//    {
-//        boolean headShot = false;
-//        float damage = this.getDamage();
-//        float newDamage = GunEnchantmentHelper.getPuncturingDamage(this.weapon, this.rand, damage);
-//        boolean critical = damage != newDamage;
-//        damage = newDamage;
-//
-//        if(Config.COMMON.gameplay.enableHeadShots.get() && entity instanceof LivingEntity)
-//        {
-//            IHeadshotBox<LivingEntity> headshotBox = (IHeadshotBox<LivingEntity>) BoundingBoxManager.getHeadshotBoxes(entity.getType());
-//            if(headshotBox != null)
-//            {
-//                AxisAlignedBB box = headshotBox.getHeadshotBox((LivingEntity)entity);
-//                box = box.offset(entity.getPosX(), entity.getPosY(), entity.getPosZ());
-//                if(box.rayTrace(startVec, endVec).isPresent())
-//                {
-//                    headShot = true;
-//                    damage *= Config.COMMON.gameplay.headShotDamageMultiplier.get();
-//                }
-//            }
-//        }
-//>>>>>>> 1.15.X
 
     @Override
     public double getZ()

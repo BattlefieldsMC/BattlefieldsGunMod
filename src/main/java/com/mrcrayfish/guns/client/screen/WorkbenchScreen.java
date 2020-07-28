@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.ItemTransformVec3f;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.DyeItem;
@@ -36,6 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.lwjgl.opengl.GL11.*;
+
 /**
  * Author: MrCrayfish
  */
@@ -43,7 +46,7 @@ import java.util.stream.Collectors;
 public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
 {
     private static final int MAX_TRANSITION_TICKS = 5;
-    private static final ResourceLocation GUI = new ResourceLocation("cgm:textures/gui/workbench.png");
+    private static final ResourceLocation GUI_BASE = new ResourceLocation("cgm:textures/gui/workbench.png");
 
     private List<MaterialItem> materials;
     private List<MaterialItem> filteredMaterials;
@@ -67,11 +70,12 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
         super(container, playerInventory, title);
         this.playerInventory = playerInventory;
         this.workbench = container.getWorkbench();
-        this.xSize = 289;
-        this.ySize = 202;
+        this.xSize = 256;
+        this.ySize = 184;
         this.materials = new ArrayList<>();
         this.recipes = WorkbenchRecipes.getAll(playerInventory.player.world);
-        if(oldRecipesSize != this.recipes.size()) {
+        if (oldRecipesSize != this.recipes.size())
+        {
             currentIndex = 0;
             previousIndex = 0;
             oldRecipesSize = this.recipes.size();
@@ -84,9 +88,9 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
         super.init();
         int startX = (this.width - this.xSize) / 2;
         int startY = (this.height - this.ySize) / 2;
-        this.addButton(new Button(startX, startY, 15, 20, "<", button ->
+        this.addButton(new Button(startX + 9, startY + 18, 15, 20, "<", button ->
         {
-            if(currentIndex - 1 < 0)
+            if (currentIndex - 1 < 0)
             {
                 this.loadItem(this.recipes.size() - 1);
             }
@@ -95,9 +99,9 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
                 this.loadItem(currentIndex - 1);
             }
         }));
-        this.addButton(new Button(startX + 161, startY, 15, 20, ">", button ->
+        this.addButton(new Button(startX + 153, startY + 18, 15, 20, ">", button ->
         {
-            if(currentIndex + 1 >= this.recipes.size())
+            if (currentIndex + 1 >= this.recipes.size())
             {
                 this.loadItem(0);
             }
@@ -106,14 +110,14 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
                 this.loadItem(currentIndex + 1);
             }
         }));
-        this.btnCraft = this.addButton(new Button(startX + 186, startY + 6, 97, 20, "Assemble", button ->
+        this.btnCraft = this.addButton(new Button(startX + 195, startY + 16, 74, 20, I18n.format("gui.cgm.workbench.assemble"), button ->
         {
             WorkbenchRecipe recipe = this.recipes.get(currentIndex);
             ResourceLocation registryName = recipe.getId();
             PacketHandler.getPlayChannel().sendToServer(new MessageCraft(registryName, this.workbench.getPos()));
         }));
         this.btnCraft.active = false;
-        this.checkBoxMaterials = this.addButton(new CheckBox(startX + 186, startY + 90, "Show Remaining"));
+        this.checkBoxMaterials = this.addButton(new CheckBox(startX + 172, startY + 51, I18n.format("gui.cgm.workbench.show_remaining")));
         this.checkBoxMaterials.setToggled(WorkbenchScreen.showRemaining);
         this.loadItem(currentIndex);
     }
@@ -123,15 +127,15 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
     {
         super.tick();
 
-        for(MaterialItem material : this.materials)
+        for (MaterialItem material : this.materials)
         {
             material.update();
         }
 
         boolean canCraft = true;
-        for(MaterialItem material : this.materials)
+        for (MaterialItem material : this.materials)
         {
-            if(!material.isEnabled())
+            if (!material.isEnabled())
             {
                 canCraft = false;
                 break;
@@ -142,13 +146,13 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
 
         WorkbenchRecipe recipe = this.recipes.get(currentIndex);
         ItemStack item = recipe.getItem();
-        if(item.getItem() instanceof IColored)
+        if (item.getItem() instanceof IColored)
         {
             IColored colored = (IColored) item.getItem();
-            if(!this.workbench.getStackInSlot(0).isEmpty())
+            if (!this.workbench.getStackInSlot(0).isEmpty())
             {
                 ItemStack dyeStack = this.workbench.getStackInSlot(0);
-                if(dyeStack.getItem() instanceof DyeItem)
+                if (dyeStack.getItem() instanceof DyeItem)
                 {
                     DyeColor color = ((DyeItem) dyeStack.getItem()).getDyeColor();
                     float[] components = color.getColorComponentValues();
@@ -170,9 +174,9 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
 
         this.prevTransitionProgress = this.transitionProgress;
 
-        if(this.transitioning)
+        if (this.transitioning)
         {
-            if(this.transitionProgress > 0)
+            if (this.transitionProgress > 0)
             {
                 this.transitionProgress = Math.max(0, this.transitionProgress - 1);
             }
@@ -181,7 +185,7 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
                 this.transitioning = false;
             }
         }
-        else if(this.transitionProgress < MAX_TRANSITION_TICKS)
+        else if (this.transitionProgress < MAX_TRANSITION_TICKS)
         {
             this.transitionProgress = Math.min(MAX_TRANSITION_TICKS, this.transitionProgress + 1);
         }
@@ -207,9 +211,9 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
         this.displayProperty = RenderUtil.getModel(stack.getItem()).getItemCameraTransforms().getTransform(ItemCameraTransforms.TransformType.GROUND);
 
         List<ItemStack> materials = recipe.getMaterials();
-        if(materials != null)
+        if (materials != null)
         {
-            for(ItemStack material : materials)
+            for (ItemStack material : materials)
             {
                 MaterialItem item = new MaterialItem(material);
                 item.update();
@@ -218,7 +222,7 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
 
             currentIndex = index;
 
-            if(Config.CLIENT.display.workbenchAnimation.get() && previousIndex != currentIndex)
+            if (Config.CLIENT.display.workbenchAnimation.get() && previousIndex != currentIndex)
             {
                 this.transitioning = true;
             }
@@ -234,14 +238,14 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
 
         int startX = (this.width - this.xSize) / 2;
         int startY = (this.height - this.ySize) / 2;
-        for(int i = 0; i < this.filteredMaterials.size(); i++)
+        for (int i = 0; i < this.filteredMaterials.size(); i++)
         {
             int itemX = startX + 186;
-            int itemY = startY + i * 19 + 6 + 57;
-            if(RenderUtil.isMouseWithin(mouseX, mouseY, itemX, itemY, 80, 19))
+            int itemY = startY + i * 19 + 6 + 95;
+            if (RenderUtil.isMouseWithin(mouseX, mouseY, itemX, itemY, 80, 19))
             {
                 MaterialItem materialItem = this.filteredMaterials.get(i);
-                if(!materialItem.getStack().isEmpty())
+                if (!materialItem.getStack().isEmpty())
                 {
                     this.renderTooltip(materialItem.getStack(), mouseX, mouseY);
                 }
@@ -260,28 +264,29 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
 
         RenderSystem.enableBlend();
 
-        this.minecraft.getTextureManager().bindTexture(GUI);
-        this.blit(startX, startY + 80, 0, 134, 176, 122);
-        this.blit(startX + 180, startY, 176, 54, 6, 208);
-        this.blit(startX + 186, startY, 182, 54, 57, 208);
-        this.blit(startX + 186 + 57, startY, 220, 54, 23, 208);
-        this.blit(startX + 186 + 57 + 23, startY, 220, 54, 3, 208);
-        this.blit(startX + 186 + 57 + 23 + 3, startY, 236, 54, 20, 208);
+        this.minecraft.getTextureManager().bindTexture(GUI_BASE);
+        this.blit(startX, startY, 0, 0, 173, this.ySize);
+        blit(startX + 173, startY, 78, this.ySize, 173, 0, 1, this.ySize, 256, 256);
+        this.blit(startX + 251, startY, 174, 0, 24, this.ySize);
+        this.blit(startX + 172, startY + 16, 198, 0, 20, 20);
 
-        if(this.workbench.getStackInSlot(0).isEmpty())
+        if (this.workbench.getStackInSlot(0).isEmpty())
         {
-            this.blit(startX + 187, startY + 30, 80, 0, 16, 16);
+            this.blit(startX + 174, startY + 18, 137, 199, 16, 16);
         }
 
         WorkbenchRecipe recipe = this.recipes.get(currentIndex);
         ItemStack currentItem = recipe.getItem();
         StringBuilder builder = new StringBuilder(currentItem.getDisplayName().getUnformattedComponentText());
-        if(currentItem.getCount() > 1)
+        if (currentItem.getCount() > 1)
         {
             builder.append(" x ");
             builder.append(currentItem.getCount());
         }
-        this.drawCenteredString(this.font, builder.toString(), startX + 88, startY + 6, Color.WHITE.getRGB());
+        this.drawCenteredString(this.font, builder.toString(), startX + 88, startY + 22, Color.WHITE.getRGB());
+
+        glEnable(GL_SCISSOR_TEST);
+        RenderUtil.scissor(startX + 8, startY + 17, 160, 70);
 
         RenderSystem.pushMatrix();
         {
@@ -307,49 +312,46 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
         }
         RenderSystem.popMatrix();
 
+        glDisable(GL_SCISSOR_TEST);
+
         this.filteredMaterials = this.getMaterials();
-        for(int i = 0; i < this.filteredMaterials.size(); i++)
+        for (int i = 0; i < this.filteredMaterials.size(); i++)
         {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            this.minecraft.getTextureManager().bindTexture(GUI);
+            this.minecraft.getTextureManager().bindTexture(GUI_BASE);
 
             MaterialItem materialItem = this.filteredMaterials.get(i);
             ItemStack stack = materialItem.stack;
-            if(stack.isEmpty())
+            if (!stack.isEmpty())
             {
                 RenderHelper.disableStandardItemLighting();
-                this.blit(startX + 186, startY + i * 19 + 6 + 95, 0, 19, 80, 19);
-            }
-            else
-            {
-                RenderHelper.disableStandardItemLighting();
-                if(materialItem.isEnabled())
+                if (materialItem.isEnabled())
                 {
-                    this.blit(startX + 186, startY + i * 19 + 6 + 95, 0, 0, 80, 19);
+                    this.blit(startX + 172, startY + i * 19 + 63, 0, 184, 80, 19);
                 }
                 else
                 {
-                    this.blit(startX + 186, startY + i * 19 + 6 + 95, 0, 38, 80, 19);
+                    this.blit(startX + 172, startY + i * 19 + 63, 0, 222, 80, 19);
                 }
 
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
                 String name = stack.getDisplayName().getUnformattedComponentText();
-                if(this.font.getStringWidth(name) > 55)
+                if (this.font.getStringWidth(name) > 55)
                 {
                     name = this.font.trimStringToWidth(name, 50).trim() + "...";
                 }
-                this.font.drawString(name, startX + 186 + 22, startY + i * 19 + 6 + 6 + 95, Color.WHITE.getRGB());
+                this.font.drawString(name, startX + 172 + 22, startY + i * 19 + 6 + 63, Color.WHITE.getRGB());
 
-                Minecraft.getInstance().getItemRenderer().renderItemAndEffectIntoGUI(stack, startX + 186 + 2, startY + i * 19 + 6 + 1 + 95);
+                Minecraft.getInstance().getItemRenderer().renderItemAndEffectIntoGUI(stack, startX + 172 + 2, startY + i * 19 + 1 + 63);
 
-                if(this.checkBoxMaterials.isToggled())
+                if (this.checkBoxMaterials.isToggled())
                 {
                     int count = InventoryUtil.getItemStackAmount(Minecraft.getInstance().player, stack);
                     stack = stack.copy();
                     stack.setCount(stack.getCount() - count);
                 }
 
-                Minecraft.getInstance().getItemRenderer().renderItemOverlayIntoGUI(this.font, stack, startX + 186 + 2, startY + i * 19 + 6 + 1 + 95, null);
+                Minecraft.getInstance().getItemRenderer().renderItemOverlayIntoGUI(this.font, stack, startX + 172 + 2, startY + i * 19 + 1 + 63, null);
             }
         }
     }
@@ -358,7 +360,7 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
     {
         List<MaterialItem> materials = NonNullList.withSize(5, new MaterialItem(ItemStack.EMPTY));
         List<MaterialItem> filteredMaterials = this.materials.stream().filter(materialItem -> this.checkBoxMaterials.isToggled() ? !materialItem.isEnabled() : !materialItem.stack.isEmpty()).collect(Collectors.toList());
-        for(int i = 0; i < filteredMaterials.size() && i < materials.size(); i++)
+        for (int i = 0; i < filteredMaterials.size() && i < materials.size(); i++)
         {
             materials.set(i, filteredMaterials.get(i));
         }
@@ -368,7 +370,8 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
     @Override
     protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
     {
-        this.font.drawString(this.playerInventory.getDisplayName().getFormattedText(), 8, 109, 4210752);
+        this.font.drawString(this.title.getFormattedText(), 8, 6, 4210752);
+        this.font.drawString(this.playerInventory.getDisplayName().getFormattedText(), 8, 91, 4210752);
     }
 
     public static class MaterialItem
@@ -378,7 +381,9 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
         private boolean enabled = false;
         private ItemStack stack = ItemStack.EMPTY;
 
-        private MaterialItem() {}
+        private MaterialItem()
+        {
+        }
 
         private MaterialItem(ItemStack stack)
         {
@@ -392,7 +397,7 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
 
         public void update()
         {
-            if(!this.stack.isEmpty())
+            if (!this.stack.isEmpty())
             {
                 this.enabled = InventoryUtil.hasItemStack(Minecraft.getInstance().player, this.stack);
             }
