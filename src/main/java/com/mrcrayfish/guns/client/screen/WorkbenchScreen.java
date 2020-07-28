@@ -231,7 +231,7 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
         if(this.currentTab != null)
         {
             ItemStack item = this.displayStack;
-            if(item.getItem() instanceof IColored)
+            if(item.getItem() instanceof IColored && ((IColored) item.getItem()).canColor())
             {
                 IColored colored = (IColored) item.getItem();
                 if(!this.workbench.getStackInSlot(0).isEmpty())
@@ -482,7 +482,7 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
 
     private List<MaterialItem> getMaterials()
     {
-        List<MaterialItem> materials = NonNullList.withSize(5, new MaterialItem(ItemStack.EMPTY));
+        List<MaterialItem> materials = NonNullList.withSize(6, new MaterialItem(ItemStack.EMPTY));
         List<MaterialItem> filteredMaterials = this.materials.stream().filter(materialItem -> this.checkBoxMaterials.isToggled() ? !materialItem.isEnabled() : !materialItem.stack.isEmpty()).collect(Collectors.toList());
         for (int i = 0; i < filteredMaterials.size() && i < materials.size(); i++)
         {

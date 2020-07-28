@@ -11,6 +11,11 @@ import java.util.List;
  */
 public interface IColored
 {
+    default boolean canColor()
+    {
+        return true;
+    }
+
     default boolean hasColor(ItemStack stack)
     {
         return stack.getTag() != null && stack.getTag().contains("Color", Constants.NBT.TAG_INT);
