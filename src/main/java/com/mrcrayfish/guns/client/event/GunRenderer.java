@@ -958,8 +958,7 @@ public class GunRenderer
         matrixStack.pop();
     }
 
-    private void renderArm(ClientPlayerEntity player, MatrixStack matrixStack, IRenderTypeBuffer buffer,
-                           int combinedLight, HandSide hand)
+    private void renderArm(ClientPlayerEntity player, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, HandSide hand)
     {
         Minecraft mc = Minecraft.getInstance();
         EntityRendererManager renderManager = mc.getRenderManager();
