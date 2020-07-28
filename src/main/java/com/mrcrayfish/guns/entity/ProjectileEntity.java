@@ -348,6 +348,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         buffer.writeCompoundTag(this.projectile.serializeNBT());
         buffer.writeCompoundTag(this.general.serializeNBT());
         buffer.writeInt(this.shooterId);
+        buffer.writeItemStack(this.weapon, false);
         buffer.writeItemStack(this.item);
         buffer.writeDouble(this.modifiedGravity);
         buffer.writeVarInt(this.life);
@@ -361,6 +362,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         this.general = new Gun.General();
         this.general.deserializeNBT(buffer.readCompoundTag());
         this.shooterId = buffer.readInt();
+        this.weapon = buffer.readItemStack();
         this.item = buffer.readItemStack();
         this.modifiedGravity = buffer.readDouble();
         this.life = buffer.readVarInt();

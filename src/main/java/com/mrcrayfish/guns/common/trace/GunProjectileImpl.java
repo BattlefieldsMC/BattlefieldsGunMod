@@ -81,7 +81,7 @@ public class GunProjectileImpl extends AbstractGunProjectile
     public void encode(PacketBuffer buf)
     {
         buf.writeVarInt(this.getShooterId());
-        buf.writeItemStack(this.weapon);
+        buf.writeItemStack(this.weapon, false);
         buf.writeItemStack(this.getBullet());
         buf.writeCompoundTag(this.modifiedGun.serializeNBT());
         buf.writeDouble(this.modifiedGravity);

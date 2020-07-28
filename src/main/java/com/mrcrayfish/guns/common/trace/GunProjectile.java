@@ -169,7 +169,7 @@ public interface GunProjectile
             BlockState state = world.getBlockState(pos);
             Block block = state.getBlock();
 
-            if (dealShotDamage && !world.isRemote() && Config.COMMON.gameplay.enableGunGriefing.get() && (block instanceof BreakableBlock || block instanceof PaneBlock) && state.getMaterial() == Material.GLASS)
+            if (!world.isRemote() && dealShotDamage && Config.COMMON.gameplay.enableGunGriefing.get() && (block instanceof BreakableBlock || block instanceof PaneBlock) && state.getMaterial() == Material.GLASS)
                 world.destroyBlock(blockRayTraceResult.getPos(), false);
 
             if (!state.getMaterial().isReplaceable())
@@ -178,9 +178,9 @@ public interface GunProjectile
             if (dealShotDamage && block instanceof IDamageable)
                 ((IDamageable) block).onBlockDamaged(world, state, pos, this, damage, (int) Math.ceil(damage / 2.0) + 1);
 
-            Vec3d hitVec = blockRayTraceResult.getHitVec();
-            if (spawnBulletHole && !world.isRemote())
+            if (!world.isRemote() && spawnBulletHole)
             {
+                Vec3d hitVec = blockRayTraceResult.getHitVec();
                 double holeX = hitVec.getX() + 0.005 * blockRayTraceResult.getFace().getXOffset();
                 double holeY = hitVec.getY() + 0.005 * blockRayTraceResult.getFace().getYOffset();
                 double holeZ = hitVec.getZ() + 0.005 * blockRayTraceResult.getFace().getZOffset();
@@ -190,15 +190,18 @@ public interface GunProjectile
 
             this.onHitBlock(world, weapon, damage, state, pos, result.getHitVec(), startVec, endVec);
 
-            int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.FIRE_STARTER.get(), this.getWeapon());
-            if (level > 0 && state.isSolidSide(world, pos, blockRayTraceResult.getFace()))
+            if (!world.isRemote())
             {
-                BlockPos offsetPos = pos.offset(blockRayTraceResult.getFace());
-                BlockState offsetState = world.getBlockState(offsetPos);
-                if (offsetState.isAir(world, offsetPos))
+                int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.FIRE_STARTER.get(), this.getWeapon());
+                if (level > 0 && state.isSolidSide(world, pos, blockRayTraceResult.getFace()))
                 {
-                    BlockState fireState = ((FireBlock) Blocks.FIRE).getStateForPlacement(world, offsetPos);
-                    world.setBlockState(offsetPos, fireState, 11);
+                    BlockPos offsetPos = pos.offset(blockRayTraceResult.getFace());
+                    BlockState offsetState = world.getBlockState(offsetPos);
+                    if (offsetState.isAir(world, offsetPos))
+                    {
+                        BlockState fireState = ((FireBlock) Blocks.FIRE).getStateForPlacement(world, offsetPos);
+                        world.setBlockState(offsetPos, fireState, 11);
+                    }
                 }
             }
 
