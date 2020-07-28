@@ -188,7 +188,7 @@ public interface GunProjectile
                 PacketHandler.getPlayChannel().send(PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunkAt(blockRayTraceResult.getPos())), new MessageBulletHole(holeX, holeY, holeZ, direction, pos));
             }
 
-            this.onHitBlock(world, damage, state, pos, result.getHitVec(), startVec, endVec);
+            this.onHitBlock(world, weapon, damage, state, pos, result.getHitVec(), startVec, endVec);
 
             int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.FIRE_STARTER.get(), this.getWeapon());
             if (level > 0 && state.isSolidSide(world, pos, blockRayTraceResult.getFace()))
@@ -277,7 +277,7 @@ public interface GunProjectile
         PacketHandler.getPlayChannel().send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new MessageBlood(hitVec.getX(), hitVec.getY(), hitVec.getZ()));
     }
 
-    default void onHitBlock(World world, float damage, BlockState state, BlockPos pos, Vec3d hitVec, Vec3d startVec, Vec3d endVec)
+    default void onHitBlock(World world, ItemStack weapon, float damage, BlockState state, BlockPos pos, Vec3d hitVec, Vec3d startVec, Vec3d endVec)
     {
         if (world.isRemote())
             return;

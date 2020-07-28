@@ -52,13 +52,13 @@ public class MissileEntity extends ProjectileEntity
     }
 
     @Override
-    public void onHitEntity(World world, float damage, Entity entity, Vec3d hitVec, Vec3d startVec, Vec3d endVec, boolean headShot)
+    public void onHitEntity(World world, ItemStack weapon, float damage, Entity entity, Vec3d hitVec, Vec3d startVec, Vec3d endVec, boolean headShot)
     {
         createExplosion(this);
     }
 
     @Override
-    public void onHitBlock(World world, float damage, BlockState state, BlockPos pos, Vec3d hitVec, Vec3d startVec, Vec3d endVec)
+    public void onHitBlock(World world, ItemStack weapon, float damage, BlockState state, BlockPos pos, Vec3d hitVec, Vec3d startVec, Vec3d endVec)
     {
         createExplosion(this);
     }
