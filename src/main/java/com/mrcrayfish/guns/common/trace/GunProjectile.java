@@ -99,10 +99,10 @@ public interface GunProjectile
         {
             for (EntityResult entityResult : hitEntities)
             {
-                result = new EntityRayTraceResult(entityResult.entity, entityResult.hitVec);
-                if (((EntityRayTraceResult) result).getEntity() instanceof PlayerEntity)
+                result = new ExtendedEntityRayTraceResult(entityResult);
+                if (((ExtendedEntityRayTraceResult) result).getEntity() instanceof PlayerEntity)
                 {
-                    PlayerEntity player = (PlayerEntity) ((EntityRayTraceResult) result).getEntity();
+                    PlayerEntity player = (PlayerEntity) ((ExtendedEntityRayTraceResult) result).getEntity();
 
                     if (this.getShooter() != null && world.getPlayerByUuid(this.getShooter()) != null && !world.getPlayerByUuid(this.getShooter()).canAttackPlayer(player))
                     {
