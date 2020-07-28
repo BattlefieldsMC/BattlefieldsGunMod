@@ -6,6 +6,7 @@ import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.object.EntityResult;
 import com.mrcrayfish.guns.object.Gun;
 import com.mrcrayfish.guns.util.GunModifierHelper;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,11 +26,13 @@ public class GunProjectileImpl extends AbstractGunProjectile
 {
     private final ItemStack weapon;
     private final Gun modifiedGun;
+    private final double modifiedGravity;
 
     public GunProjectileImpl(LivingEntity shooter, ItemStack weapon, GunItem item, Gun modifiedGun)
     {
         this.weapon = weapon;
         this.modifiedGun = modifiedGun;
+        this.modifiedGravity = GunModifierHelper.getModifiedProjectileGravity(weapon, 0.05);
         this.setShooter(shooter.getUniqueID());
 
         Vec3d dir = getDirection(shooter.getRNG(), shooter, item, modifiedGun);
@@ -43,12 +46,13 @@ public class GunProjectileImpl extends AbstractGunProjectile
             this.setBullet(new ItemStack(ammo));
     }
 
-    private GunProjectileImpl(int shooterId, ItemStack bullet, ItemStack weapon, Gun modifiedGun, double x, double y, double z, double motionX, double motionY, double motionZ)
+    private GunProjectileImpl(int shooterId, ItemStack bullet, ItemStack weapon, Gun modifiedGun, double modifiedGravity, double x, double y, double z, double motionX, double motionY, double motionZ)
     {
         this.setShooterId(shooterId);
         this.setBullet(bullet);
         this.weapon = weapon;
         this.modifiedGun = modifiedGun;
+        this.modifiedGravity = modifiedGravity;
         this.setLastPosition(x, y, z);
         this.setPosition(x, y, z);
         this.setMotion(motionX, motionY, motionZ);
@@ -58,7 +62,7 @@ public class GunProjectileImpl extends AbstractGunProjectile
     public void tick(World world)
     {
         super.tick(world);
-        this.tickStep(world, this.modifiedGun.projectile.size, this.modifiedGun.projectile.life, this.modifiedGun.projectile.gravity, this.modifiedGun.projectile.spawnBulletHole, true);
+        this.tickStep(world, this.modifiedGun.projectile.size, this.modifiedGun.projectile.life, this.modifiedGravity, this.modifiedGun.projectile.spawnBulletHole, true);
     }
 
     @Override
@@ -80,6 +84,7 @@ public class GunProjectileImpl extends AbstractGunProjectile
         buf.writeItemStack(this.weapon);
         buf.writeItemStack(this.getBullet());
         buf.writeCompoundTag(this.modifiedGun.serializeNBT());
+        buf.writeDouble(this.modifiedGravity);
         buf.writeDouble(this.getX());
         buf.writeDouble(this.getY());
         buf.writeDouble(this.getZ());
@@ -90,7 +95,7 @@ public class GunProjectileImpl extends AbstractGunProjectile
 
     public static GunProjectileImpl decode(PacketBuffer buf)
     {
-        return new GunProjectileImpl(buf.readVarInt(), buf.readItemStack(), buf.readItemStack(), Gun.create(buf.readCompoundTag()), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble());
+        return new GunProjectileImpl(buf.readVarInt(), buf.readItemStack(), buf.readItemStack(), Gun.create(buf.readCompoundTag()), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble());
     }
 
     private static Vec3d getVectorFromRotation(float pitch, float yaw)
