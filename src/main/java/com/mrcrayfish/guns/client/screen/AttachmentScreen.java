@@ -141,8 +141,9 @@ public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
         {
             float scale = 1f / Math.min(2, (float) Minecraft.getInstance().getMainWindow().getGuiScaleFactor());
             RenderSystem.pushMatrix();
+            RenderSystem.translatef(28, 19, 0);
             RenderSystem.scalef(scale, scale, scale);
-            minecraft.fontRenderer.drawString(I18n.format("container.cgm.attachments.window_help"), 56, 38, 0xFFFFFF);
+            minecraft.fontRenderer.drawString(I18n.format("container.cgm.attachments.window_help"), 0, 0, 0xFFFFFF);
             RenderSystem.popMatrix();
         }
     }
