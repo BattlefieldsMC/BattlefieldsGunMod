@@ -46,11 +46,11 @@ public class GunProjectileImpl extends AbstractGunProjectile
             this.setBullet(new ItemStack(ammo));
     }
 
-    private GunProjectileImpl(int shooterId, ItemStack bullet, ItemStack weapon, Gun modifiedGun, double modifiedGravity, double x, double y, double z, double motionX, double motionY, double motionZ)
+    private GunProjectileImpl(int shooterId, ItemStack weapon, ItemStack bullet, Gun modifiedGun, double modifiedGravity, double x, double y, double z, double motionX, double motionY, double motionZ)
     {
         this.setShooterId(shooterId);
-        this.setBullet(bullet);
         this.weapon = weapon;
+        this.setBullet(bullet);
         this.modifiedGun = modifiedGun;
         this.modifiedGravity = modifiedGravity;
         this.setLastPosition(x, y, z);
