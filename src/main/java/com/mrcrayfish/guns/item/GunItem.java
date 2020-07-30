@@ -59,13 +59,15 @@ public class GunItem extends Item implements IColored
             if (tagCompound.contains("AdditionalDamage", Constants.NBT.TAG_FLOAT))
             {
                 float additionalDamage = tagCompound.getFloat("AdditionalDamage");
-                if (additionalDamage > 0)
+                additionalDamage += GunModifierHelper.getAdditionalDamage(stack);
+                
+                if(additionalDamage > 0)
                 {
-                    additionalDamageText = TextFormatting.GREEN + " +" + ItemStack.DECIMALFORMAT.format(tagCompound.getFloat("AdditionalDamage"));
+                    additionalDamageText = TextFormatting.GREEN + " +" + ItemStack.DECIMALFORMAT.format(additionalDamage);
                 }
                 else if (additionalDamage < 0)
                 {
-                    additionalDamageText = TextFormatting.RED + " " + ItemStack.DECIMALFORMAT.format(tagCompound.getFloat("AdditionalDamage"));
+                    additionalDamageText = TextFormatting.RED + " " + ItemStack.DECIMALFORMAT.format(additionalDamage);
                 }
             }
         }
