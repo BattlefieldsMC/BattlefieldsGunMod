@@ -16,6 +16,7 @@ public class MessageBullet implements IMessage
 {
     private ResourceLocation item;
     private GunProjectile projectile;
+    private int life;
     private int trailColor;
     private double trailLengthMultiplier;
 
@@ -23,10 +24,11 @@ public class MessageBullet implements IMessage
     {
     }
 
-    public MessageBullet(ResourceLocation item, GunProjectile projectile, int trailColor, double trailLengthMultiplier)
+    public MessageBullet(ResourceLocation item, GunProjectile projectile, int life, int trailColor, double trailLengthMultiplier)
     {
         this.item = item;
         this.projectile = projectile;
+        this.life = life;
         this.trailColor = trailColor;
         this.trailLengthMultiplier = trailLengthMultiplier;
     }
@@ -36,6 +38,7 @@ public class MessageBullet implements IMessage
     {
         buffer.writeResourceLocation(this.item);
         ProjectileManager.getInstance().getFactory(this.item).encode(buffer, this.projectile);
+        buffer.writeVarInt(this.life);
         buffer.writeVarInt(this.trailColor);
         buffer.writeDouble(this.trailLengthMultiplier);
     }
@@ -45,6 +48,7 @@ public class MessageBullet implements IMessage
     {
         this.item = buffer.readResourceLocation();
         this.projectile = ProjectileManager.getInstance().getFactory(this.item).decode(buffer);
+        this.life = buffer.readVarInt();
         this.trailColor = buffer.readVarInt();
         this.trailLengthMultiplier = buffer.readDouble();
     }
@@ -59,6 +63,10 @@ public class MessageBullet implements IMessage
     public GunProjectile getProjectile()
     {
         return projectile;
+    }
+
+    public int getLife() {
+        return life;
     }
 
     public int getTrailColor()

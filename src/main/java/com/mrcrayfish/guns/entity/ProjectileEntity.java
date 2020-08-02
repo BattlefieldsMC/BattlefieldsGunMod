@@ -28,6 +28,7 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -251,7 +252,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     }
 
     @Override
-    public void complete()
+    public void complete(Vec3d completePos)
     {
         super.remove();
     }
@@ -266,6 +267,12 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     public boolean isComplete()
     {
         return !super.isAlive();
+    }
+
+    @Nullable
+    @Override
+    public Vec3d getCompletePos() {
+        return null;
     }
 
     @Override

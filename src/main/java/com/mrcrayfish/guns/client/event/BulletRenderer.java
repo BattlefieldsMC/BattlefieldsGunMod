@@ -53,7 +53,7 @@ public class BulletRenderer
         if (Minecraft.getInstance().world != null && event.phase == TickEvent.Phase.END)
         {
             this.bullets.forEach(Bullet::tick);
-            this.bullets.removeIf(bullet -> bullet.getProjectile().isComplete());
+            this.bullets.removeIf(Bullet::isComplete);
         }
     }
 
@@ -83,14 +83,12 @@ public class BulletRenderer
     private void renderBullet(Entity entity, Bullet bullet, IRenderTypeBuffer buffer, MatrixStack matrixStack, boolean renderBullet, float partialTicks)
     {
         GunProjectile projectile = bullet.getProjectile();
-        if (projectile.isComplete())
-            return;
 
         matrixStack.push();
 
-        double bulletX = projectile.getX() + projectile.getMotionX() * partialTicks;
-        double bulletY = projectile.getY() + projectile.getMotionY() * partialTicks;
-        double bulletZ = projectile.getZ() + projectile.getMotionZ() * partialTicks;
+        double bulletX = bullet.getPosX(partialTicks);
+        double bulletY = bullet.getPosY(partialTicks);
+        double bulletZ = bullet.getPosZ(partialTicks);
         matrixStack.translate(bulletX, bulletY, bulletZ);
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(bullet.getRotationYaw()));
@@ -126,7 +124,7 @@ public class BulletRenderer
             return;
         }
 
-        matrixStack.rotate(Vector3f.YP.rotationDegrees((projectile.getTicksExisted() + partialTicks) * (float) 50));
+        matrixStack.rotate(Vector3f.YP.rotationDegrees((bullet.getTicksExisted() + partialTicks) * (float) 50));
         matrixStack.scale(0.275F, 0.275F, 0.275F);
 
         int combinedLight = WorldRenderer.getCombinedLight(entity.world, entity.getPosition());

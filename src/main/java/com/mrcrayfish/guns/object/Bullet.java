@@ -3,61 +3,116 @@ package com.mrcrayfish.guns.object;
 import com.mrcrayfish.guns.common.trace.GunProjectile;
 import com.mrcrayfish.guns.network.message.MessageBullet;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 
 /**
  * Author: MrCrayfish
  */
-public class Bullet
-{
+public class Bullet {
     private final GunProjectile projectile;
+    private double posX;
+    private double posY;
+    private double posZ;
+    private double lastX;
+    private double lastY;
+    private double lastZ;
+    private int ticksExisted;
+    private boolean complete;
+    private final int maxLife;
     private float rotationYaw;
     private float rotationPitch;
     private final int trailColor;
     private final double trailLengthMultiplier;
 
-    public Bullet(MessageBullet message)
-    {
+    public Bullet(MessageBullet message) {
         this.projectile = message.getProjectile();
+        this.posX = this.projectile.getX();
+        this.posY = this.projectile.getY();
+        this.posZ = this.projectile.getZ();
+        this.lastX = this.projectile.getX();
+        this.lastY = this.projectile.getY();
+        this.lastZ = this.projectile.getZ();
+        this.maxLife = message.getLife();
         this.trailColor = message.getTrailColor();
         this.trailLengthMultiplier = message.getTrailLengthMultiplier();
         this.updateHeading();
     }
 
-    private void updateHeading()
-    {
-        float d = MathHelper.sqrt(this.projectile.getMotionX() * this.projectile.getMotionX() + this.projectile.getMotionZ() * this.projectile.getMotionZ());
-        this.rotationYaw = (float) (MathHelper.atan2(this.projectile.getMotionX(), this.projectile.getMotionZ()) * (180D / Math.PI));
-        this.rotationPitch = (float) (MathHelper.atan2(this.projectile.getMotionY(), d) * (180D / Math.PI));
+    private void updateHeading() {
+        Vec3d motion;
+
+        if (this.projectile.isComplete() && this.projectile.getCompletePos() == null)
+            this.complete = true;
+        if (this.projectile.isComplete() && this.projectile.getCompletePos() != null) {
+            Vec3d projectileMotion = new Vec3d(this.projectile.getMotionX(), this.projectile.getMotionY(), this.projectile.getMotionZ());
+            Vec3d difference = this.projectile.getCompletePos().subtract(this.posX, this.posY, this.posZ);
+            if (difference.lengthSquared() < projectileMotion.lengthSquared()) {
+                motion = difference;
+                this.complete = true;
+            } else {
+                motion = projectileMotion;
+            }
+        } else {
+            motion = new Vec3d(this.projectile.getMotionX(), this.projectile.getMotionY(), this.projectile.getMotionZ());
+        }
+
+        float d = MathHelper.sqrt(motion.getX() * motion.getX() + motion.getZ() * motion.getZ());
+        this.rotationYaw = (float) (MathHelper.atan2(motion.getX(), motion.getZ()) * (180D / Math.PI));
+        this.rotationPitch = (float) (MathHelper.atan2(motion.getY(), d) * (180D / Math.PI));
+
+        this.posX += motion.getX();
+        this.posY += motion.getY();
+        this.posZ += motion.getZ();
     }
 
-    public void tick()
-    {
-        if (!this.projectile.isComplete())
+    public void tick() {
+        this.lastX = this.posX;
+        this.lastY = this.posY;
+        this.lastZ = this.posZ;
+        this.ticksExisted++;
+        if (!this.complete)
             this.updateHeading();
+        if (this.ticksExisted >= this.maxLife)
+            this.complete = true;
     }
 
-    public GunProjectile getProjectile()
-    {
+    public GunProjectile getProjectile() {
         return projectile;
     }
 
-    public float getRotationYaw()
-    {
+    public double getPosX(float partialTicks) {
+        return MathHelper.lerp(partialTicks, this.lastX, this.posX);
+    }
+
+    public double getPosY(float partialTicks) {
+        return MathHelper.lerp(partialTicks, this.lastY, this.posY);
+    }
+
+    public double getPosZ(float partialTicks) {
+        return MathHelper.lerp(partialTicks, this.lastZ, this.posZ);
+    }
+
+    public int getTicksExisted() {
+        return ticksExisted;
+    }
+
+    public boolean isComplete() {
+        return this.complete && this.lastX == this.posX && this.lastY == this.posY && this.lastZ == this.posZ;
+    }
+
+    public float getRotationYaw() {
         return this.rotationYaw;
     }
 
-    public float getRotationPitch()
-    {
+    public float getRotationPitch() {
         return this.rotationPitch;
     }
 
-    public int getTrailColor()
-    {
+    public int getTrailColor() {
         return this.trailColor;
     }
 
-    public double getTrailLengthMultiplier()
-    {
+    public double getTrailLengthMultiplier() {
         return this.trailLengthMultiplier;
     }
 }

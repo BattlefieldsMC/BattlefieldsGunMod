@@ -1,8 +1,6 @@
 package com.mrcrayfish.guns.common.trace;
 
 import com.mrcrayfish.guns.Reference;
-import com.mrcrayfish.guns.client.ClientHandler;
-import com.mrcrayfish.guns.object.Bullet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
@@ -18,21 +16,17 @@ import static net.minecraftforge.api.distmarker.Dist.CLIENT;
 
 @SuppressWarnings("unused")
 @Mod.EventBusSubscriber(value = CLIENT, modid = Reference.MOD_ID)
-public final class ClientGunTracer implements GunTracer
-{
+public final class ClientGunTracer implements GunTracer {
     static ClientGunTracer INSTANCE = new ClientGunTracer();
 
     private final Map<DimensionType, Set<GunProjectile>> projectiles;
 
-    private ClientGunTracer()
-    {
+    private ClientGunTracer() {
         this.projectiles = new HashMap<>();
     }
 
-    private void tick(World world)
-    {
-        if (this.projectiles.containsKey(world.getDimension().getType()))
-        {
+    private void tick(World world) {
+        if (this.projectiles.containsKey(world.getDimension().getType())) {
             Set<GunProjectile> projectiles = this.projectiles.get(world.getDimension().getType());
             projectiles.forEach(projectile -> projectile.tick(world));
             projectiles.removeIf(GunProjectile::isComplete);
@@ -40,25 +34,22 @@ public final class ClientGunTracer implements GunTracer
         this.projectiles.values().removeIf(Collection::isEmpty);
     }
 
-    private void clear()
-    {
+    private void clear() {
         this.projectiles.values().forEach(set ->
         {
-            set.forEach(GunProjectile::complete);
+            set.forEach(projectile -> projectile.complete(null));
             set.clear();
         });
         this.projectiles.values().clear();
     }
 
     @Override
-    public void add(IWorldReader world, GunProjectile projectile)
-    {
+    public void add(IWorldReader world, GunProjectile projectile) {
         this.projectiles.computeIfAbsent(world.getDimension().getType(), key -> new HashSet<>()).add(projectile);
     }
 
     @SubscribeEvent
-    public static void onEvent(TickEvent.ClientTickEvent event)
-    {
+    public static void onEvent(TickEvent.ClientTickEvent event) {
         if (Minecraft.getInstance().world == null)
             return;
         if (event.phase == TickEvent.Phase.END)
@@ -66,8 +57,7 @@ public final class ClientGunTracer implements GunTracer
     }
 
     @SubscribeEvent
-    public static void onEvent(WorldEvent.Unload event)
-    {
+    public static void onEvent(WorldEvent.Unload event) {
         Minecraft.getInstance().execute(INSTANCE::clear);
     }
 }
