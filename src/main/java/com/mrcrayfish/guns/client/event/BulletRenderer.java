@@ -105,8 +105,8 @@ public class BulletRenderer
 
         Matrix4f matrix4f = matrixStack.getLast().getMatrix();
 
-//        if (projectile.getShooterId() != entity.getEntityId())
-//        {
+        if (projectile.getShooterId() != entity.getEntityId())
+        {
             RenderType bulletType = getBulletTrail();
             IVertexBuilder builder = buffer.getBuffer(bulletType);
             builder.pos(matrix4f, 0, 0, -0.035F).color(red, green, blue, alpha).endVertex();
@@ -117,7 +117,7 @@ public class BulletRenderer
             builder.pos(matrix4f, 0.035F, 0, 0).color(red, green, blue, alpha).endVertex();
             builder.pos(matrix4f, 0.035F, -trailLength, 0).color(red, green, blue, alpha).endVertex();
             builder.pos(matrix4f, -0.035F, -trailLength, 0).color(red, green, blue, alpha).endVertex();
-//        }
+        }
 
         // No point rendering item if empty, so return
         if (!renderBullet || projectile.getBullet().isEmpty())
