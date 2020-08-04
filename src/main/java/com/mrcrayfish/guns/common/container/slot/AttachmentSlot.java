@@ -5,6 +5,7 @@ import com.mrcrayfish.guns.init.ModSounds;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.item.IAttachment;
 import com.mrcrayfish.guns.object.Gun;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Slot;
@@ -52,6 +53,13 @@ public class AttachmentSlot extends Slot
         GunItem item = (GunItem) this.weapon.getItem();
         Gun modifiedGun = item.getModifiedGun(this.weapon);
         return stack.getItem() instanceof IAttachment && ((IAttachment) stack.getItem()).getType() == this.type && modifiedGun.canAttachType(this.type);
+    }
+
+    @Override
+    public boolean canTakeStack(PlayerEntity player)
+    {
+        ItemStack stack = this.getStack();
+        return (stack.isEmpty() || player.isCreative() || !EnchantmentHelper.hasBindingCurse(stack)) && super.canTakeStack(player);
     }
 
     @Override
