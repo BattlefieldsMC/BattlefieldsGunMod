@@ -185,11 +185,18 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     }
 
 //<<<<<<< HEAD
+//<<<<<<< HEAD
     @Override
     public void setMotionX(double motionX)
     {
         super.setMotion(motionX, super.getMotion().getY(), super.getMotion().getZ());
     }
+//=======
+//        if(this.projectile.isGravity())
+//        {
+//            this.setMotion(this.getMotion().add(0, this.modifiedGravity, 0));
+//        }
+//>>>>>>> 1.15.X
 //=======
 //        if(this.projectile.isGravity())
 //        {
@@ -334,7 +341,12 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     public double getMotionZ()
     {
 //<<<<<<< HEAD
+//<<<<<<< HEAD
         return super.getMotion().z;
+//=======
+//        ((ServerWorld) this.world).spawnParticle(new BlockParticleData(ParticleTypes.BLOCK, state), x, y, z, (int) this.projectile.getDamage(), 0.0, 0.0, 0.0, 0.05);
+//        this.world.playSound(null, x, y, z, state.getSoundType().getBreakSound(), SoundCategory.BLOCKS, 0.75F, 2.0F);
+//>>>>>>> 1.15.X
 //=======
 //        ((ServerWorld) this.world).spawnParticle(new BlockParticleData(ParticleTypes.BLOCK, state), x, y, z, (int) this.projectile.getDamage(), 0.0, 0.0, 0.0, 0.05);
 //        this.world.playSound(null, x, y, z, state.getSoundType().getBreakSound(), SoundCategory.BLOCKS, 0.75F, 2.0F);

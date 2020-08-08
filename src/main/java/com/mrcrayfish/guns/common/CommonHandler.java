@@ -248,7 +248,6 @@ public class CommonHandler
                     {
                         DyeItem dyeItem = (DyeItem) dyeStack.getItem();
                         int color = dyeItem.getDyeColor().getColorValue();
-
                         if (stack.getItem() instanceof IColored && ((IColored) stack.getItem()).canColor(stack))
                         {
                             IColored colored = (IColored) stack.getItem();

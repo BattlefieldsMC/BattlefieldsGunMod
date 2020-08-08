@@ -342,7 +342,7 @@ public final class Gun implements INBTSerializable<CompoundNBT>
             {
                 this.damageReduceOverLife = tag.getBoolean("DamageReduceOverLife");
             }
-            if(tag.contains("TrailColor", Constants.NBT.TAG_INT))
+            if (tag.contains("TrailColor", Constants.NBT.TAG_INT))
             {
                 this.trailColor = tag.getInt("TrailColor");
             }
@@ -426,6 +426,8 @@ public final class Gun implements INBTSerializable<CompoundNBT>
         }
 
         /**
+         * <<<<<<< HEAD
+         *
          * @return Whether or not a bullet hole should be spawned from the bullet hitting a block
          */
         public boolean isSpawnBulletHole()
@@ -434,6 +436,9 @@ public final class Gun implements INBTSerializable<CompoundNBT>
         }
 
         /**
+         * =======
+         * >>>>>>> 1.15.X
+         *
          * @return If the damage should reduce the further the projectile travels
          */
         public boolean isDamageReduceOverLife()
