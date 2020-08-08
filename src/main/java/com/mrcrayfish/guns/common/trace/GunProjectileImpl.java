@@ -27,7 +27,7 @@ public class GunProjectileImpl extends AbstractGunProjectile {
         this.weapon = weapon;
         this.modifiedGun = modifiedGun;
         this.modifiedGravity = GunModifierHelper.getModifiedProjectileGravity(weapon, 0.05);
-        this.setShooter(shooter.getUniqueID());
+        this.setShooter(shooter);
 
         Vec3d dir = getDirection(shooter.getRNG(), shooter, item, modifiedGun);
         this.setMotion(dir.getX() * modifiedGun.getProjectile().getSpeed(), dir.getY() * modifiedGun.getProjectile().getSpeed(), dir.getZ() * modifiedGun.getProjectile().getSpeed());
