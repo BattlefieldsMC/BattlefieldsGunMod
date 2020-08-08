@@ -136,7 +136,7 @@ public class CommonHandler
 
                         if (!modifiedGun.getProjectile().isVisible())
                         {
-                            MessageBullet messageBullet = new MessageBullet(bullet, modifiedGun.getProjectile());
+                            MessageBullet messageBullet = new MessageBullet(modifiedGun.getProjectile().getItem(), bullet, modifiedGun.getProjectile().isGravity() ? GunModifierHelper.getModifiedProjectileGravity(heldItem, 0.05) : 0, modifiedGun.getProjectile().getLife(), modifiedGun.getProjectile().getTrailColor(), modifiedGun.getProjectile().getTrailLengthMultiplier());
                             PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player.getPosX(), player.getPosY(), player.getPosZ(), Config.COMMON.network.projectileTrackingRange.get(), player.world.getDimension().getType())), messageBullet);
                         }
                     });

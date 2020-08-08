@@ -18,6 +18,7 @@ public class Bullet {
     private double lastZ;
     private int ticksExisted;
     private boolean complete;
+    private final double gravity;
     private final int maxLife;
     private float rotationYaw;
     private float rotationPitch;
@@ -32,6 +33,7 @@ public class Bullet {
         this.lastX = this.projectile.getX();
         this.lastY = this.projectile.getY();
         this.lastZ = this.projectile.getZ();
+        this.gravity = message.getGravity();
         this.maxLife = message.getLife();
         this.trailColor = message.getTrailColor();
         this.trailLengthMultiplier = message.getTrailLengthMultiplier();
@@ -44,7 +46,7 @@ public class Bullet {
         if (this.projectile.isComplete() && this.projectile.getCompletePos() == null)
             this.complete = true;
         if (this.projectile.isComplete() && this.projectile.getCompletePos() != null) {
-            Vec3d projectileMotion = new Vec3d(this.projectile.getMotionX(), this.projectile.getMotionY(), this.projectile.getMotionZ());
+            Vec3d projectileMotion = new Vec3d(this.projectile.getMotionX(), this.projectile.getMotionY() - this.gravity, this.projectile.getMotionZ());
             Vec3d difference = this.projectile.getCompletePos().subtract(this.posX, this.posY, this.posZ);
             if (difference.lengthSquared() < projectileMotion.lengthSquared()) {
                 motion = difference;

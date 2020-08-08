@@ -17,6 +17,7 @@ public class MessageBullet implements IMessage
 {
     private ResourceLocation item;
     private GunProjectile projectile;
+    private double gravity;
     private int life;
     private int trailColor;
     private double trailLengthMultiplier;
@@ -25,13 +26,14 @@ public class MessageBullet implements IMessage
     {
     }
 
-    public MessageBullet(GunProjectile bullet, Gun.Projectile projectile)
+    public MessageBullet(ResourceLocation item, GunProjectile projectile, double gravity, int life, int trailColor, double trailLengthMultiplier)
     {
-        this.item = projectile.getItem();
-        this.projectile = bullet;
-        this.life = projectile.getLife();
-        this.trailColor = projectile.getTrailColor();
-        this.trailLengthMultiplier = projectile.getTrailLengthMultiplier();
+        this.item = item;
+        this.projectile = projectile;
+        this.gravity = gravity;
+        this.life = life;
+        this.trailColor = trailColor;
+        this.trailLengthMultiplier = trailLengthMultiplier;
     }
 
     @Override
@@ -39,6 +41,7 @@ public class MessageBullet implements IMessage
     {
         buffer.writeResourceLocation(this.item);
         ProjectileManager.getInstance().getFactory(this.item).encode(buffer, this.projectile);
+        buffer.writeDouble(this.gravity);
         buffer.writeVarInt(this.life);
         buffer.writeVarInt(this.trailColor);
         buffer.writeDouble(this.trailLengthMultiplier);
@@ -49,6 +52,7 @@ public class MessageBullet implements IMessage
     {
         this.item = buffer.readResourceLocation();
         this.projectile = ProjectileManager.getInstance().getFactory(this.item).decode(buffer);
+        this.gravity = buffer.readDouble();
         this.life = buffer.readVarInt();
         this.trailColor = buffer.readVarInt();
         this.trailLengthMultiplier = buffer.readDouble();
@@ -64,6 +68,11 @@ public class MessageBullet implements IMessage
     public GunProjectile getProjectile()
     {
         return projectile;
+    }
+
+    public double getGravity()
+    {
+        return gravity;
     }
 
     public int getLife() {
