@@ -11,7 +11,7 @@ import com.mrcrayfish.guns.crafting.WorkbenchRecipes;
 import com.mrcrayfish.guns.init.ModItems;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.item.IAmmo;
-import com.mrcrayfish.guns.item.IAttachment;
+import com.mrcrayfish.guns.item.attachment.IAttachment;
 import com.mrcrayfish.guns.item.IColored;
 import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.network.message.MessageCraft;
@@ -24,7 +24,6 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.ItemTransformVec3f;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.PlayerInventory;
@@ -112,7 +111,7 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
         if(!weapons.isEmpty())
         {
             ItemStack icon = new ItemStack(ModItems.ASSAULT_RIFLE.get());
-            icon.getOrCreateTag().putInt("AmmoCount", ModItems.ASSAULT_RIFLE.get().getGun().general.maxAmmo);
+            icon.getOrCreateTag().putInt("AmmoCount", ModItems.ASSAULT_RIFLE.get().getGun().getGeneral().getMaxAmmo());
             this.tabs.add(new Tab(icon, "weapons", weapons));
         }
 
@@ -147,7 +146,7 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
         Objects.requireNonNull(id);
         for(GunItem gunItem : NetworkGunManager.getClientRegisteredGuns())
         {
-            if(id.equals(gunItem.getModifiedGun(stack).projectile.item))
+            if(id.equals(gunItem.getModifiedGun(stack).getProjectile().getItem()))
             {
                 return true;
             }
@@ -231,7 +230,7 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
         if(this.currentTab != null)
         {
             ItemStack item = this.displayStack;
-            if(item.getItem() instanceof IColored && ((IColored) item.getItem()).canColor())
+            if(item.getItem() instanceof IColored && ((IColored) item.getItem()).canColor(item))
             {
                 IColored colored = (IColored) item.getItem();
                 if(!this.workbench.getStackInSlot(0).isEmpty())

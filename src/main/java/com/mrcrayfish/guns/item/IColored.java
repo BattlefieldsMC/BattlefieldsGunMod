@@ -1,5 +1,7 @@
 package com.mrcrayfish.guns.item;
 
+import net.minecraft.client.renderer.color.IItemColor;
+import net.minecraft.client.renderer.color.ItemColors;
 import net.minecraft.item.DyeItem;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.util.Constants;
@@ -7,35 +9,77 @@ import net.minecraftforge.common.util.Constants;
 import java.util.List;
 
 /**
+ * A simple interface to allow items to be colored. Implementing this on an item will automatically
+ * register an {@link IItemColor} into {@link ItemColors}. If the item this is implemented on is an
+ * attachment, it will colored automatically by the color of the weapon if the item does not explicitly
+ * have a color set.
+ * <p>
  * Author: MrCrayfish
  */
 public interface IColored
 {
-    default boolean canColor()
+    /**
+     * Gets whether or not this item can be colored
+     *
+     * @param stack the ItemStack of the colored item
+     * @return If this item can be colored
+     */
+    default boolean canColor(ItemStack stack)
     {
         return true;
     }
 
+    /**
+     * Gets whether or not this item has a color applied
+     *
+     * @param stack the ItemStack of the colored item
+     * @return If this item has a color applied
+     */
     default boolean hasColor(ItemStack stack)
     {
         return stack.getTag() != null && stack.getTag().contains("Color", Constants.NBT.TAG_INT);
     }
 
+    /**
+     * Gets the color of this item
+     *
+     * @param stack the ItemStack of the colored item
+     * @return the color in rgba integer format
+     */
     default int getColor(ItemStack stack)
     {
         return stack.getTag() != null ? stack.getTag().getInt("Color") : -1;
     }
 
+    /**
+     * Sets the color of this item
+     *
+     * @param stack the ItemStack of the colored item
+     * @param color the color in rgba integer format
+     */
     default void setColor(ItemStack stack, int color)
     {
         stack.getOrCreateTag().putInt("Color", color);
     }
 
+    /**
+     * Removes the color from this item
+     *
+     * @param stack the ItemStack of the colored item
+     */
     default void removeColor(ItemStack stack)
     {
         stack.getOrCreateTag().remove("Color");
     }
 
+    /**
+     * Combines the color values of a list of dyes and applies the color to the colored item. If the
+     * colored item already has a color, this will be included into combining the dye color values.
+     *
+     * @param stack the ItemStack of the colored item
+     * @param dyes  a list of {@link DyeItem}
+     * @return a new ItemStack with the combined color
+     */
     static ItemStack dye(ItemStack stack, List<DyeItem> dyes)
     {
         ItemStack resultStack = ItemStack.EMPTY;
@@ -43,7 +87,7 @@ public interface IColored
         int maxColor = 0;
         int colorCount = 0;
         IColored coloredItem = null;
-        if(stack.getItem() instanceof IColored)
+        if (stack.getItem() instanceof IColored && ((IColored) stack.getItem()).canColor(stack))
         {
             coloredItem = (IColored) stack.getItem();
             resultStack = stack.copy();

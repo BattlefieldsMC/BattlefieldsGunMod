@@ -30,10 +30,10 @@ public class GunProjectileImpl extends AbstractGunProjectile {
         this.setShooter(shooter.getUniqueID());
 
         Vec3d dir = getDirection(shooter.getRNG(), shooter, item, modifiedGun);
-        this.setMotion(dir.getX() * modifiedGun.projectile.speed, dir.getY() * modifiedGun.projectile.speed, dir.getZ() * modifiedGun.projectile.speed);
+        this.setMotion(dir.getX() * modifiedGun.getProjectile().getSpeed(), dir.getY() * modifiedGun.getProjectile().getSpeed(), dir.getZ() * modifiedGun.getProjectile().getSpeed());
         this.setPosition(shooter.getPosX(), shooter.getPosY() + shooter.getEyeHeight(), shooter.getPosZ());
 
-        Item ammo = ForgeRegistries.ITEMS.getValue(modifiedGun.projectile.item);
+        Item ammo = ForgeRegistries.ITEMS.getValue(modifiedGun.getProjectile().getItem());
         if (ammo != null)
             this.setBullet(new ItemStack(ammo));
     }
@@ -52,17 +52,17 @@ public class GunProjectileImpl extends AbstractGunProjectile {
     @Override
     public void tick(World world) {
         super.tick(world);
-        this.tickStep(world, this.modifiedGun.projectile.size, this.modifiedGun.projectile.life, this.modifiedGravity, this.modifiedGun.projectile.spawnBulletHole, true);
+        this.tickStep(world, this.modifiedGun.getProjectile().getSize(), this.modifiedGun.getProjectile().getLife(), this.modifiedGravity, this.modifiedGun.getProjectile().isSpawnBulletHole(), true);
     }
 
     @Override
     public float getDamage() {
-        float initialDamage = (this.modifiedGun.projectile.damage + this.getAdditionalDamage());
-        if (this.modifiedGun.projectile.damageReduceOverLife) {
-            float modifier = ((float) this.modifiedGun.projectile.life - (float) (this.getTicksExisted() - 1)) / (float) this.modifiedGun.projectile.life;
+        float initialDamage = (this.modifiedGun.getProjectile().getDamage() + this.getAdditionalDamage());
+        if (this.modifiedGun.getProjectile().isDamageReduceOverLife()) {
+            float modifier = ((float) this.modifiedGun.getProjectile().getLife() - (float) (this.getTicksExisted() - 1)) / (float) this.modifiedGun.getProjectile().getLife();
             initialDamage *= modifier;
         }
-        float damage = initialDamage / this.modifiedGun.general.projectileAmount;
+        float damage = initialDamage / this.modifiedGun.getGeneral().getProjectileAmount();
         return GunModifierHelper.getModifiedDamage(this.weapon, this.modifiedGun, damage);
     }
 
@@ -93,13 +93,13 @@ public class GunProjectileImpl extends AbstractGunProjectile {
     }
 
     private static Vec3d getDirection(Random random, LivingEntity shooter, GunItem item, Gun modifiedGun) {
-        float gunSpread = modifiedGun.general.spread;
+        float gunSpread = modifiedGun.getGeneral().getSpread();
 
         if (gunSpread == 0F) {
             return getVectorFromRotation(shooter.rotationPitch, shooter.rotationYaw);
         }
 
-        if (!modifiedGun.general.alwaysSpread) {
+        if (!modifiedGun.getGeneral().isAlwaysSpread()) {
             gunSpread *= SpreadTracker.get(shooter.getUniqueID()).getSpread(item);
         }
 

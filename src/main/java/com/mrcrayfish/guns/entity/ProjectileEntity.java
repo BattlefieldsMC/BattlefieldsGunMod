@@ -19,6 +19,9 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SExplosionPacket;
+import net.minecraft.particles.BlockParticleData;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
@@ -54,18 +57,17 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     public ProjectileEntity(EntityType<? extends Entity> entityType, World worldIn, LivingEntity shooter, ItemStack weapon, GunItem item, Gun modifiedGun)
     {
         this(entityType, worldIn);
-        this.shooterId = shooter.getEntityId();
-        this.shooter = shooter;
+        this.setShooter(shooter);
         this.modifiedGun = modifiedGun;
-        this.general = modifiedGun.general;
-        this.projectile = modifiedGun.projectile;
-        this.entitySize = new EntitySize(this.projectile.size, this.projectile.size, false);
+        this.general = modifiedGun.getGeneral();
+        this.projectile = modifiedGun.getProjectile();
+        this.entitySize = new EntitySize(this.projectile.getSize(), this.projectile.getSize(), false);
         this.modifiedGravity = GunModifierHelper.getModifiedProjectileGravity(weapon, 0.05);
-        this.life = GunModifierHelper.getModifiedProjectileLife(weapon, this.projectile.life);
+        this.life = GunModifierHelper.getModifiedProjectileLife(weapon, this.projectile.getLife());
 
         Vec3d dir = this.getDirection(shooter, weapon, item, modifiedGun);
         double speedModifier = GunEnchantmentHelper.getProjectileSpeedModifier(weapon, modifiedGun);
-        double speed = GunModifierHelper.getModifiedProjectileSpeed(weapon, this.projectile.speed * speedModifier);
+        double speed = GunModifierHelper.getModifiedProjectileSpeed(weapon, this.projectile.getSpeed() * speedModifier);
         this.setMotion(dir.x * speed, dir.y * speed, dir.z * speed);
         this.updateHeading();
 
@@ -75,11 +77,9 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         double posZ = shooter.lastTickPosZ + (shooter.getPosZ() - shooter.lastTickPosZ) / 2.0;
         this.setPosition(posX, posY, posZ);
 
-        Item ammo = ForgeRegistries.ITEMS.getValue(this.projectile.item);
-        if (ammo != null)
-        {
+        Item ammo = ForgeRegistries.ITEMS.getValue(this.projectile.getItem());
+        if(ammo != null)
             this.item = new ItemStack(ammo);
-        }
     }
 
     @Override
@@ -95,7 +95,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
     private Vec3d getDirection(LivingEntity shooter, ItemStack weapon, GunItem item, Gun modifiedGun)
     {
-        float gunSpread = GunModifierHelper.getModifiedSpread(weapon, modifiedGun.general.spread);
+        float gunSpread = GunModifierHelper.getModifiedSpread(weapon, modifiedGun.getGeneral().getSpread());
 
         if (gunSpread == 0F)
         {
@@ -104,7 +104,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
         if (shooter instanceof PlayerEntity)
         {
-            if (!modifiedGun.general.alwaysSpread)
+            if(!modifiedGun.getGeneral().isAlwaysSpread())
             {
                 gunSpread *= SpreadTracker.get(shooter.getUniqueID()).getSpread(item);
             }
@@ -184,11 +184,18 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         super.setPosition(super.getPosX(), super.getPosY(), z);
     }
 
+//<<<<<<< HEAD
     @Override
     public void setMotionX(double motionX)
     {
         super.setMotion(motionX, super.getMotion().getY(), super.getMotion().getZ());
     }
+//=======
+//        if(this.projectile.isGravity())
+//        {
+//            this.setMotion(this.getMotion().add(0, this.modifiedGravity, 0));
+//        }
+//>>>>>>> 1.15.X
 
     @Override
     public void setMotionY(double motionY)
@@ -232,13 +239,13 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     {
         if (!this.world.isRemote())
         {
-            this.tickStep(this.world, this.projectile.size, this.projectile.life, this.modifiedGravity, this.projectile.spawnBulletHole, false);
+            this.tickStep(this.world, this.projectile.getSize(), this.projectile.getLife(), this.modifiedGravity, this.projectile.isSpawnBulletHole(), false);
         }
         else
         {
             this.setPosition(this.getX() + this.getMotionX(), this.getY() + this.getMotionY(), this.getZ() + this.getMotionZ());
 
-            if (this.projectile.gravity)
+            if (this.projectile.isGravity())
                 this.setMotionY(this.getMotionY() - GunModifierHelper.getModifiedProjectileGravity(this.getWeapon(), 0.04));
         }
     }
@@ -326,7 +333,12 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     @Override
     public double getMotionZ()
     {
+//<<<<<<< HEAD
         return super.getMotion().z;
+//=======
+//        ((ServerWorld) this.world).spawnParticle(new BlockParticleData(ParticleTypes.BLOCK, state), x, y, z, (int) this.projectile.getDamage(), 0.0, 0.0, 0.0, 0.05);
+//        this.world.playSound(null, x, y, z, state.getSoundType().getBreakSound(), SoundCategory.BLOCKS, 0.75F, 2.0F);
+//>>>>>>> 1.15.X
     }
 
     @Override
@@ -373,7 +385,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         this.item = buffer.readItemStack();
         this.modifiedGravity = buffer.readDouble();
         this.life = buffer.readVarInt();
-        this.entitySize = new EntitySize(this.projectile.size, this.projectile.size, false);
+        this.entitySize = new EntitySize(this.projectile.getSize(), this.projectile.getSize(), false);
     }
 
     public void updateHeading()
@@ -414,13 +426,13 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     @Override
     public float getDamage()
     {
-        float initialDamage = (this.projectile.damage + this.additionalDamage);
-        if (this.projectile.damageReduceOverLife)
+        float initialDamage = (this.projectile.getDamage() + this.additionalDamage);
+        if(this.projectile.isDamageReduceOverLife())
         {
-            float modifier = ((float) this.projectile.life - (float) (this.ticksExisted - 1)) / (float) this.projectile.life;
+            float modifier = ((float) this.projectile.getLife() - (float) (this.ticksExisted - 1)) / (float) this.projectile.getLife();
             initialDamage *= modifier;
         }
-        float damage = initialDamage / this.general.projectileAmount;
+        float damage = initialDamage / this.general.getProjectileAmount();
         return GunModifierHelper.getModifiedDamage(this.weapon, this.modifiedGun, damage);
     }
 

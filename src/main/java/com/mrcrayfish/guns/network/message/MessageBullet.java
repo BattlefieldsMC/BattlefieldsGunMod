@@ -3,6 +3,7 @@ package com.mrcrayfish.guns.network.message;
 import com.mrcrayfish.guns.client.ClientHandler;
 import com.mrcrayfish.guns.common.ProjectileManager;
 import com.mrcrayfish.guns.common.trace.GunProjectile;
+import com.mrcrayfish.guns.object.Gun;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -24,13 +25,13 @@ public class MessageBullet implements IMessage
     {
     }
 
-    public MessageBullet(ResourceLocation item, GunProjectile projectile, int life, int trailColor, double trailLengthMultiplier)
+    public MessageBullet(GunProjectile bullet, Gun.Projectile projectile)
     {
-        this.item = item;
-        this.projectile = projectile;
-        this.life = life;
-        this.trailColor = trailColor;
-        this.trailLengthMultiplier = trailLengthMultiplier;
+        this.item = projectile.getItem();
+        this.projectile = bullet;
+        this.life = projectile.getLife();
+        this.trailColor = projectile.getTrailColor();
+        this.trailLengthMultiplier = projectile.getTrailLengthMultiplier();
     }
 
     @Override

@@ -46,7 +46,8 @@ import java.util.function.Predicate;
  *
  * @author Ocelot
  */
-public interface GunProjectile {
+public interface GunProjectile
+{
     Predicate<Entity> PROJECTILE_TARGETS = input -> input != null && !input.isSpectator() && input.canBeCollidedWith();
     Predicate<BlockState> IGNORE_LEAVES = input -> input != null && Config.COMMON.gameplay.ignoreLeaves.get() && input.getBlock() instanceof LeavesBlock;
 
@@ -67,42 +68,55 @@ public interface GunProjectile {
      * @param spawnBulletHole Whether or not a bullet hole should be spawned by this projectile
      * @param dealShotDamage  Whether or not the bullet itself should deal damage to the world
      */
-    default void tickStep(World world, float size, int life, double gravity, boolean spawnBulletHole, boolean dealShotDamage) {
+    default void tickStep(World world, float size, int life, double gravity, boolean spawnBulletHole, boolean dealShotDamage)
+    {
         Entity shooter = world.getEntityByID(this.getShooterId());
 
         Vec3d startVec = new Vec3d(this.getX(), this.getY(), this.getZ());
         Vec3d endVec = startVec.add(this.getMotionX(), this.getMotionY(), this.getMotionZ());
         RayTraceResult result = rayTraceBlocks(world, new RayTraceContext(startVec, endVec, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, shooter), IGNORE_LEAVES);
-        if (result.getType() != RayTraceResult.Type.MISS) {
+        if (result.getType() != RayTraceResult.Type.MISS)
+        {
             endVec = result.getHitVec();
         }
 
         List<EntityResult> hitEntities = null;
         int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.COLLATERAL.get(), this.getWeapon());
-        if (level == 0) {
+        if (level == 0)
+        {
             EntityResult entityResult = findEntityOnPath(this, world, size, startVec, endVec);
-            if (entityResult != null) {
+            if (entityResult != null)
+            {
                 hitEntities = Collections.singletonList(entityResult);
             }
-        } else {
+        }
+        else
+        {
             hitEntities = findEntitiesOnPath(this, world, size, startVec, endVec);
         }
 
-        if (hitEntities != null && hitEntities.size() > 0) {
-            for (EntityResult entityResult : hitEntities) {
+        if (hitEntities != null && hitEntities.size() > 0)
+        {
+            for (EntityResult entityResult : hitEntities)
+            {
                 result = new ExtendedEntityRayTraceResult(entityResult);
-                if (((ExtendedEntityRayTraceResult) result).getEntity() instanceof PlayerEntity) {
+                if (((ExtendedEntityRayTraceResult) result).getEntity() instanceof PlayerEntity)
+                {
                     PlayerEntity player = (PlayerEntity) ((ExtendedEntityRayTraceResult) result).getEntity();
 
-                    if (this.getShooter() != null && world.getPlayerByUuid(this.getShooter()) != null && !world.getPlayerByUuid(this.getShooter()).canAttackPlayer(player)) {
+                    if (this.getShooter() != null && world.getPlayerByUuid(this.getShooter()) != null && !world.getPlayerByUuid(this.getShooter()).canAttackPlayer(player))
+                    {
                         result = null;
                     }
                 }
-                if (result != null) {
+                if (result != null)
+                {
                     this.onHit(world, this.getWeapon(), this.getDamage(), spawnBulletHole, dealShotDamage, result, startVec, endVec);
                 }
             }
-        } else {
+        }
+        else
+        {
             this.onHit(world, this.getWeapon(), this.getDamage(), spawnBulletHole, dealShotDamage, result, startVec, endVec);
         }
 
@@ -111,8 +125,10 @@ public interface GunProjectile {
         if (gravity != 0)
             this.setMotionY(this.getMotionY() - gravity);
 
-        if (this.getTicksExisted() >= life) {
-            if (!this.isComplete()) {
+        if (this.getTicksExisted() >= life)
+        {
+            if (!this.isComplete())
+            {
                 this.onExpired(world);
             }
             this.complete(new Vec3d(this.getX(), this.getY(), this.getZ()));
@@ -122,7 +138,8 @@ public interface GunProjectile {
     /**
      * Called when this projectile is removed.
      */
-    default void onExpired(World world) {
+    default void onExpired(World world)
+    {
     }
 
     /**
@@ -136,12 +153,15 @@ public interface GunProjectile {
      * @param startVec        The ray trace start position
      * @param endVec          The ray trace end position
      */
-    default void onHit(World world, ItemStack weapon, float damage, boolean spawnBulletHole, boolean dealShotDamage, RayTraceResult result, Vec3d startVec, Vec3d endVec) {
+    default void onHit(World world, ItemStack weapon, float damage, boolean spawnBulletHole, boolean dealShotDamage, RayTraceResult result, Vec3d startVec, Vec3d endVec)
+    {
         MinecraftForge.EVENT_BUS.post(new GunProjectileHitEvent(result, this));
 
-        if (result instanceof BlockRayTraceResult) {
+        if (result instanceof BlockRayTraceResult)
+        {
             BlockRayTraceResult blockRayTraceResult = (BlockRayTraceResult) result;
-            if (blockRayTraceResult.getType() == RayTraceResult.Type.MISS) {
+            if (blockRayTraceResult.getType() == RayTraceResult.Type.MISS)
+            {
                 return;
             }
 
@@ -158,7 +178,8 @@ public interface GunProjectile {
             if (dealShotDamage && block instanceof IDamageable)
                 ((IDamageable) block).onBlockDamaged(world, state, pos, this, damage, (int) Math.ceil(damage / 2.0) + 1);
 
-            if (!world.isRemote() && spawnBulletHole) {
+            if (!world.isRemote() && spawnBulletHole)
+            {
                 Vec3d hitVec = blockRayTraceResult.getHitVec();
                 double holeX = hitVec.getX() + 0.005 * blockRayTraceResult.getFace().getXOffset();
                 double holeY = hitVec.getY() + 0.005 * blockRayTraceResult.getFace().getYOffset();
@@ -169,12 +190,15 @@ public interface GunProjectile {
 
             this.onHitBlock(world, weapon, damage, state, pos, result.getHitVec(), startVec, endVec);
 
-            if (!world.isRemote()) {
+            if (!world.isRemote())
+            {
                 int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.FIRE_STARTER.get(), this.getWeapon());
-                if (level > 0 && state.isSolidSide(world, pos, blockRayTraceResult.getFace())) {
+                if (level > 0 && state.isSolidSide(world, pos, blockRayTraceResult.getFace()))
+                {
                     BlockPos offsetPos = pos.offset(blockRayTraceResult.getFace());
                     BlockState offsetState = world.getBlockState(offsetPos);
-                    if (offsetState.isAir(world, offsetPos)) {
+                    if (offsetState.isAir(world, offsetPos))
+                    {
                         BlockState fireState = ((FireBlock) Blocks.FIRE).getStateForPlacement(world, offsetPos);
                         world.setBlockState(offsetPos, fireState, 11);
                     }
@@ -184,7 +208,8 @@ public interface GunProjectile {
             return;
         }
 
-        if (result instanceof ExtendedEntityRayTraceResult) {
+        if (result instanceof ExtendedEntityRayTraceResult)
+        {
             ExtendedEntityRayTraceResult entityRayTraceResult = (ExtendedEntityRayTraceResult) result;
             Entity entity = entityRayTraceResult.getEntity();
             if (entity.getEntityId() == this.getShooterId())
@@ -209,7 +234,8 @@ public interface GunProjectile {
      * @param endVec   The ending position of the shot
      * @param headShot Whether or not the shot was a headshot
      */
-    default void onHitEntity(World world, ItemStack weapon, float damage, Entity entity, Vec3d hitVec, Vec3d startVec, Vec3d endVec, boolean headShot) {
+    default void onHitEntity(World world, ItemStack weapon, float damage, Entity entity, Vec3d hitVec, Vec3d startVec, Vec3d endVec, boolean headShot)
+    {
         if (world.isRemote())
             return;
 
@@ -221,22 +247,28 @@ public interface GunProjectile {
         boolean critical = damage != newDamage;
         damage = newDamage;
 
-        if (headShot) {
+        if (headShot)
+        {
             damage *= Config.COMMON.gameplay.headShotDamageMultiplier.get();
         }
 
         DamageSource source = new DamageSourceProjectile("bullet", this, shooter, this.getWeapon()).setProjectile();
         entity.attackEntityFrom(source, damage);
 
-        if (shooter instanceof ServerPlayerEntity) {
-            if (entity instanceof PlayerEntity) {
+        if (shooter instanceof ServerPlayerEntity)
+        {
+            if (entity instanceof PlayerEntity)
+            {
                 SoundEvent event = headShot ? SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP : SoundEvents.ENTITY_PLAYER_HURT;
-                if (critical) {
+                if (critical)
+                {
                     event = SoundEvents.ENTITY_ITEM_BREAK; //TODO change
                 }
                 ServerPlayerEntity shooterPlayer = (ServerPlayerEntity) shooter;
                 shooterPlayer.connection.sendPacket(new SPlaySoundPacket(event.getRegistryName(), SoundCategory.PLAYERS, new Vec3d(shooter.getPosX(), shooter.getPosY(), shooter.getPosZ()), 0.75F, 1.0F));
-            } else if (critical || headShot) {
+            }
+            else if (critical || headShot)
+            {
                 SoundEvent event = headShot ? SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP : SoundEvents.ENTITY_ITEM_BREAK;
                 ServerPlayerEntity shooterPlayer = (ServerPlayerEntity) shooter;
                 shooterPlayer.connection.sendPacket(new SPlaySoundPacket(event.getRegistryName(), SoundCategory.PLAYERS, new Vec3d(shooter.getPosX(), shooter.getPosY(), shooter.getPosZ()), 0.75F, 1.0F));
@@ -248,7 +280,8 @@ public interface GunProjectile {
         PacketHandler.getPlayChannel().send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new MessageBlood(hitVec.getX(), hitVec.getY(), hitVec.getZ()));
     }
 
-    default void onHitBlock(World world, ItemStack weapon, float damage, BlockState state, BlockPos pos, Vec3d hitVec, Vec3d startVec, Vec3d endVec) {
+    default void onHitBlock(World world, ItemStack weapon, float damage, BlockState state, BlockPos pos, Vec3d hitVec, Vec3d startVec, Vec3d endVec)
+    {
         if (world.isRemote())
             return;
 
@@ -383,7 +416,8 @@ public interface GunProjectile {
      * @param lastY The new last y position
      * @param lastZ The new last z position
      */
-    default void setLastPosition(double lastX, double lastY, double lastZ) {
+    default void setLastPosition(double lastX, double lastY, double lastZ)
+    {
         this.setLastX(lastX);
         this.setLastY(lastY);
         this.setLastZ(lastZ);
@@ -417,7 +451,8 @@ public interface GunProjectile {
      * @param y The new y position of this projectile
      * @param z The new z position of this projectile
      */
-    default void setPosition(double x, double y, double z) {
+    default void setPosition(double x, double y, double z)
+    {
         this.setX(x);
         this.setY(y);
         this.setZ(z);
@@ -451,10 +486,22 @@ public interface GunProjectile {
      * @param motionY The new motion in the y direction
      * @param motionZ The new motion in the z direction
      */
-    default void setMotion(double motionX, double motionY, double motionZ) {
+    default void setMotion(double motionX, double motionY, double motionZ)
+    {
         this.setMotionX(motionX);
         this.setMotionY(motionY);
         this.setMotionZ(motionZ);
+    }
+
+    /**
+     * Sets the shooter entity to the one provided.
+     *
+     * @param shooter The new shooter of the bullet
+     */
+    default void setShooter(LivingEntity shooter)
+    {
+        this.setShooter(shooter.getUniqueID());
+        this.setShooterId(shooter.getEntityId());
     }
 
     /**
@@ -503,7 +550,8 @@ public interface GunProjectile {
      * @return Whether or not an entity was hit by the projectile
      */
     @Nullable
-    static EntityResult findEntityOnPath(GunProjectile projectile, World world, float bulletSize, Vec3d startVec, Vec3d endVec) {
+    static EntityResult findEntityOnPath(GunProjectile projectile, World world, float bulletSize, Vec3d startVec, Vec3d endVec)
+    {
         Entity shooter = world.getEntityByID(projectile.getShooterId());
         if (shooter == null)
             return null;
@@ -513,16 +561,20 @@ public interface GunProjectile {
         boolean headshot = false;
         List<Entity> entities = world.getEntitiesInAABBexcluding(shooter, new AxisAlignedBB(projectile.getX() - bulletSize / 2, projectile.getY() - bulletSize / 2, projectile.getZ() - bulletSize / 2, projectile.getX() + bulletSize / 2, projectile.getY() + bulletSize / 2, projectile.getZ() + bulletSize / 2).expand(projectile.getMotionX(), projectile.getMotionY(), projectile.getMotionZ()).grow(1.0), PROJECTILE_TARGETS);
         double closestDistance = Double.MAX_VALUE;
-        for (Entity entity : entities) {
-            if (!(entity instanceof GunProjectile)) {
+        for (Entity entity : entities)
+        {
+            if (!(entity instanceof GunProjectile))
+            {
                 HitResult result = getHitResult(world, entity, startVec, endVec);
                 Optional<Vec3d> hitPos = result.getHitPos();
-                if (!hitPos.isPresent()) {
+                if (!hitPos.isPresent())
+                {
                     continue;
                 }
 
                 double distanceToHit = startVec.distanceTo(hitPos.get());
-                if (distanceToHit < closestDistance) {
+                if (distanceToHit < closestDistance)
+                {
                     hitVec = hitPos.get();
                     hitEntity = entity;
                     closestDistance = distanceToHit;
@@ -580,7 +632,8 @@ public interface GunProjectile {
      * @param endVec     The ending position of the movement
      * @return The list of results collected by the ray trace
      */
-    static List<EntityResult> findEntitiesOnPath(GunProjectile projectile, World world, float bulletSize, Vec3d startVec, Vec3d endVec) {
+    static List<EntityResult> findEntitiesOnPath(GunProjectile projectile, World world, float bulletSize, Vec3d startVec, Vec3d endVec)
+    {
         Entity shooter = world.getEntityByID(projectile.getShooterId());
         if (shooter == null)
             return Collections.emptyList();
@@ -616,11 +669,14 @@ public interface GunProjectile {
 
         List<EntityResult> hitEntities = new ArrayList<>();
         List<Entity> entities = world.getEntitiesInAABBexcluding(shooter, new AxisAlignedBB(projectile.getX() - bulletSize / 2, projectile.getY() - bulletSize / 2, projectile.getZ() - bulletSize / 2, projectile.getX() + bulletSize / 2, projectile.getY() + bulletSize / 2, projectile.getZ() + bulletSize / 2).expand(projectile.getMotionX(), projectile.getMotionY(), projectile.getMotionZ()).grow(1.0), PROJECTILE_TARGETS);
-        for (Entity entity : entities) {
-            if (!(entity instanceof GunProjectile)) {
+        for (Entity entity : entities)
+        {
+            if (!(entity instanceof GunProjectile))
+            {
                 HitResult result = getHitResult(world, entity, startVec, endVec);
                 Optional<Vec3d> hitPos = result.getHitPos();
-                if (!hitPos.isPresent()) {
+                if (!hitPos.isPresent())
+                {
                     continue;
                 }
                 hitEntities.add(new EntityResult(entity, hitPos.get(), result.isHeadshot()));
@@ -638,7 +694,8 @@ public interface GunProjectile {
      * @param predicate the block state predicate
      * @return a result of the raytrace
      */
-    static BlockRayTraceResult rayTraceBlocks(World world, RayTraceContext context, java.util.function.Predicate<BlockState> predicate) {
+    static BlockRayTraceResult rayTraceBlocks(World world, RayTraceContext context, java.util.function.Predicate<BlockState> predicate)
+    {
         return func_217300_a(context, (rayTraceContext, blockPos) ->
         {
             BlockState blockState = world.getBlockState(blockPos);
@@ -661,15 +718,18 @@ public interface GunProjectile {
     }
 
     @SuppressWarnings("unchecked")
-    static HitResult getHitResult(World world, Entity entity, Vec3d startVec, Vec3d endVec) {
+    static HitResult getHitResult(World world, Entity entity, Vec3d startVec, Vec3d endVec)
+    {
         double expandHeight = entity instanceof PlayerEntity && !entity.isCrouching() ? 0.0625 : 0.0;
         AxisAlignedBB boundingBox = entity.getBoundingBox().expand(0, expandHeight, 0);
 
         Vec3d hitPos = boundingBox.rayTrace(startVec, endVec).orElse(null);
         Vec3d grownHitPos = boundingBox.grow(Config.COMMON.gameplay.growBoundingBoxAmount.get(), 0, Config.COMMON.gameplay.growBoundingBoxAmount.get()).rayTrace(startVec, endVec).orElse(null);
-        if (hitPos == null && grownHitPos != null) {
+        if (hitPos == null && grownHitPos != null)
+        {
             RayTraceResult raytraceresult = rayTraceBlocks(world, new RayTraceContext(startVec, grownHitPos, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, null), IGNORE_LEAVES);
-            if (raytraceresult.getType() == RayTraceResult.Type.BLOCK) {
+            if (raytraceresult.getType() == RayTraceResult.Type.BLOCK)
+            {
                 return new HitResult(null, false);
             }
             hitPos = grownHitPos;
@@ -677,18 +737,23 @@ public interface GunProjectile {
 
         /* Check for headshot */
         boolean headshot = false;
-        if (Config.COMMON.gameplay.enableHeadShots.get() && entity instanceof LivingEntity) {
+        if (Config.COMMON.gameplay.enableHeadShots.get() && entity instanceof LivingEntity)
+        {
             IHeadshotBox<LivingEntity> headshotBox = (IHeadshotBox<LivingEntity>) BoundingBoxManager.getHeadshotBoxes(entity.getType());
-            if (headshotBox != null) {
+            if (headshotBox != null)
+            {
                 AxisAlignedBB box = headshotBox.getHeadshotBox((LivingEntity) entity);
-                if (box != null) {
+                if (box != null)
+                {
                     box = box.offset(entity.getPosX(), entity.getPosY(), entity.getPosZ());
                     Optional<Vec3d> headshotHitPos = box.rayTrace(startVec, endVec);
-                    if (!headshotHitPos.isPresent()) {
+                    if (!headshotHitPos.isPresent())
+                    {
                         box = box.grow(Config.COMMON.gameplay.growBoundingBoxAmount.get(), 0, Config.COMMON.gameplay.growBoundingBoxAmount.get());
                         headshotHitPos = box.rayTrace(startVec, endVec);
                     }
-                    if (headshotHitPos.isPresent() && (hitPos == null || headshotHitPos.get().distanceTo(hitPos) < 0.5)) {
+                    if (headshotHitPos.isPresent() && (hitPos == null || headshotHitPos.get().distanceTo(hitPos) < 0.5))
+                    {
                         hitPos = headshotHitPos.get();
                         headshot = true;
                     }
@@ -698,12 +763,16 @@ public interface GunProjectile {
         return new HitResult(hitPos, headshot);
     }
 
-    static <T> T func_217300_a(RayTraceContext context, BiFunction<RayTraceContext, BlockPos, T> hitFunction, Function<RayTraceContext, T> p_217300_2_) {
+    static <T> T func_217300_a(RayTraceContext context, BiFunction<RayTraceContext, BlockPos, T> hitFunction, Function<RayTraceContext, T> p_217300_2_)
+    {
         Vec3d startVec = context.getStartVec();
         Vec3d endVec = context.getEndVec();
-        if (startVec.equals(endVec)) {
+        if (startVec.equals(endVec))
+        {
             return p_217300_2_.apply(context);
-        } else {
+        }
+        else
+        {
             double d0 = MathHelper.lerp(-1.0E-7D, endVec.x, startVec.x);
             double d1 = MathHelper.lerp(-1.0E-7D, endVec.y, startVec.y);
             double d2 = MathHelper.lerp(-1.0E-7D, endVec.z, startVec.z);
@@ -715,9 +784,12 @@ public interface GunProjectile {
             int k = MathHelper.floor(d5);
             BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable(i, j, k);
             T t = hitFunction.apply(context, blockpos$mutable);
-            if (t != null) {
+            if (t != null)
+            {
                 return t;
-            } else {
+            }
+            else
+            {
                 double d6 = d0 - d3;
                 double d7 = d1 - d4;
                 double d8 = d2 - d5;
@@ -731,25 +803,35 @@ public interface GunProjectile {
                 double d13 = d10 * (i1 > 0 ? 1.0D - MathHelper.frac(d4) : MathHelper.frac(d4));
                 double d14 = d11 * (j1 > 0 ? 1.0D - MathHelper.frac(d5) : MathHelper.frac(d5));
 
-                while (d12 <= 1.0D || d13 <= 1.0D || d14 <= 1.0D) {
-                    if (d12 < d13) {
-                        if (d12 < d14) {
+                while (d12 <= 1.0D || d13 <= 1.0D || d14 <= 1.0D)
+                {
+                    if (d12 < d13)
+                    {
+                        if (d12 < d14)
+                        {
                             i += l;
                             d12 += d9;
-                        } else {
+                        }
+                        else
+                        {
                             k += j1;
                             d14 += d11;
                         }
-                    } else if (d13 < d14) {
+                    }
+                    else if (d13 < d14)
+                    {
                         j += i1;
                         d13 += d10;
-                    } else {
+                    }
+                    else
+                    {
                         k += j1;
                         d14 += d11;
                     }
 
                     T t1 = hitFunction.apply(context, blockpos$mutable.setPos(i, j, k));
-                    if (t1 != null) {
+                    if (t1 != null)
+                    {
                         return t1;
                     }
                 }

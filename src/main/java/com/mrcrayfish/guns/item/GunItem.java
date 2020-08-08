@@ -3,6 +3,7 @@ package com.mrcrayfish.guns.item;
 import com.google.common.annotations.Beta;
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.Reference;
+import com.mrcrayfish.guns.common.NetworkGunManager;
 import com.mrcrayfish.guns.enchantment.EnchantmentTypes;
 import com.mrcrayfish.guns.object.Gun;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
@@ -33,9 +34,9 @@ public class GunItem extends Item implements IColored
         super(properties);
     }
 
-    public void setGun(Gun gun)
+    public void setGun(NetworkGunManager.Supplier supplier)
     {
-        this.gun = gun;
+        this.gun = supplier.getGun();
     }
 
     public Gun getGun()
@@ -48,7 +49,7 @@ public class GunItem extends Item implements IColored
     {
         Gun modifiedGun = this.getModifiedGun(stack);
 
-        Item ammo = ForgeRegistries.ITEMS.getValue(modifiedGun.projectile.item);
+        Item ammo = ForgeRegistries.ITEMS.getValue(modifiedGun.getProjectile().getItem());
         if (ammo != null)
             tooltip.add(new TranslationTextComponent("info.cgm.ammo_type", ammo.getName()).setStyle(new Style().setColor(TextFormatting.GRAY)));
 
@@ -60,8 +61,8 @@ public class GunItem extends Item implements IColored
             {
                 float additionalDamage = tagCompound.getFloat("AdditionalDamage");
                 additionalDamage += GunModifierHelper.getAdditionalDamage(stack);
-                
-                if(additionalDamage > 0)
+
+                if (additionalDamage > 0)
                 {
                     additionalDamageText = TextFormatting.GREEN + " +" + ItemStack.DECIMALFORMAT.format(additionalDamage);
                 }
@@ -72,16 +73,16 @@ public class GunItem extends Item implements IColored
             }
         }
 
-        tooltip.add(new TranslationTextComponent("info.cgm.damage", ItemStack.DECIMALFORMAT.format(modifiedGun.projectile.damage) + additionalDamageText).setStyle(new Style().setColor(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("info.cgm.damage", ItemStack.DECIMALFORMAT.format(modifiedGun.getProjectile().getDamage()) + additionalDamageText).setStyle(new Style().setColor(TextFormatting.GRAY)));
         tooltip.add(new TranslationTextComponent("info.cgm.fire_rate", GunModifierHelper.getModifiedRate(stack, GunEnchantmentHelper.getRate(stack, modifiedGun))).setStyle(new Style().setColor(TextFormatting.GRAY)));
-        tooltip.add(new TranslationTextComponent("info.cgm.reload_speed", modifiedGun.general.reloadSpeed).setStyle(new Style().setColor(TextFormatting.GRAY)));
-        if (modifiedGun.general.spread == 0 || modifiedGun.general.alwaysSpread)
+        tooltip.add(new TranslationTextComponent("info.cgm.reload_speed", modifiedGun.getGeneral().getReloadSpeed()).setStyle(new Style().setColor(TextFormatting.GRAY)));
+        if (modifiedGun.getGeneral().getSpread() == 0 || modifiedGun.getGeneral().isAlwaysSpread())
         {
-            tooltip.add(new TranslationTextComponent("info.cgm.always_spread", ItemStack.DECIMALFORMAT.format(GunModifierHelper.getModifiedSpread(stack, modifiedGun.general.spread))).setStyle(new Style().setColor(TextFormatting.GRAY)));
+            tooltip.add(new TranslationTextComponent("info.cgm.always_spread", ItemStack.DECIMALFORMAT.format(GunModifierHelper.getModifiedSpread(stack, modifiedGun.getGeneral().getSpread()))).setStyle(new Style().setColor(TextFormatting.GRAY)));
         }
         else
         {
-            tooltip.add(new TranslationTextComponent("info.cgm.spread", ItemStack.DECIMALFORMAT.format((1.0 / Config.COMMON.projectileSpread.maxCount.get().doubleValue()) * modifiedGun.general.spread)).setStyle(new Style().setColor(TextFormatting.GRAY)));
+            tooltip.add(new TranslationTextComponent("info.cgm.spread", ItemStack.DECIMALFORMAT.format((1.0 / Config.COMMON.projectileSpread.maxCount.get().doubleValue()) * modifiedGun.getGeneral().getSpread())).setStyle(new Style().setColor(TextFormatting.GRAY)));
         }
 
         if (tagCompound != null)
@@ -111,7 +112,7 @@ public class GunItem extends Item implements IColored
         if (this.isInGroup(group))
         {
             ItemStack stack = new ItemStack(this);
-            stack.getOrCreateTag().putInt("AmmoCount", this.gun.general.maxAmmo);
+            stack.getOrCreateTag().putInt("AmmoCount", this.gun.getGeneral().getMaxAmmo());
             stacks.add(stack);
         }
     }
@@ -169,7 +170,7 @@ public class GunItem extends Item implements IColored
         if (enchantment.type == EnchantmentTypes.SEMI_AUTO_GUN)
         {
             Gun modifiedGun = this.getModifiedGun(stack);
-            return !modifiedGun.general.auto;
+            return !modifiedGun.getGeneral().isAuto();
         }
         return super.canApplyAtEnchantingTable(stack, enchantment);
     }

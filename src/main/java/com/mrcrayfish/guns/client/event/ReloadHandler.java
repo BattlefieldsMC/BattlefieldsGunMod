@@ -93,7 +93,7 @@ public class ReloadHandler
                         {
                             return;
                         }
-                        if(Gun.findAmmo(player, gun.projectile.item).isEmpty())
+                        if(Gun.findAmmo(player, gun.getProjectile().getItem()).isEmpty())
                         {
                             return;
                         }

@@ -108,23 +108,22 @@ public class CommonHandler
                     SyncedPlayerData.instance().set(player, ModSyncedDataKeys.RELOADING, false);
                 }
 
-                if (!modifiedGun.general.alwaysSpread && modifiedGun.general.spread > 0.0F)
+                if (!modifiedGun.getGeneral().isAlwaysSpread() && modifiedGun.getGeneral().getSpread() > 0.0F)
                 {
                     SpreadTracker.get(player.getUniqueID()).update(player, item);
                 }
 
                 boolean silenced = GunModifierHelper.isSilencedFire(heldItem);
 
-                for (int i = 0; i < modifiedGun.general.projectileAmount; i++)
+                for (int i = 0; i < modifiedGun.getGeneral().getProjectileAmount(); i++)
                 {
                     ((ServerWorld) world).getServer().execute(() ->
                     {
-                        ProjectileFactory<?> factory = ProjectileManager.getInstance().getFactory(modifiedGun.projectile.item);
+                        ProjectileFactory<?> factory = ProjectileManager.getInstance().getFactory(modifiedGun.getProjectile().getItem());
                         GunProjectile bullet = factory.create(world, player, heldItem, item, modifiedGun);
+
                         bullet.setWeapon(heldItem);
                         bullet.setAdditionalDamage(Gun.getAdditionalDamage(heldItem));
-                        bullet.setShooter(player.getUniqueID());
-                        bullet.setShooterId(player.getEntityId());
 
                         if (bullet instanceof Entity)
                         {
@@ -135,9 +134,9 @@ public class CommonHandler
                             GunTracer.get(world).add(world, bullet);
                         }
 
-                        if (!modifiedGun.projectile.visible)
+                        if (!modifiedGun.getProjectile().isVisible())
                         {
-                            MessageBullet messageBullet = new MessageBullet(modifiedGun.projectile.item, bullet, modifiedGun.projectile.life, modifiedGun.projectile.trailColor, modifiedGun.projectile.trailLengthMultiplier);
+                            MessageBullet messageBullet = new MessageBullet(bullet, modifiedGun.getProjectile());
                             PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player.getPosX(), player.getPosY(), player.getPosZ(), Config.COMMON.network.projectileTrackingRange.get(), player.world.getDimension().getType())), messageBullet);
                         }
                     });
@@ -153,13 +152,20 @@ public class CommonHandler
                     double z = player.getPosZ();
                     AxisAlignedBB box = new AxisAlignedBB(x - radius, y - radius, z - radius, x + radius, y + radius, z + radius);
                     radius *= radius;
+                    double dx, dy, dz;
                     for (LivingEntity entity : world.getEntitiesWithinAABB(LivingEntity.class, box, NOT_AGGRO_EXEMPT))
                     {
-                        entity.setRevengeTarget(Config.COMMON.aggroMobs.angerHostileMobs.get() ? player : entity);
+                        dx = x - entity.getPosX();
+                        dy = y - entity.getPosY();
+                        dz = z - entity.getPosZ();
+                        if (dx * dx + dy * dy + dz * dz <= radius)
+                        {
+                            entity.setRevengeTarget(Config.COMMON.aggroMobs.angerHostileMobs.get() ? player : entity);
+                        }
                     }
                 }
 
-                ResourceLocation fireSound = silenced ? modifiedGun.sounds.silencedFire : modifiedGun.sounds.fire;
+                ResourceLocation fireSound = silenced ? modifiedGun.getSounds().getSilencedFire() : modifiedGun.getSounds().getFire();
                 SoundEvent event = ForgeRegistries.SOUND_EVENTS.getValue(fireSound);
                 if (event != null)
                 {
@@ -243,7 +249,7 @@ public class CommonHandler
                         DyeItem dyeItem = (DyeItem) dyeStack.getItem();
                         int color = dyeItem.getDyeColor().getColorValue();
 
-                        if(stack.getItem() instanceof IColored && ((IColored) stack.getItem()).canColor())
+                        if (stack.getItem() instanceof IColored && ((IColored) stack.getItem()).canColor(stack))
                         {
                             IColored colored = (IColored) stack.getItem();
                             colored.setColor(stack, color);
@@ -273,7 +279,7 @@ public class CommonHandler
 
                 GunItem gunItem = (GunItem) stack.getItem();
                 Gun gun = gunItem.getModifiedGun(stack);
-                ResourceLocation id = gun.projectile.item;
+                ResourceLocation id = gun.getProjectile().getItem();
 
                 Item item = ForgeRegistries.ITEMS.getValue(id);
                 if (item == null)

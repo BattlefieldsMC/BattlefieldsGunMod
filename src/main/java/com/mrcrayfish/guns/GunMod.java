@@ -55,7 +55,7 @@ public class GunMod
         public ItemStack createIcon()
         {
             ItemStack stack = new ItemStack(ModItems.PISTOL.get());
-            stack.getOrCreateTag().putInt("AmmoCount", ModItems.PISTOL.get().getModifiedGun(stack).general.maxAmmo);
+            stack.getOrCreateTag().putInt("AmmoCount", ModItems.PISTOL.get().getModifiedGun(stack).getGeneral().getMaxAmmo());
             return stack;
         }
 
