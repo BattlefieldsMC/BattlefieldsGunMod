@@ -17,6 +17,7 @@ import com.mrcrayfish.guns.item.IColored;
 import com.mrcrayfish.guns.network.PacketHandler;
 import com.mrcrayfish.guns.network.message.MessageBullet;
 import com.mrcrayfish.guns.network.message.MessageGunSound;
+import com.mrcrayfish.guns.network.message.MessageMuzzleFlash;
 import com.mrcrayfish.guns.network.message.MessageShoot;
 import com.mrcrayfish.guns.object.Gun;
 import com.mrcrayfish.guns.tileentity.WorkbenchTileEntity;
@@ -180,14 +181,20 @@ public class CommonHandler
                     PacketHandler.getPlayChannel().send(PacketDistributor.PLAYER.with(() -> player), new MessageGunSound(event, SoundCategory.PLAYERS, (float) posX, (float) posY, (float) posZ, volume, pitch, true));
                 }
 
-                if (!player.isCreative())
+                if(modifiedGun.getDisplay().getFlash() != null)
                 {
-                    CompoundNBT tag = heldItem.getOrCreateTag();
-                    if (!tag.getBoolean("IgnoreAmmo"))
+                    PacketHandler.getPlayChannel().send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player),new MessageMuzzleFlash(player.getEntityId()));
+                }
+
+                if(!player.isCreative())
+                {
+                    CompoundNBT tag = heldItem.getTag();
+                    if(tag == null || !tag.getBoolean("IgnoreAmmo"))
                     {
                         int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.RECLAIMED.get(), heldItem);
-                        if (level == 0 || player.world.rand.nextInt(4 - MathHelper.clamp(level, 1, 2)) != 0)
+                        if(level == 0 || player.world.rand.nextInt(4 - MathHelper.clamp(level, 1, 2)) != 0)
                         {
+                            tag = heldItem.getOrCreateTag();
                             tag.putInt("AmmoCount", Math.max(0, tag.getInt("AmmoCount") - 1));
                         }
                     }

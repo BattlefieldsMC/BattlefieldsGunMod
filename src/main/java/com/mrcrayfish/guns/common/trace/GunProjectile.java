@@ -255,24 +255,21 @@ public interface GunProjectile
         DamageSource source = new DamageSourceProjectile("bullet", this, shooter, this.getWeapon()).setProjectile();
         entity.attackEntityFrom(source, damage);
 
-        if (shooter instanceof ServerPlayerEntity)
+        if (entity instanceof PlayerEntity && shooter instanceof ServerPlayerEntity)
         {
-            if (entity instanceof PlayerEntity)
+            SoundEvent event = headShot ? SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP : SoundEvents.ENTITY_PLAYER_HURT;
+            if (critical)
             {
-                SoundEvent event = headShot ? SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP : SoundEvents.ENTITY_PLAYER_HURT;
-                if (critical)
-                {
-                    event = SoundEvents.ENTITY_ITEM_BREAK; //TODO change
-                }
-                ServerPlayerEntity shooterPlayer = (ServerPlayerEntity) shooter;
-                shooterPlayer.connection.sendPacket(new SPlaySoundPacket(event.getRegistryName(), SoundCategory.PLAYERS, new Vec3d(shooter.getPosX(), shooter.getPosY(), shooter.getPosZ()), 0.75F, 1.0F));
+                event = SoundEvents.ENTITY_ITEM_BREAK; //TODO change
             }
-            else if (critical || headShot)
-            {
-                SoundEvent event = headShot ? SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP : SoundEvents.ENTITY_ITEM_BREAK;
-                ServerPlayerEntity shooterPlayer = (ServerPlayerEntity) shooter;
-                shooterPlayer.connection.sendPacket(new SPlaySoundPacket(event.getRegistryName(), SoundCategory.PLAYERS, new Vec3d(shooter.getPosX(), shooter.getPosY(), shooter.getPosZ()), 0.75F, 1.0F));
-            }
+            ServerPlayerEntity shooterPlayer = (ServerPlayerEntity) shooter;
+            shooterPlayer.connection.sendPacket(new SPlaySoundPacket(event.getRegistryName(), SoundCategory.PLAYERS, new Vec3d(shooter.getPosX(), shooter.getPosY(), shooter.getPosZ()), 0.75F, 1.0F));
+        }
+        else if ((critical || headShot) && shooter instanceof ServerPlayerEntity)
+        {
+            SoundEvent event = headShot ? SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP : SoundEvents.ENTITY_ITEM_BREAK;
+            ServerPlayerEntity shooterPlayer = (ServerPlayerEntity) shooter;
+            shooterPlayer.connection.sendPacket(new SPlaySoundPacket(event.getRegistryName(), SoundCategory.PLAYERS, new Vec3d(shooter.getPosX(), shooter.getPosY(), shooter.getPosZ()), 0.75F, 1.0F));
         }
 
         /* Send blood particle to tracking clients. */

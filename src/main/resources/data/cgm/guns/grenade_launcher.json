@@ -17,7 +17,6 @@
         "life": 50,
         "gravity": true,
         "spawnBulletHole": false,
-        "damageReduceOverLife": false,
         "damageReduceIfNotZoomed": false
     },
     "sounds": {

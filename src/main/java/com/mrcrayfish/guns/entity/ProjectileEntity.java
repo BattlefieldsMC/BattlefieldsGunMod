@@ -307,8 +307,12 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         return super.lastTickPosZ;
     }
 
+//<<<<<<< HEAD
     @Override
     public double getX()
+//=======
+//    protected void onHitEntity(Entity entity, Vec3d hitVec, Vec3d startVec, Vec3d endVec, boolean headshot)
+//>>>>>>> 1.15.X
     {
         return super.getPosX();
     }
@@ -340,17 +344,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     @Override
     public double getMotionZ()
     {
-//<<<<<<< HEAD
-//<<<<<<< HEAD
         return super.getMotion().z;
-//=======
-//        ((ServerWorld) this.world).spawnParticle(new BlockParticleData(ParticleTypes.BLOCK, state), x, y, z, (int) this.projectile.getDamage(), 0.0, 0.0, 0.0, 0.05);
-//        this.world.playSound(null, x, y, z, state.getSoundType().getBreakSound(), SoundCategory.BLOCKS, 0.75F, 2.0F);
-//>>>>>>> 1.15.X
-//=======
-//        ((ServerWorld) this.world).spawnParticle(new BlockParticleData(ParticleTypes.BLOCK, state), x, y, z, (int) this.projectile.getDamage(), 0.0, 0.0, 0.0, 0.05);
-//        this.world.playSound(null, x, y, z, state.getSoundType().getBreakSound(), SoundCategory.BLOCKS, 0.75F, 2.0F);
-//>>>>>>> 1.15.X
     }
 
     @Override

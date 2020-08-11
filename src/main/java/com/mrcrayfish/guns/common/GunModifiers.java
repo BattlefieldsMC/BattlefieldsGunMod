@@ -1,8 +1,6 @@
 package com.mrcrayfish.guns.common;
 
 import com.mrcrayfish.guns.interfaces.IGunModifier;
-import com.mrcrayfish.guns.object.Gun;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 
 /**
@@ -129,7 +127,7 @@ public class GunModifiers
         @Override
         public double modifyAimDownSightSpeed(double speed)
         {
-            return speed * 0.7F;
+            return speed * 0.5F;
         }
 
         @Override
