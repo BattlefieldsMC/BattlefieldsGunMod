@@ -75,7 +75,7 @@ public class GunItem extends Item implements IColored
 
         tooltip.add(new TranslationTextComponent("info.cgm.damage", ItemStack.DECIMALFORMAT.format(modifiedGun.getProjectile().getDamage()) + additionalDamageText).setStyle(new Style().setColor(TextFormatting.GRAY)));
         tooltip.add(new TranslationTextComponent("info.cgm.fire_rate", GunModifierHelper.getModifiedRate(stack, GunEnchantmentHelper.getRate(stack, modifiedGun))).setStyle(new Style().setColor(TextFormatting.GRAY)));
-        tooltip.add(new TranslationTextComponent("info.cgm.reload_speed", modifiedGun.getGeneral().getReloadSpeed()).setStyle(new Style().setColor(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("info.cgm.reload_speed", modifiedGun.getGeneral().getReloadAmount()).setStyle(new Style().setColor(TextFormatting.GRAY)));
         if (modifiedGun.getGeneral().getSpread() == 0 || modifiedGun.getGeneral().isAlwaysSpread())
         {
             tooltip.add(new TranslationTextComponent("info.cgm.always_spread", ItemStack.DECIMALFORMAT.format(GunModifierHelper.getModifiedSpread(stack, modifiedGun.getGeneral().getSpread()))).setStyle(new Style().setColor(TextFormatting.GRAY)));
