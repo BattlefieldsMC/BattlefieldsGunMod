@@ -214,9 +214,15 @@ public interface GunProjectile
             Entity entity = entityRayTraceResult.getEntity();
             if (entity.getEntityId() == this.getShooterId())
                 return;
+
+            if(EnchantmentHelper.getEnchantmentLevel(ModEnchantments.FIRE_STARTER.get(), weapon) > 0)
+                entity.setFire(2);
+
             this.onHitEntity(world, weapon, damage, entity, result.getHitVec(), startVec, endVec, entityRayTraceResult.isHeadshot());
+
             if (EnchantmentHelper.getEnchantmentLevel(ModEnchantments.COLLATERAL.get(), weapon) == 0)
                 this.complete(result.getHitVec());
+
             if (!world.isRemote())
                 entity.hurtResistantTime = 0;
         }

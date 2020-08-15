@@ -3,12 +3,16 @@ package com.mrcrayfish.guns.client.util;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.model.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Direction;
+import net.minecraft.util.HandSide;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.lwjgl.opengl.GL11;
@@ -74,23 +78,23 @@ public class RenderUtil
 
     public static void renderModel(IBakedModel model, ItemCameraTransforms.TransformType transformType, @Nullable Transform transform, ItemStack stack, ItemStack parent, MatrixStack matrixStack, IRenderTypeBuffer buffer, int light, int overlay)
     {
-        if(!stack.isEmpty())
+        if (!stack.isEmpty())
         {
             matrixStack.push();
 
             boolean isGui = transformType == ItemCameraTransforms.TransformType.GUI;
             boolean tridentFlag = isGui || transformType == ItemCameraTransforms.TransformType.GROUND || transformType == ItemCameraTransforms.TransformType.FIXED;
-            if(stack.getItem() == Items.TRIDENT && tridentFlag)
+            if (stack.getItem() == Items.TRIDENT && tridentFlag)
             {
                 model = Minecraft.getInstance().getModelManager().getModel(new ModelResourceLocation("minecraft:trident#inventory"));
             }
 
             model = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(matrixStack, model, transformType, false);
             matrixStack.translate(-0.5, -0.5, -0.5);
-            if(!model.isBuiltInRenderer() && (stack.getItem() != Items.TRIDENT || tridentFlag))
+            if (!model.isBuiltInRenderer() && (stack.getItem() != Items.TRIDENT || tridentFlag))
             {
                 RenderType renderType = RenderTypeLookup.getRenderType(stack);
-                if(isGui && Objects.equals(renderType, Atlases.getTranslucentBlockType()))
+                if (isGui && Objects.equals(renderType, Atlases.getTranslucentBlockType()))
                 {
                     renderType = Atlases.getTranslucentCullBlockType();
                 }
@@ -107,7 +111,6 @@ public class RenderUtil
     }
 
     /**
-     *
      * @param model
      * @param stack
      * @param parent
@@ -119,12 +122,12 @@ public class RenderUtil
      */
     private static void renderModel(IBakedModel model, ItemStack stack, ItemStack parent, @Nullable Transform transform, MatrixStack matrixStack, IVertexBuilder buffer, int light, int overlay)
     {
-        if(transform != null)
+        if (transform != null)
         {
             transform.apply();
         }
         Random random = new Random();
-        for(Direction direction : Direction.values())
+        for (Direction direction : Direction.values())
         {
             random.setSeed(42L);
             renderQuads(matrixStack, buffer, model.getQuads(null, direction, random), stack, parent, light, overlay);
@@ -134,7 +137,6 @@ public class RenderUtil
     }
 
     /**
-     *
      * @param matrixStack
      * @param buffer
      * @param quads
@@ -146,10 +148,10 @@ public class RenderUtil
     private static void renderQuads(MatrixStack matrixStack, IVertexBuilder buffer, List<BakedQuad> quads, ItemStack stack, ItemStack parent, int light, int overlay)
     {
         MatrixStack.Entry entry = matrixStack.getLast();
-        for(BakedQuad quad : quads)
+        for (BakedQuad quad : quads)
         {
             int color = -1;
-            if(quad.hasTintIndex())
+            if (quad.hasTintIndex())
             {
                 color = getItemStackColor(stack, parent, quad.getTintIndex());
             }
@@ -163,9 +165,9 @@ public class RenderUtil
     public static int getItemStackColor(ItemStack stack, ItemStack parent, int tintIndex)
     {
         int color = Minecraft.getInstance().getItemColors().getColor(stack, tintIndex);
-        if(color == -1)
+        if (color == -1)
         {
-            if(!parent.isEmpty())
+            if (!parent.isEmpty())
             {
                 return getItemStackColor(parent, ItemStack.EMPTY, tintIndex);
             }
@@ -192,5 +194,21 @@ public class RenderUtil
     public static boolean isMouseWithin(int mouseX, int mouseY, int x, int y, int width, int height)
     {
         return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
+    }
+
+    public static void renderFirstPersonArm(ClientPlayerEntity player, HandSide hand, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight)
+    {
+        Minecraft mc = Minecraft.getInstance();
+        EntityRendererManager renderManager = mc.getRenderManager();
+        PlayerRenderer renderer = (PlayerRenderer) renderManager.getRenderer(player);
+        mc.getTextureManager().bindTexture(player.getLocationSkin());
+        if (hand == HandSide.RIGHT)
+        {
+            renderer.renderRightArm(matrixStack, buffer, combinedLight, player);
+        }
+        else
+        {
+            renderer.renderLeftArm(matrixStack, buffer, combinedLight, player);
+        }
     }
 }

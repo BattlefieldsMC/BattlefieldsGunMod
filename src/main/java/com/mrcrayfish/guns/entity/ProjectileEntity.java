@@ -19,9 +19,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SExplosionPacket;
-import net.minecraft.particles.BlockParticleData;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
@@ -78,7 +75,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         this.setPosition(posX, posY, posZ);
 
         Item ammo = ForgeRegistries.ITEMS.getValue(this.projectile.getItem());
-        if(ammo != null)
+        if (ammo != null)
             this.item = new ItemStack(ammo);
     }
 
@@ -104,7 +101,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
         if (shooter instanceof PlayerEntity)
         {
-            if(!modifiedGun.getGeneral().isAlwaysSpread())
+            if (!modifiedGun.getGeneral().isAlwaysSpread())
             {
                 gunSpread *= SpreadTracker.get(shooter.getUniqueID()).getSpread(item);
             }
@@ -184,25 +181,11 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         super.setPosition(super.getPosX(), super.getPosY(), z);
     }
 
-//<<<<<<< HEAD
-//<<<<<<< HEAD
     @Override
     public void setMotionX(double motionX)
     {
         super.setMotion(motionX, super.getMotion().getY(), super.getMotion().getZ());
     }
-//=======
-//        if(this.projectile.isGravity())
-//        {
-//            this.setMotion(this.getMotion().add(0, this.modifiedGravity, 0));
-//        }
-//>>>>>>> 1.15.X
-//=======
-//        if(this.projectile.isGravity())
-//        {
-//            this.setMotion(this.getMotion().add(0, this.modifiedGravity, 0));
-//        }
-//>>>>>>> 1.15.X
 
     @Override
     public void setMotionY(double motionY)
@@ -285,7 +268,8 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
     @Nullable
     @Override
-    public Vec3d getCompletePos() {
+    public Vec3d getCompletePos()
+    {
         return null;
     }
 
@@ -307,12 +291,8 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         return super.lastTickPosZ;
     }
 
-//<<<<<<< HEAD
     @Override
     public double getX()
-//=======
-//    protected void onHitEntity(Entity entity, Vec3d hitVec, Vec3d startVec, Vec3d endVec, boolean headshot)
-//>>>>>>> 1.15.X
     {
         return super.getPosX();
     }
@@ -433,7 +413,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
     public float getDamage()
     {
         float initialDamage = (this.projectile.getDamage() + this.additionalDamage);
-        if(this.projectile.isDamageReduceOverLife())
+        if (this.projectile.isDamageReduceOverLife())
         {
             float modifier = ((float) this.projectile.getLife() - (float) (this.ticksExisted - 1)) / (float) this.projectile.getLife();
             initialDamage *= modifier;
