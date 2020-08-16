@@ -16,7 +16,7 @@
         "speed": 1.5,
         "life": 50,
         "gravity": true,
-        "spawnBulletHole": false
+        "spawnBulletHole": false,
         "damageReduceOverLife": false
     },
     "sounds": {
