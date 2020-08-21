@@ -1,7 +1,6 @@
 package com.mrcrayfish.guns.common.trace;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -13,7 +12,8 @@ import java.util.UUID;
  *
  * @author Ocelot
  */
-public abstract class AbstractGunProjectile implements GunProjectile {
+public abstract class AbstractGunProjectile implements GunProjectile
+{
     private int ticksExisted;
     private boolean complete;
     private Vector3d completePos;
@@ -33,174 +33,208 @@ public abstract class AbstractGunProjectile implements GunProjectile {
     private float additionalDamage;
 
     @Override
-    public void tick(World world) {
+    public void tick(World world)
+    {
         this.setLastPosition(this.getX(), this.getY(), this.getZ());
         this.setTicksExisted(this.getTicksExisted() + 1);
     }
 
     @Override
-    public void complete(Vector3d completePos) {
+    public void complete(Vector3d completePos)
+    {
         this.complete = true;
         this.completePos = completePos;
     }
 
     @Override
-    public int getTicksExisted() {
+    public int getTicksExisted()
+    {
         return ticksExisted;
     }
 
     @Override
-    public boolean isComplete() {
+    public boolean isComplete()
+    {
         return complete;
     }
 
     @Override
-    public Vector3d getCompletePos() {
+    public Vector3d getCompletePos()
+    {
         return completePos;
     }
 
     @Override
-    public double getLastX() {
+    public double getLastX()
+    {
         return lastX;
     }
 
     @Override
-    public double getLastY() {
+    public double getLastY()
+    {
         return lastY;
     }
 
     @Override
-    public double getLastZ() {
+    public double getLastZ()
+    {
         return lastZ;
     }
 
     @Override
-    public double getX() {
+    public double getX()
+    {
         return x;
     }
 
     @Override
-    public double getY() {
+    public double getY()
+    {
         return y;
     }
 
     @Override
-    public double getZ() {
+    public double getZ()
+    {
         return z;
     }
 
     @Override
-    public double getMotionX() {
+    public double getMotionX()
+    {
         return motionX;
     }
 
     @Override
-    public double getMotionY() {
+    public double getMotionY()
+    {
         return motionY;
     }
 
     @Override
-    public double getMotionZ() {
+    public double getMotionZ()
+    {
         return motionZ;
     }
 
     @Override
-    public int getShooterId() {
+    public int getShooterId()
+    {
         return shooterId;
     }
 
     @Nullable
     @Override
-    public UUID getShooter() {
+    public UUID getShooter()
+    {
         return shooter;
     }
 
     @Override
-    public ItemStack getWeapon() {
+    public ItemStack getWeapon()
+    {
         return weapon;
     }
 
     @Override
-    public ItemStack getBullet() {
+    public ItemStack getBullet()
+    {
         return bullet;
     }
 
     @Override
-    public float getAdditionalDamage() {
+    public float getAdditionalDamage()
+    {
         return additionalDamage;
     }
 
-    protected void setTicksExisted(int ticksExisted) {
+    protected void setTicksExisted(int ticksExisted)
+    {
         this.ticksExisted = ticksExisted;
     }
 
     @Override
-    public void setLastX(double lastX) {
+    public void setLastX(double lastX)
+    {
         this.lastX = lastX;
     }
 
     @Override
-    public void setLastY(double lastY) {
+    public void setLastY(double lastY)
+    {
         this.lastY = lastY;
     }
 
     @Override
-    public void setLastZ(double lastZ) {
+    public void setLastZ(double lastZ)
+    {
         this.lastZ = lastZ;
     }
 
     @Override
-    public void setX(double x) {
+    public void setX(double x)
+    {
         this.x = x;
     }
 
     @Override
-    public void setY(double y) {
+    public void setY(double y)
+    {
         this.y = y;
     }
 
     @Override
-    public void setZ(double z) {
+    public void setZ(double z)
+    {
         this.z = z;
     }
 
     @Override
-    public void setMotionX(double motionX) {
+    public void setMotionX(double motionX)
+    {
         this.motionX = motionX;
     }
 
     @Override
-    public void setMotionY(double motionY) {
+    public void setMotionY(double motionY)
+    {
         this.motionY = motionY;
     }
 
     @Override
-    public void setMotionZ(double motionZ) {
+    public void setMotionZ(double motionZ)
+    {
         this.motionZ = motionZ;
     }
 
     @Override
-    public void setShooterId(int shooterId) {
+    public void setShooterId(int shooterId)
+    {
         this.shooterId = shooterId;
     }
 
     @Override
-    public void setShooter(UUID shooterId) {
+    public void setShooter(UUID shooterId)
+    {
         this.shooter = shooterId;
     }
 
     @Override
-    public void setWeapon(ItemStack weapon) {
+    public void setWeapon(ItemStack weapon)
+    {
         this.weapon = weapon.copy();
     }
 
     @Override
-    public void setBullet(ItemStack bullet) {
+    public void setBullet(ItemStack bullet)
+    {
         this.bullet = bullet.copy();
     }
 
     @Override
-    public void setAdditionalDamage(float additionalDamage) {
+    public void setAdditionalDamage(float additionalDamage)
+    {
         this.additionalDamage = additionalDamage;
     }
 }

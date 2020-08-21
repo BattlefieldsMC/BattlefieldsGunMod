@@ -3,13 +3,13 @@ package com.mrcrayfish.guns.object;
 import com.mrcrayfish.guns.common.trace.GunProjectile;
 import com.mrcrayfish.guns.network.message.MessageBullet;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.vector.Vector3d;
 
 /**
  * Author: MrCrayfish
  */
-public class Bullet {
+public class Bullet
+{
     private final GunProjectile projectile;
     private double posX;
     private double posY;
@@ -26,7 +26,8 @@ public class Bullet {
     private final int trailColor;
     private final double trailLengthMultiplier;
 
-    public Bullet(MessageBullet message) {
+    public Bullet(MessageBullet message)
+    {
         this.projectile = message.getProjectile();
         this.posX = this.projectile.getX();
         this.posY = this.projectile.getY();
@@ -41,21 +42,28 @@ public class Bullet {
         this.updateHeading();
     }
 
-    private void updateHeading() {
+    private void updateHeading()
+    {
         Vector3d motion;
 
         if (this.projectile.isComplete() && this.projectile.getCompletePos() == null)
             this.complete = true;
-        if (this.projectile.isComplete() && this.projectile.getCompletePos() != null) {
+        if (this.projectile.isComplete() && this.projectile.getCompletePos() != null)
+        {
             Vector3d projectileMotion = new Vector3d(this.projectile.getMotionX(), this.projectile.getMotionY() - this.gravity, this.projectile.getMotionZ());
             Vector3d difference = this.projectile.getCompletePos().subtract(this.posX, this.posY, this.posZ);
-            if (difference.lengthSquared() < projectileMotion.lengthSquared()) {
+            if (difference.lengthSquared() < projectileMotion.lengthSquared())
+            {
                 motion = difference;
                 this.complete = true;
-            } else {
+            }
+            else
+            {
                 motion = projectileMotion;
             }
-        } else {
+        }
+        else
+        {
             motion = new Vector3d(this.projectile.getMotionX(), this.projectile.getMotionY(), this.projectile.getMotionZ());
         }
 
@@ -68,7 +76,8 @@ public class Bullet {
         this.posZ += motion.getZ();
     }
 
-    public void tick() {
+    public void tick()
+    {
         this.lastX = this.posX;
         this.lastY = this.posY;
         this.lastZ = this.posZ;
@@ -79,43 +88,53 @@ public class Bullet {
             this.complete = true;
     }
 
-    public GunProjectile getProjectile() {
+    public GunProjectile getProjectile()
+    {
         return projectile;
     }
 
-    public double getPosX(float partialTicks) {
+    public double getPosX(float partialTicks)
+    {
         return MathHelper.lerp(partialTicks, this.lastX, this.posX);
     }
 
-    public double getPosY(float partialTicks) {
+    public double getPosY(float partialTicks)
+    {
         return MathHelper.lerp(partialTicks, this.lastY, this.posY);
     }
 
-    public double getPosZ(float partialTicks) {
+    public double getPosZ(float partialTicks)
+    {
         return MathHelper.lerp(partialTicks, this.lastZ, this.posZ);
     }
 
-    public int getTicksExisted() {
+    public int getTicksExisted()
+    {
         return ticksExisted;
     }
 
-    public boolean isComplete() {
+    public boolean isComplete()
+    {
         return this.complete && this.lastX == this.posX && this.lastY == this.posY && this.lastZ == this.posZ;
     }
 
-    public float getRotationYaw() {
+    public float getRotationYaw()
+    {
         return this.rotationYaw;
     }
 
-    public float getRotationPitch() {
+    public float getRotationPitch()
+    {
         return this.rotationPitch;
     }
 
-    public int getTrailColor() {
+    public int getTrailColor()
+    {
         return this.trailColor;
     }
 
-    public double getTrailLengthMultiplier() {
+    public double getTrailLengthMultiplier()
+    {
         return this.trailLengthMultiplier;
     }
 }

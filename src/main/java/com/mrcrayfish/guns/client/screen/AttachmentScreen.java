@@ -92,11 +92,11 @@ public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
     }
 
     @Override
-    protected void func_230451_b_(MatrixStack matrixStack, int mouseX, int mouseY)
+    protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        this.font.func_238422_b_(matrixStack, this.title, (float)this.field_238742_p_, (float)this.field_238743_q_, 4210752);
-        this.font.func_238422_b_(matrixStack, this.playerInventory.getDisplayName(), (float)this.field_238744_r_, (float)this.field_238745_s_ + 19, 4210752);
+        this.font.func_238422_b_(matrixStack, this.title, (float)this.titleX, (float)this.titleY, 4210752);
+        this.font.func_238422_b_(matrixStack, this.playerInventory.getDisplayName(), (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY + 19, 4210752);
 
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         int left = (this.width - this.xSize) / 2;
@@ -145,7 +145,7 @@ public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
     }
 
     @Override
-    protected void func_230450_a_(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY)
+    protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY)
     {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         Minecraft minecraft = Minecraft.getInstance();
