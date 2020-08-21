@@ -32,7 +32,13 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.FirstPersonRenderer;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.Matrix4f;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -61,6 +67,11 @@ import net.minecraft.world.LightType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.event.FOVUpdateEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderHandEvent;
+import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -70,7 +81,12 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.lwjgl.opengl.GL11;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
 public class GunRenderer
@@ -204,25 +220,8 @@ public class GunRenderer
     {
         if(SyncedPlayerData.instance().get(player, ModSyncedDataKeys.RELOADING))
         {
-            if(this.startReloadTick == -1)
-            {
-                this.startReloadTick = player.ticksExisted + 5;
-            }
-            if(this.reloadTimer < 5)
-            {
-                this.reloadTimer++;
-            }
-        }
-        else
-        {
-            if(this.startReloadTick != -1)
-            {
-                this.startReloadTick = -1;
-            }
-            if(this.reloadTimer > 0)
-            {
-                this.reloadTimer--;
-            }
+            this.tickOverrideModel(player);
+            this.updateReloadTimer(player);
         }
     }
 
