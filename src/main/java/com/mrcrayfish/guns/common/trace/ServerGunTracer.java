@@ -1,9 +1,8 @@
 package com.mrcrayfish.guns.common.trace;
 
 import com.mrcrayfish.guns.Reference;
-import net.minecraft.world.IWorldReader;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.world.World;
-import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -17,7 +16,7 @@ public final class ServerGunTracer implements GunTracer
 {
     static ServerGunTracer INSTANCE = new ServerGunTracer();
 
-    private final Map<DimensionType, Set<GunProjectile>> projectiles;
+    private final Map<RegistryKey<World>, Set<GunProjectile>> projectiles;
 
     private ServerGunTracer()
     {
@@ -29,9 +28,9 @@ public final class ServerGunTracer implements GunTracer
         if (!(world instanceof ServerWorld))
             return;
 
-        if (this.projectiles.containsKey(world.getDimension().getType()))
+        if (this.projectiles.containsKey(world.func_234923_W_()))
         {
-            Set<GunProjectile> projectiles = this.projectiles.get(world.getDimension().getType());
+            Set<GunProjectile> projectiles = this.projectiles.get(world.func_234923_W_());
             projectiles.forEach(projectile -> ((ServerWorld) world).getServer().execute(() -> projectile.tick(world)));
             ((ServerWorld) world).getServer().execute(() -> projectiles.removeIf(GunProjectile::isComplete));
         }
@@ -39,9 +38,9 @@ public final class ServerGunTracer implements GunTracer
     }
 
     @Override
-    public void add(IWorldReader world, GunProjectile projectile)
+    public void add(World world, GunProjectile projectile)
     {
-        this.projectiles.computeIfAbsent(world.getDimension().getType(), key -> new HashSet<>()).add(projectile);
+        this.projectiles.computeIfAbsent(world.func_234923_W_(), key -> new HashSet<>()).add(projectile);
     }
 
     @SubscribeEvent

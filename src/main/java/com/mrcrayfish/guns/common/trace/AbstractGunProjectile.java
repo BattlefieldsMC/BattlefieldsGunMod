@@ -2,6 +2,7 @@ package com.mrcrayfish.guns.common.trace;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
@@ -15,7 +16,7 @@ import java.util.UUID;
 public abstract class AbstractGunProjectile implements GunProjectile {
     private int ticksExisted;
     private boolean complete;
-    private Vec3d completePos;
+    private Vector3d completePos;
     private double lastX;
     private double lastY;
     private double lastZ;
@@ -38,7 +39,7 @@ public abstract class AbstractGunProjectile implements GunProjectile {
     }
 
     @Override
-    public void complete(Vec3d completePos) {
+    public void complete(Vector3d completePos) {
         this.complete = true;
         this.completePos = completePos;
     }
@@ -54,7 +55,7 @@ public abstract class AbstractGunProjectile implements GunProjectile {
     }
 
     @Override
-    public Vec3d getCompletePos() {
+    public Vector3d getCompletePos() {
         return completePos;
     }
 

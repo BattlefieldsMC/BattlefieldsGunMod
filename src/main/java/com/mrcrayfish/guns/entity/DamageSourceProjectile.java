@@ -2,11 +2,12 @@ package com.mrcrayfish.guns.entity;
 
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.common.trace.GunProjectile;
+import com.sun.javafx.geom.Vec3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IndirectEntityDamageSource;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -57,8 +58,8 @@ public class DamageSourceProjectile extends IndirectEntityDamageSource
 
     @Nullable
     @Override
-    public Vec3d getDamageLocation()
+    public Vector3d getDamageLocation()
     {
-        return this.source instanceof Entity ? super.getDamageLocation() : new Vec3d(this.source.getX(), this.source.getY(), this.source.getZ());
+        return this.source instanceof Entity ? super.getDamageLocation() : new Vector3d(this.source.getX(), this.source.getY(), this.source.getZ());
     }
 }

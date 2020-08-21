@@ -4,6 +4,7 @@ import com.mrcrayfish.guns.common.trace.GunProjectile;
 import com.mrcrayfish.guns.network.message.MessageBullet;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 
 /**
  * Author: MrCrayfish
@@ -41,13 +42,13 @@ public class Bullet {
     }
 
     private void updateHeading() {
-        Vec3d motion;
+        Vector3d motion;
 
         if (this.projectile.isComplete() && this.projectile.getCompletePos() == null)
             this.complete = true;
         if (this.projectile.isComplete() && this.projectile.getCompletePos() != null) {
-            Vec3d projectileMotion = new Vec3d(this.projectile.getMotionX(), this.projectile.getMotionY() - this.gravity, this.projectile.getMotionZ());
-            Vec3d difference = this.projectile.getCompletePos().subtract(this.posX, this.posY, this.posZ);
+            Vector3d projectileMotion = new Vector3d(this.projectile.getMotionX(), this.projectile.getMotionY() - this.gravity, this.projectile.getMotionZ());
+            Vector3d difference = this.projectile.getCompletePos().subtract(this.posX, this.posY, this.posZ);
             if (difference.lengthSquared() < projectileMotion.lengthSquared()) {
                 motion = difference;
                 this.complete = true;
@@ -55,7 +56,7 @@ public class Bullet {
                 motion = projectileMotion;
             }
         } else {
-            motion = new Vec3d(this.projectile.getMotionX(), this.projectile.getMotionY(), this.projectile.getMotionZ());
+            motion = new Vector3d(this.projectile.getMotionX(), this.projectile.getMotionY(), this.projectile.getMotionZ());
         }
 
         float d = MathHelper.sqrt(motion.getX() * motion.getX() + motion.getZ() * motion.getZ());

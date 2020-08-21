@@ -4,12 +4,13 @@ import com.mrcrayfish.guns.common.SpreadTracker;
 import com.mrcrayfish.guns.item.GunItem;
 import com.mrcrayfish.guns.object.Gun;
 import com.mrcrayfish.guns.util.GunModifierHelper;
+import com.sun.javafx.geom.Vec3d;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -29,7 +30,7 @@ public class GunProjectileImpl extends AbstractGunProjectile {
         this.modifiedGravity = GunModifierHelper.getModifiedProjectileGravity(weapon, 0.05);
         this.setShooter(shooter);
 
-        Vec3d dir = getDirection(shooter.getRNG(), shooter, item, modifiedGun);
+        Vector3d dir = getDirection(shooter.getRNG(), shooter, item, modifiedGun);
         this.setMotion(dir.getX() * modifiedGun.getProjectile().getSpeed(), dir.getY() * modifiedGun.getProjectile().getSpeed(), dir.getZ() * modifiedGun.getProjectile().getSpeed());
         this.setPosition(shooter.getPosX(), shooter.getPosY() + shooter.getEyeHeight(), shooter.getPosZ());
 
@@ -84,15 +85,15 @@ public class GunProjectileImpl extends AbstractGunProjectile {
         return new GunProjectileImpl(buf.readVarInt(), buf.readItemStack(), buf.readItemStack(), Gun.create(buf.readCompoundTag()), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble());
     }
 
-    private static Vec3d getVectorFromRotation(float pitch, float yaw) {
+    private static Vector3d getVectorFromRotation(float pitch, float yaw) {
         float f = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
         float f1 = MathHelper.sin(-yaw * 0.017453292F - (float) Math.PI);
         float f2 = -MathHelper.cos(-pitch * 0.017453292F);
         float f3 = MathHelper.sin(-pitch * 0.017453292F);
-        return new Vec3d(f1 * f2, f3, f * f2);
+        return new Vector3d(f1 * f2, f3, f * f2);
     }
 
-    private static Vec3d getDirection(Random random, LivingEntity shooter, GunItem item, Gun modifiedGun) {
+    private static Vector3d getDirection(Random random, LivingEntity shooter, GunItem item, Gun modifiedGun) {
         float gunSpread = modifiedGun.getGeneral().getSpread();
 
         if (gunSpread == 0F) {

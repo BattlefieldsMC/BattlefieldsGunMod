@@ -1,6 +1,7 @@
 package com.mrcrayfish.guns.common.trace;
 
 import net.minecraft.world.IWorldReader;
+import net.minecraft.world.World;
 
 /**
  * <p>Manages the tracing of bullets from their starting position to their ending position. This is to reduce overhead and used as a replacement to entities.</p>
@@ -15,7 +16,7 @@ public interface GunTracer
      * @param world      The world to add the projectile to
      * @param projectile The projectile that was newly fired
      */
-    void add(IWorldReader world, GunProjectile projectile);
+    void add(World world, GunProjectile projectile);
 
     /**
      * Fetches the correct gun tracer for the specified world.
