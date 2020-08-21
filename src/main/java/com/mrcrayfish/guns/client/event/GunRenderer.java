@@ -217,7 +217,6 @@ public class GunRenderer
         if(SyncedPlayerData.instance().get(player, ModSyncedDataKeys.RELOADING))
         {
             this.tickOverrideModel(player);
-            this.updateReloadTimer(player);
         }
     }
 
