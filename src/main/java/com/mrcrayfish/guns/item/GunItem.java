@@ -95,7 +95,7 @@ public class GunItem extends Item implements IColored
             }
         }
 
-        tooltip.add(new TranslationTextComponent("info.cgm.attachment_help", new KeybindTextComponent("key." + Reference.MOD_ID + ".attachments")).setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("info.cgm.attachment_help", new KeybindTextComponent("key." + Reference.MOD_ID + ".attachments")));
     }
 
     @Override
