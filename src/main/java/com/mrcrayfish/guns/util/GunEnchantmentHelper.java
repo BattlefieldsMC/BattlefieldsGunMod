@@ -16,8 +16,8 @@ public class GunEnchantmentHelper
     public static int getReloadInterval(ItemStack weapon)
     {
         int interval = 10;
-        int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.QUICK_HANDS.get(), weapon);
-        if(level > 0)
+        int level = !ModEnchantments.QUICK_HANDS.isPresent() ? 0 : EnchantmentHelper.getEnchantmentLevel(ModEnchantments.QUICK_HANDS.get(), weapon);
+        if (level > 0)
         {
             interval /= 2;
         }
@@ -27,8 +27,8 @@ public class GunEnchantmentHelper
     public static int getRate(ItemStack weapon, Gun modifiedGun)
     {
         int rate = modifiedGun.getGeneral().getRate();
-        int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.TRIGGER_FINGER.get(), weapon);
-        if(level > 0)
+        int level = !ModEnchantments.TRIGGER_FINGER.isPresent() ? 0 : EnchantmentHelper.getEnchantmentLevel(ModEnchantments.TRIGGER_FINGER.get(), weapon);
+        if (level > 0)
         {
             float newRate = rate * (0.25F * level);
             rate -= MathHelper.clamp(newRate, 0, rate);
@@ -38,15 +38,15 @@ public class GunEnchantmentHelper
 
     public static double getAimDownSightSpeed(ItemStack weapon)
     {
-        int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.LIGHTWEIGHT.get(), weapon);
+        int level = !ModEnchantments.LIGHTWEIGHT.isPresent() ? 0 : EnchantmentHelper.getEnchantmentLevel(ModEnchantments.LIGHTWEIGHT.get(), weapon);
         return level > 0 ? 1.5 : 1.0;
     }
 
     public static int getAmmoCapacity(ItemStack weapon, Gun modifiedGun)
     {
         int capacity = modifiedGun.getGeneral().getMaxAmmo();
-        int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.OVER_CAPACITY.get(), weapon);
-        if(level > 0)
+        int level = !ModEnchantments.OVER_CAPACITY.isPresent() ? 0 : EnchantmentHelper.getEnchantmentLevel(ModEnchantments.OVER_CAPACITY.get(), weapon);
+        if (level > 0)
         {
             capacity += (capacity / 2) * level;
         }
@@ -55,8 +55,8 @@ public class GunEnchantmentHelper
 
     public static double getProjectileSpeedModifier(ItemStack weapon, Gun modifiedGun)
     {
-        int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.ACCELERATOR.get(), weapon);
-        if(level > 0)
+        int level = !ModEnchantments.ACCELERATOR.isPresent() ? 0 : EnchantmentHelper.getEnchantmentLevel(ModEnchantments.ACCELERATOR.get(), weapon);
+        if (level > 0)
         {
             return 1.0 + 0.15 * level;
         }
@@ -65,8 +65,8 @@ public class GunEnchantmentHelper
 
     public static float getPuncturingDamage(ItemStack weapon, Random rand, float damage)
     {
-        int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.PUNCTURING.get(), weapon);
-        if(rand.nextInt(5) == 0)
+        int level = !ModEnchantments.PUNCTURING.isPresent() ? 0 : EnchantmentHelper.getEnchantmentLevel(ModEnchantments.PUNCTURING.get(), weapon);
+        if (rand.nextInt(5) == 0)
         {
             float modifier = 0.05F * level;
             return damage + damage * modifier;
