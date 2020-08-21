@@ -12,10 +12,22 @@ import com.mrcrayfish.guns.object.Gun.Projectile;
 import com.mrcrayfish.guns.util.GunEnchantmentHelper;
 import com.mrcrayfish.guns.util.GunModifierHelper;
 import com.mrcrayfish.obfuscate.common.data.SyncedPlayerData;
-import net.minecraft.entity.*;
+import net.minecraft.block.AbstractFireBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.BreakableBlock;
+import net.minecraft.block.LeavesBlock;
+import net.minecraft.block.PaneBlock;
+import net.minecraft.block.material.Material;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntitySize;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.FlintAndSteelItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -24,7 +36,10 @@ import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SExplosionPacket;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -71,7 +86,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         this.modifiedGravity = GunModifierHelper.getModifiedProjectileGravity(weapon, 0.05);
         this.life = GunModifierHelper.getModifiedProjectileLife(weapon, this.projectile.getLife());
 
-        Vec3d dir = this.getDirection(shooter, weapon, item, modifiedGun);
+        Vector3d dir = this.getDirection(shooter, weapon, item, modifiedGun);
         double speedModifier = GunEnchantmentHelper.getProjectileSpeedModifier(weapon, modifiedGun);
         double speed = GunModifierHelper.getModifiedProjectileSpeed(weapon, this.projectile.getSpeed() * speedModifier);
         this.setMotion(dir.x * speed, dir.y * speed, dir.z * speed);
@@ -99,7 +114,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         return this.entitySize;
     }
 
-    private Vec3d getDirection(LivingEntity shooter, ItemStack weapon, GunItem item, Gun modifiedGun)
+    private Vector3d getDirection(LivingEntity shooter, ItemStack weapon, GunItem item, Gun modifiedGun)
     {
         float gunSpread = GunModifierHelper.getModifiedSpread(weapon, modifiedGun.getGeneral().getSpread());
 
@@ -166,11 +181,23 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         super.lastTickPosY = lastY;
     }
 
+//<<<<<<< HEAD
     @Override
     public void setLastZ(double lastZ)
     {
         super.lastTickPosZ = lastZ;
     }
+//=======
+//        if(!this.world.isRemote())
+//        {
+//            Vector3d startVec = this.getPositionVec();
+//            Vector3d endVec = startVec.add(this.getMotion());
+//            RayTraceResult result = rayTraceBlocks(this.world, new RayTraceContext(startVec, endVec, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, this), IGNORE_LEAVES);
+//            if(result.getType() != RayTraceResult.Type.MISS)
+//            {
+//                endVec = result.getHitVec();
+//            }
+//>>>>>>> upstream/1.16.X
 
     @Override
     public void setX(double x)
@@ -216,6 +243,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         this.shooter = entity instanceof LivingEntity ? (LivingEntity) entity : null;
     }
 
+//<<<<<<< HEAD
     @Override
     public void setShooter(UUID shooterId)
     {
@@ -224,9 +252,40 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
             Entity shooter = ((ServerWorld) this.world).getEntityByUuid(shooterId);
             if (shooter instanceof LivingEntity)
                 this.shooter = (LivingEntity) shooter;
+//=======
+//    @Nullable
+//    protected EntityResult findEntityOnPath(Vector3d startVec, Vector3d endVec)
+//    {
+//        Vector3d hitVec = null;
+//        Entity hitEntity = null;
+//        boolean headshot = false;
+//        List<Entity> entities = this.world.getEntitiesInAABBexcluding(this, this.getBoundingBox().expand(this.getMotion()).grow(1.0), PROJECTILE_TARGETS);
+//        double closestDistance = Double.MAX_VALUE;
+//        for(Entity entity : entities)
+//        {
+//            if(!entity.equals(this.shooter))
+//            {
+//                HitResult result = this.getHitResult(entity, startVec, endVec);
+//                Optional<Vector3d> hitPos = result.getHitPos();
+//                if(!hitPos.isPresent())
+//                {
+//                    continue;
+//                }
+//
+//                double distanceToHit = startVec.distanceTo(hitPos.get());
+//                if(distanceToHit < closestDistance)
+//                {
+//                    hitVec = hitPos.get();
+//                    hitEntity = entity;
+//                    closestDistance = distanceToHit;
+//                    headshot = result.isHeadshot();
+//                }
+//            }
+//>>>>>>> upstream/1.16.X
         }
     }
 
+//<<<<<<< HEAD
     @Override
     public void setAdditionalDamage(float additionalDamage)
     {
@@ -235,20 +294,81 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
     @Override
     public void tick(World world)
+//=======
+//    @Nullable
+//    protected List<EntityResult> findEntitiesOnPath(Vector3d startVec, Vector3d endVec)
+//    {
+//        List<EntityResult> hitEntities = new ArrayList<>();
+//        List<Entity> entities = this.world.getEntitiesInAABBexcluding(this, this.getBoundingBox().expand(this.getMotion()).grow(1.0), PROJECTILE_TARGETS);
+//        for(Entity entity : entities)
+//        {
+//            if(!entity.equals(this.shooter))
+//            {
+//                HitResult result = this.getHitResult(entity, startVec, endVec);
+//                Optional<Vector3d> hitPos = result.getHitPos();
+//                if(!hitPos.isPresent())
+//                {
+//                    continue;
+//                }
+//                hitEntities.add(new EntityResult(entity, hitPos.get(), result.isHeadshot()));
+//            }
+//        }
+//        return hitEntities;
+//    }
+//
+//    @SuppressWarnings("unchecked")
+//    private HitResult getHitResult(Entity entity, Vector3d startVec, Vector3d endVec)
+//>>>>>>> upstream/1.16.X
     {
         if (!this.world.isRemote())
         {
             this.tickStep(this.world, this.projectile.getSize(), this.projectile.getLife(), this.modifiedGravity, this.projectile.isSpawnBulletHole(), false);
         }
+//<<<<<<< HEAD
         else
+//=======
+//        boundingBox = boundingBox.expand(0, expandHeight, 0);
+//
+//        Vector3d hitPos = boundingBox.rayTrace(startVec, endVec).orElse(null);
+//        Vector3d grownHitPos = boundingBox.grow(Config.COMMON.gameplay.growBoundingBoxAmount.get(), 0, Config.COMMON.gameplay.growBoundingBoxAmount.get()).rayTrace(startVec, endVec).orElse(null);
+//        if(hitPos == null && grownHitPos != null)
+//>>>>>>> upstream/1.16.X
         {
             this.setPosition(this.getX() + this.getMotionX(), this.getY() + this.getMotionY(), this.getZ() + this.getMotionZ());
 
+//<<<<<<< HEAD
             if (this.projectile.isGravity())
                 this.setMotionY(this.getMotionY() - GunModifierHelper.getModifiedProjectileGravity(this.getWeapon(), 0.04));
+//=======
+//        /* Check for headshot */
+//        boolean headshot = false;
+//        if(Config.COMMON.gameplay.enableHeadShots.get() && entity instanceof LivingEntity)
+//        {
+//            IHeadshotBox<LivingEntity> headshotBox = (IHeadshotBox<LivingEntity>) BoundingBoxManager.getHeadshotBoxes(entity.getType());
+//            if(headshotBox != null)
+//            {
+//                AxisAlignedBB box = headshotBox.getHeadshotBox((LivingEntity) entity);
+//                if(box != null)
+//                {
+//                    box = box.offset(entity.getPosX(), entity.getPosY(), entity.getPosZ());
+//                    Optional<Vector3d> headshotHitPos = box.rayTrace(startVec, endVec);
+//                    if(!headshotHitPos.isPresent())
+//                    {
+//                        box = box.grow(Config.COMMON.gameplay.growBoundingBoxAmount.get(), 0, Config.COMMON.gameplay.growBoundingBoxAmount.get());
+//                        headshotHitPos = box.rayTrace(startVec, endVec);
+//                    }
+//                    if(headshotHitPos.isPresent() && (hitPos == null || headshotHitPos.get().distanceTo(hitPos) < 0.5))
+//                    {
+//                        hitPos = headshotHitPos.get();
+//                        headshot = true;
+//                    }
+//                }
+//            }
+//>>>>>>> upstream/1.16.X
         }
     }
 
+//<<<<<<< HEAD
     @Override
     public void tick()
     {
@@ -256,18 +376,70 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         this.updateHeading();
         this.tick(this.world);
     }
+//=======
+//    private void onHit(RayTraceResult result, Vector3d startVec, Vector3d endVec)
+//    {
+//        if(result instanceof BlockRayTraceResult)
+//        {
+//            BlockRayTraceResult blockRayTraceResult = (BlockRayTraceResult) result;
+//            if(blockRayTraceResult.getType() == RayTraceResult.Type.MISS)
+//            {
+//                return;
+//            }
+//
+//            BlockPos pos = blockRayTraceResult.getPos();
+//            BlockState state = this.world.getBlockState(pos);
+//            Block block = state.getBlock();
+//
+//            if(Config.COMMON.gameplay.enableGunGriefing.get() && (block instanceof BreakableBlock || block instanceof PaneBlock) && state.getMaterial() == Material.GLASS)
+//            {
+//                this.world.destroyBlock(blockRayTraceResult.getPos(), false);
+//            }
+//
+//            if(!state.getMaterial().isReplaceable())
+//            {
+//                this.remove();
+//            }
+//
+//            if(block instanceof IDamageable)
+//            {
+//                ((IDamageable) block).onBlockDamaged(this.world, state, pos, (int) Math.ceil(getDamage() / 2.0) + 1);
+//            }
+//
+//            Vector3d hitVec = blockRayTraceResult.getHitVec();
+//            double holeX = hitVec.getX() + 0.005 * blockRayTraceResult.getFace().getXOffset();
+//            double holeY = hitVec.getY() + 0.005 * blockRayTraceResult.getFace().getYOffset();
+//            double holeZ = hitVec.getZ() + 0.005 * blockRayTraceResult.getFace().getZOffset();
+//            Direction direction = blockRayTraceResult.getFace();
+//            PacketHandler.getPlayChannel().send(PacketDistributor.TRACKING_CHUNK.with(() -> this.world.getChunkAt(blockRayTraceResult.getPos())), new MessageBulletHole(holeX, holeY, holeZ, direction, pos));
+//>>>>>>> upstream/1.16.X
 
     @Override
-    public void complete(Vec3d completePos)
+    public void complete(Vector3d completePos)
     {
         super.remove();
     }
 
+//<<<<<<< HEAD
     @Override
     public int getTicksExisted()
     {
         return super.ticksExisted;
     }
+//=======
+//            int fireStarterLevel = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.FIRE_STARTER.get(), this.weapon);
+//            if(fireStarterLevel > 0)
+//            {
+//                BlockPos offsetPos = pos.offset(blockRayTraceResult.getFace());
+//                if(AbstractFireBlock.canLightBlock(this.world, offsetPos))
+//                {
+//                    BlockState fireState = AbstractFireBlock.getFireForPlacement(this.world, offsetPos);
+//                    this.world.setBlockState(offsetPos, fireState, 11);
+//                }
+//            }
+//            return;
+//        }
+//>>>>>>> upstream/1.16.X
 
     @Override
     public boolean isComplete()
@@ -277,7 +449,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
 
     @Nullable
     @Override
-    public Vec3d getCompletePos()
+    public Vector3d getCompletePos()
     {
         return null;
     }
@@ -300,8 +472,12 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         return super.lastTickPosZ;
     }
 
+//<<<<<<< HEAD
     @Override
     public double getX()
+//=======
+//    protected void onHitEntity(Entity entity, Vector3d hitVec, Vector3d startVec, Vector3d endVec, boolean headshot)
+//>>>>>>> upstream/1.16.X
     {
         return super.getPosX();
     }
@@ -318,11 +494,30 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         return super.getPosZ();
     }
 
+//<<<<<<< HEAD
     @Override
     public double getMotionX()
     {
         return super.getMotion().x;
     }
+//=======
+//        if(entity instanceof PlayerEntity && this.shooter instanceof ServerPlayerEntity)
+//        {
+//            SoundEvent event = headshot ? SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP : SoundEvents.ENTITY_PLAYER_HURT;
+//            if(critical)
+//            {
+//                event = SoundEvents.ENTITY_ITEM_BREAK; //TODO change
+//            }
+//            ServerPlayerEntity shooterPlayer = (ServerPlayerEntity) this.shooter;
+//            shooterPlayer.connection.sendPacket(new SPlaySoundPacket(event.getRegistryName(), SoundCategory.PLAYERS, new Vector3d(this.shooter.getPosX(), this.shooter.getPosY(), this.shooter.getPosZ()), 0.75F, 1.0F));
+//        }
+//        else if((critical || headshot) && this.shooter instanceof ServerPlayerEntity)
+//        {
+//            SoundEvent event = headshot ? SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP : SoundEvents.ENTITY_ITEM_BREAK;
+//            ServerPlayerEntity shooterPlayer = (ServerPlayerEntity) this.shooter;
+//            shooterPlayer.connection.sendPacket(new SPlaySoundPacket(event.getRegistryName(), SoundCategory.PLAYERS, new Vector3d(this.shooter.getPosX(), this.shooter.getPosY(), this.shooter.getPosZ()), 0.75F, 1.0F));
+//        }
+//>>>>>>> upstream/1.16.X
 
     @Override
     public double getMotionY()
@@ -397,13 +592,13 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         return projectile;
     }
 
-    private Vec3d getVectorFromRotation(float pitch, float yaw)
+    private Vector3d getVectorFromRotation(float pitch, float yaw)
     {
         float f = MathHelper.cos(-yaw * 0.017453292F - (float) Math.PI);
         float f1 = MathHelper.sin(-yaw * 0.017453292F - (float) Math.PI);
         float f2 = -MathHelper.cos(-pitch * 0.017453292F);
         float f3 = MathHelper.sin(-pitch * 0.017453292F);
-        return new Vec3d((double) (f1 * f2), (double) f3, (double) (f * f2));
+        return new Vector3d((double) (f1 * f2), (double) f3, (double) (f * f2));
     }
 
     @Override

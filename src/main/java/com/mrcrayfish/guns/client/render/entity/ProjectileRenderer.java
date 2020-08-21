@@ -5,7 +5,6 @@ import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.entity.ProjectileEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
@@ -14,6 +13,7 @@ import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.math.vector.Vector3f;
 
 @OnlyIn(Dist.CLIENT)
 public class ProjectileRenderer extends EntityRenderer<ProjectileEntity>

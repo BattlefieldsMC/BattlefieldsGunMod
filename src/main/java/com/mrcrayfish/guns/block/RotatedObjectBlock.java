@@ -7,8 +7,6 @@ import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
 
 import javax.annotation.Nullable;
 
@@ -26,9 +24,9 @@ public abstract class RotatedObjectBlock extends HorizontalBlock
     }
 
     @Override
-    public boolean isNormalCube(BlockState state, IBlockReader reader, BlockPos pos)
+    public boolean isTransparent(BlockState state)
     {
-        return false;
+        return true;
     }
 
     @Nullable

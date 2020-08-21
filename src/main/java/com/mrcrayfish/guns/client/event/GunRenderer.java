@@ -28,19 +28,13 @@ import com.mrcrayfish.obfuscate.client.event.RenderItemEvent;
 import com.mrcrayfish.obfuscate.common.data.SyncedPlayerData;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.Vector3f;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -63,6 +57,8 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.LightType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -515,8 +511,9 @@ public class GunRenderer
                     {
                         RenderSystem.scaled(scale, scale, scale);
                         int progress = (int) Math.ceil((cookTime) * 17.0F) - 1;
-                        Screen.blit(j, i, 36, 94, 16, 4, 256, 256);
-                        Screen.blit(j, i, 52, 94, progress, 4, 256, 256);
+                        MatrixStack matrixStack = new MatrixStack();
+                        Screen.blit(matrixStack, j, i, 36, 94, 16, 4, 256, 256);
+                        Screen.blit(matrixStack, j, i, 52, 94, progress, 4, 256, 256);
                     }
                     RenderSystem.popMatrix();
 
@@ -547,8 +544,9 @@ public class GunRenderer
                     {
                         RenderSystem.scaled(scale, scale, scale);
                         int progress = (int) Math.ceil((coolDown + 0.05) * 17.0F) - 1;
-                        Screen.blit(j, i, 36, 94, 16, 4, 256, 256);
-                        Screen.blit(j, i, 52, 94, progress, 4, 256, 256);
+                        MatrixStack matrixStack = new MatrixStack();
+                        Screen.blit(matrixStack, j, i, 36, 94, 16, 4, 256, 256);
+                        Screen.blit(matrixStack, j, i, 52, 94, progress, 4, 256, 256);
                     }
                     RenderSystem.popMatrix();
 
@@ -906,16 +904,7 @@ public class GunRenderer
         dest.rotateAngleZ = source.rotateAngleZ;
     }
 
-    private void renderHeldArm(MatrixStack matrixStack, IRenderTypeBuffer buffer, int light, ClientPlayerEntity player, ItemStack stack, HandSide hand, float partialTicks)
-    {
-        matrixStack.push();
-        Gun modifiedGun = ((GunItem) stack.getItem()).getModifiedGun(stack);
-        modifiedGun.getGeneral().getGripType().getHeldAnimation().renderFirstPersonArms(player, hand, stack, matrixStack, buffer, light, partialTicks);
-        matrixStack.pop();
-    }
-
-    private void renderReloadArm(MatrixStack matrixStack, IRenderTypeBuffer buffer, int light, ItemStack
-            stack, HandSide hand)
+    private void renderReloadArm(MatrixStack matrixStack, IRenderTypeBuffer buffer, int light, ItemStack stack, HandSide hand)
     {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.player.ticksExisted < startReloadTick || reloadTimer != 5)

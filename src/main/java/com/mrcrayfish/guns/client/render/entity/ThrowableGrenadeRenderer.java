@@ -5,23 +5,19 @@ import com.mrcrayfish.guns.entity.ThrowableGrenadeEntity;
 import com.mrcrayfish.guns.entity.ThrowableStunGrenadeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.Pose;
-import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.math.vector.Vector3f;
 
 import javax.annotation.Nullable;
 
 /**
  * Author: MrCrayfish
  */
-@OnlyIn(Dist.CLIENT)
 public class ThrowableGrenadeRenderer extends EntityRenderer<ThrowableGrenadeEntity>
 {
     public ThrowableGrenadeRenderer(EntityRendererManager renderManager)
@@ -29,10 +25,11 @@ public class ThrowableGrenadeRenderer extends EntityRenderer<ThrowableGrenadeEnt
         super(renderManager);
     }
 
+    @Nullable
     @Override
     public ResourceLocation getEntityTexture(ThrowableGrenadeEntity entity)
     {
-        return PlayerContainer.LOCATION_BLOCKS_TEXTURE;
+        return null;
     }
 
     @Override

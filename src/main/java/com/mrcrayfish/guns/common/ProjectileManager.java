@@ -1,6 +1,5 @@
 package com.mrcrayfish.guns.common;
 
-import com.google.common.annotations.Beta;
 import com.mrcrayfish.guns.common.trace.GunProjectile;
 import com.mrcrayfish.guns.common.trace.GunProjectileImpl;
 import com.mrcrayfish.guns.item.GunItem;
@@ -18,7 +17,6 @@ import java.util.Map;
 /**
  * Author: MrCrayfish
  */
-@Beta
 public class ProjectileManager
 {
     private static ProjectileManager instance = null;

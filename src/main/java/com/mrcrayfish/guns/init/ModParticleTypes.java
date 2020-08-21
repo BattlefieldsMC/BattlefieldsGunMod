@@ -1,5 +1,6 @@
 package com.mrcrayfish.guns.init;
 
+import com.mojang.serialization.Codec;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.particles.BulletHoleData;
 import net.minecraft.particles.BasicParticleType;
@@ -13,8 +14,15 @@ import net.minecraftforge.registries.ForgeRegistries;
  */
 public class ModParticleTypes
 {
-    public static final DeferredRegister<ParticleType<?>> REGISTER = new DeferredRegister<>(ForgeRegistries.PARTICLE_TYPES, Reference.MOD_ID);
+    public static final DeferredRegister<ParticleType<?>> REGISTER = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, Reference.MOD_ID);
 
-    public static final RegistryObject<ParticleType<BulletHoleData>> BULLET_HOLE = REGISTER.register("bullet_hole", () -> new ParticleType<>(false, BulletHoleData.DESERIALIZER));
+    public static final RegistryObject<ParticleType<BulletHoleData>> BULLET_HOLE = REGISTER.register("bullet_hole",() -> new ParticleType<BulletHoleData>(false, BulletHoleData.DESERIALIZER)
+    {
+        @Override
+        public Codec<BulletHoleData> func_230522_e_()
+        {
+            return BulletHoleData.CODEC;
+        }
+    });
     public static final RegistryObject<BasicParticleType> BLOOD = REGISTER.register("blood", () -> new BasicParticleType(true));
 }

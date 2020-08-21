@@ -1,7 +1,6 @@
 buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
-        maven { url "https://plugins.gradle.org/m2/" }
         jcenter()
         mavenCentral()
     }
@@ -12,14 +11,14 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'maven-publish'
 
-version = "0.16.1-1.15.2"
+version = "1.0.0-1.16.1"
 group = "com.mrcrayfish"
 archivesBaseName = "gun-mod"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
 minecraft {
-    mappings channel: project.mappingsChannel, version: project.mappings
+    mappings channel: 'snapshot', version: '20200723-1.16.1'
 
     runs {
         client {
@@ -27,7 +26,7 @@ minecraft {
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
             mods {
-                examplemod {
+                cgm {
                     source sourceSets.main
                 }
             }
@@ -38,7 +37,19 @@ minecraft {
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
             mods {
-                modid {
+                cgm {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+            property 'forge.logging.console.level', 'debug'
+            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/')
+            mods {
+                cgm {
                     source sourceSets.main
                 }
             }
@@ -48,16 +59,14 @@ minecraft {
 
 repositories {
     maven {
-        name = "Curse Maven"
         url = "https://www.cursemaven.com"
     }
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${project.minecraft}-${project.forge}"
-
-    implementation fg.deobf('curse.maven:obfuscate:2946425')
-    compileOnly fg.deobf('curse.maven:controllable:2880167')
+    minecraft 'net.minecraftforge:forge:1.16.1-32.0.61'
+    compile fg.deobf('curse.maven:obfuscate:3000205')
+    compileOnly fg.deobf('curse.maven:controllable:3008760')
 }
 
 jar {

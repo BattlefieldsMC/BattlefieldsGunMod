@@ -2,7 +2,7 @@ package com.mrcrayfish.guns.object.headshot;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
 
@@ -38,7 +38,7 @@ public class RotatedHeadshotBox<T extends LivingEntity> extends BasicHeadshotBox
         AxisAlignedBB headBox = super.getHeadshotBox(entity);
         if(headBox != null)
         {
-            headBox = headBox.offset(Vec3d.fromPitchYaw(this.rotatePitch ? entity.rotationPitch : 0.0F, this.rotateYaw ? entity.renderYawOffset : 0.0F).normalize().scale(this.headZOffset * 0.0625));
+            headBox = headBox.offset(Vector3d.fromPitchYaw(this.rotatePitch ? entity.rotationPitch : 0.0F, this.rotateYaw ? entity.renderYawOffset : 0.0F).normalize().scale(this.headZOffset * 0.0625));
             return headBox;
         }
         return null;

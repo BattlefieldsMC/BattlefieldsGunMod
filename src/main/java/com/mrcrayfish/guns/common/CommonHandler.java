@@ -138,7 +138,7 @@ public class CommonHandler
                         if (!modifiedGun.getProjectile().isVisible())
                         {
                             MessageBullet messageBullet = new MessageBullet(modifiedGun.getProjectile().getItem(), bullet, modifiedGun.getProjectile().isGravity() ? GunModifierHelper.getModifiedProjectileGravity(heldItem, 0.05) : 0, modifiedGun.getProjectile().getLife(), modifiedGun.getProjectile().getTrailColor(), modifiedGun.getProjectile().getTrailLengthMultiplier());
-                            PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player.getPosX(), player.getPosY(), player.getPosZ(), Config.COMMON.network.projectileTrackingRange.get(), player.world.getDimension().getType())), messageBullet);
+                            PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player.getPosX(), player.getPosY(), player.getPosZ(), Config.COMMON.network.projectileTrackingRange.get(), player.world.func_234923_W_())), messageBullet);
                         }
                     });
                 }
@@ -166,20 +166,20 @@ public class CommonHandler
                     }
                 }
 
-                ResourceLocation fireSound = silenced ? modifiedGun.getSounds().getSilencedFire() : modifiedGun.getSounds().getFire();
-                SoundEvent event = ForgeRegistries.SOUND_EVENTS.getValue(fireSound);
-                if (event != null)
-                {
-                    double posX = player.prevPosX;
-                    double posY = player.prevPosY + player.getEyeHeight();
-                    double posZ = player.prevPosZ;
-                    float volume = GunModifierHelper.getFireSoundVolume(heldItem);
-                    float pitch = 0.8F + world.rand.nextFloat() * 0.2F;
-                    double radius = GunModifierHelper.getModifiedFireSoundRadius(heldItem, Config.SERVER.gunShotMaxDistance.get());
-                    MessageGunSound messageSound = new MessageGunSound(event, SoundCategory.PLAYERS, (float) posX, (float) posY, (float) posZ, volume, pitch, false);
-                    PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player, player.getPosX(), player.getPosY() + player.getEyeHeight(), player.getPosZ(), radius, player.world.getDimension().getType())), messageSound);
-                    PacketHandler.getPlayChannel().send(PacketDistributor.PLAYER.with(() -> player), new MessageGunSound(event, SoundCategory.PLAYERS, (float) posX, (float) posY, (float) posZ, volume, pitch, true));
-                }
+                    ResourceLocation fireSound = silenced ? modifiedGun.getSounds().getSilencedFire() : modifiedGun.getSounds().getFire();
+                    SoundEvent event = ForgeRegistries.SOUND_EVENTS.getValue(fireSound);
+                    if(event != null)
+                    {
+                        double posX = player.prevPosX;
+                        double posY = player.prevPosY + player.getEyeHeight();
+                        double posZ = player.prevPosZ;
+                        float volume = GunModifierHelper.getFireSoundVolume(heldItem);
+                        float pitch = 0.8F + world.rand.nextFloat() * 0.2F;
+                        double radius = GunModifierHelper.getModifiedFireSoundRadius(heldItem, Config.SERVER.gunShotMaxDistance.get());
+                        MessageGunSound messageSound = new MessageGunSound(event, SoundCategory.PLAYERS, (float) posX, (float) posY, (float) posZ, volume, pitch, false);
+                        PacketHandler.getPlayChannel().send(PacketDistributor.NEAR.with(() -> new PacketDistributor.TargetPoint(player, player.getPosX(), player.getPosY() + player.getEyeHeight(), player.getPosZ(), radius, player.world.func_234923_W_())), messageSound);
+                        PacketHandler.getPlayChannel().send(PacketDistributor.PLAYER.with(() -> player), new MessageGunSound(event, SoundCategory.PLAYERS, (float) posX, (float) posY, (float) posZ, volume, pitch, true));
+                    }
 
                 if(modifiedGun.getDisplay().getFlash() != null)
                 {
@@ -200,10 +200,10 @@ public class CommonHandler
                     }
                 }
             }
-        }
-        else
-        {
-            world.playSound(null, player.getPosition(), SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, 0.8F);
+            else
+            {
+                world.playSound(null, player.getPosX(), player.getPosY(), player.getPosZ(), SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.3F, 0.8F);
+            }
         }
     }
 

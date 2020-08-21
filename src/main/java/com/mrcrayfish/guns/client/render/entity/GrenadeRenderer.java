@@ -4,20 +4,16 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mrcrayfish.guns.entity.GrenadeEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.math.vector.Vector3f;
 
 /**
  * Author: MrCrayfish
  */
-@OnlyIn(Dist.CLIENT)
 public class GrenadeRenderer extends EntityRenderer<GrenadeEntity>
 {
     public GrenadeRenderer(EntityRendererManager renderManager)
@@ -28,7 +24,7 @@ public class GrenadeRenderer extends EntityRenderer<GrenadeEntity>
     @Override
     public ResourceLocation getEntityTexture(GrenadeEntity entity)
     {
-        return PlayerContainer.LOCATION_BLOCKS_TEXTURE;
+        return null;
     }
 
     @Override
@@ -52,7 +48,7 @@ public class GrenadeRenderer extends EntityRenderer<GrenadeEntity>
 
         matrixStack.translate(0.0, 0.5, 0.0);
 
-        Minecraft.getInstance().getItemRenderer().renderItem(entity.getBullet(), ItemCameraTransforms.TransformType.NONE, light, OverlayTexture.NO_OVERLAY, matrixStack, renderTypeBuffer);
+        Minecraft.getInstance().getItemRenderer().renderItem(entity.getItem(), ItemCameraTransforms.TransformType.NONE, light, OverlayTexture.NO_OVERLAY, matrixStack, renderTypeBuffer);
         matrixStack.pop();
     }
 }

@@ -1,27 +1,29 @@
 package com.mrcrayfish.guns.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mrcrayfish.guns.client.RenderTypes;
 import com.mrcrayfish.guns.client.util.RenderUtil;
 import com.mrcrayfish.guns.common.trace.GunProjectile;
 import com.mrcrayfish.guns.object.Bullet;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +59,7 @@ public class BulletRenderer
         if (mc.renderViewEntity == null)
             return;
 
-        Vec3d view = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
+        Vector3d view = mc.gameRenderer.getActiveRenderInfo().getProjectedView();
         IRenderTypeBuffer.Impl buffer = mc.getRenderTypeBuffers().getBufferSource();
         MatrixStack matrixStack = event.getMatrixStack();
 
@@ -87,11 +89,11 @@ public class BulletRenderer
         matrixStack.rotate(Vector3f.YP.rotationDegrees(bullet.getRotationYaw()));
         matrixStack.rotate(Vector3f.XP.rotationDegrees(-bullet.getRotationPitch() + 90));
 
-        double motionLength = MathHelper.sqrt(projectile.getMotionX() * projectile.getMotionX() + projectile.getMotionY() * projectile.getMotionY() + projectile.getMotionZ() * projectile.getMotionZ());
-        float trailLength = (float) ((motionLength / 3.0F) * bullet.getTrailLengthMultiplier());
-        float red = (float) (bullet.getTrailColor() >> 16 & 255) / 255.0F;
-        float green = (float) (bullet.getTrailColor() >> 8 & 255) / 255.0F;
-        float blue = (float) (bullet.getTrailColor() & 255) / 255.0F;
+        Vector3d motionVec = new Vector3d(projectile.getMotionX(), projectile.getMotionY(), projectile.getMotionZ());
+        float trailLength = (float) ((motionVec.length() / 3.0F) * bullet.getTrailLengthMultiplier());
+        float red = (float)(bullet.getTrailColor() >> 16 & 255) / 255.0F;
+        float green = (float)(bullet.getTrailColor() >> 8 & 255) / 255.0F;
+        float blue = (float)(bullet.getTrailColor() & 255) / 255.0F;
         float alpha = 0.3F;
 
         Matrix4f matrix4f = matrixStack.getLast().getMatrix();
@@ -119,9 +121,11 @@ public class BulletRenderer
         matrixStack.rotate(Vector3f.YP.rotationDegrees((bullet.getTicksExisted() + partialTicks) * (float) 50));
         matrixStack.scale(0.275F, 0.275F, 0.275F);
 
-        int combinedLight = WorldRenderer.getCombinedLight(entity.world, entity.getPosition());
-        ItemStack stack = projectile.getBullet();
+        int combinedLight = WorldRenderer.getCombinedLight(entity.world, new BlockPos(entity.getPositionVec()));
+        ItemStack stack = bullet.getProjectile().getBullet();
+        RenderType renderType = RenderTypeLookup.func_239219_a_(stack, false);
         RenderUtil.renderModel(stack, ItemCameraTransforms.TransformType.NONE, matrixStack, buffer, combinedLight, OverlayTexture.NO_OVERLAY);
+        Minecraft.getInstance().getRenderTypeBuffers().getBufferSource().finish(renderType);
 
         matrixStack.pop();
     }

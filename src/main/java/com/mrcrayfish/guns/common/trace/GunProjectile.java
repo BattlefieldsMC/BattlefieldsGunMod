@@ -21,7 +21,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPlaySoundPacket;
 import net.minecraft.particles.BlockParticleData;
@@ -29,6 +29,7 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
 import net.minecraft.util.math.*;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -72,8 +73,8 @@ public interface GunProjectile
     {
         Entity shooter = world.getEntityByID(this.getShooterId());
 
-        Vec3d startVec = new Vec3d(this.getX(), this.getY(), this.getZ());
-        Vec3d endVec = startVec.add(this.getMotionX(), this.getMotionY(), this.getMotionZ());
+        Vector3d startVec = new Vector3d(this.getX(), this.getY(), this.getZ());
+        Vector3d endVec = startVec.add(this.getMotionX(), this.getMotionY(), this.getMotionZ());
         RayTraceResult result = rayTraceBlocks(world, new RayTraceContext(startVec, endVec, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, shooter), IGNORE_LEAVES);
         if (result.getType() != RayTraceResult.Type.MISS)
         {
@@ -131,7 +132,7 @@ public interface GunProjectile
             {
                 this.onExpired(world);
             }
-            this.complete(new Vec3d(this.getX(), this.getY(), this.getZ()));
+            this.complete(new Vector3d(this.getX(), this.getY(), this.getZ()));
         }
     }
 
@@ -153,7 +154,7 @@ public interface GunProjectile
      * @param startVec        The ray trace start position
      * @param endVec          The ray trace end position
      */
-    default void onHit(World world, ItemStack weapon, float damage, boolean spawnBulletHole, boolean dealShotDamage, RayTraceResult result, Vec3d startVec, Vec3d endVec)
+    default void onHit(World world, ItemStack weapon, float damage, boolean spawnBulletHole, boolean dealShotDamage, RayTraceResult result, Vector3d startVec, Vector3d endVec)
     {
         MinecraftForge.EVENT_BUS.post(new GunProjectileHitEvent(result, this));
 
@@ -180,7 +181,7 @@ public interface GunProjectile
 
             if (!world.isRemote() && spawnBulletHole)
             {
-                Vec3d hitVec = blockRayTraceResult.getHitVec();
+                Vector3d hitVec = blockRayTraceResult.getHitVec();
                 double holeX = hitVec.getX() + 0.005 * blockRayTraceResult.getFace().getXOffset();
                 double holeY = hitVec.getY() + 0.005 * blockRayTraceResult.getFace().getYOffset();
                 double holeZ = hitVec.getZ() + 0.005 * blockRayTraceResult.getFace().getZOffset();
@@ -193,13 +194,12 @@ public interface GunProjectile
             if (!world.isRemote())
             {
                 int level = EnchantmentHelper.getEnchantmentLevel(ModEnchantments.FIRE_STARTER.get(), this.getWeapon());
-                if (level > 0 && state.isSolidSide(world, pos, blockRayTraceResult.getFace()))
+                if (level > 0)
                 {
                     BlockPos offsetPos = pos.offset(blockRayTraceResult.getFace());
-                    BlockState offsetState = world.getBlockState(offsetPos);
-                    if (offsetState.isAir(world, offsetPos))
+                    if (AbstractFireBlock.canLightBlock(world, offsetPos))
                     {
-                        BlockState fireState = ((FireBlock) Blocks.FIRE).getStateForPlacement(world, offsetPos);
+                        BlockState fireState = AbstractFireBlock.getFireForPlacement(world, offsetPos);
                         world.setBlockState(offsetPos, fireState, 11);
                     }
                 }
@@ -215,7 +215,7 @@ public interface GunProjectile
             if (entity.getEntityId() == this.getShooterId())
                 return;
 
-            if(EnchantmentHelper.getEnchantmentLevel(ModEnchantments.FIRE_STARTER.get(), weapon) > 0)
+            if (EnchantmentHelper.getEnchantmentLevel(ModEnchantments.FIRE_STARTER.get(), weapon) > 0)
                 entity.setFire(2);
 
             this.onHitEntity(world, weapon, damage, entity, result.getHitVec(), startVec, endVec, entityRayTraceResult.isHeadshot());
@@ -240,7 +240,7 @@ public interface GunProjectile
      * @param endVec   The ending position of the shot
      * @param headShot Whether or not the shot was a headshot
      */
-    default void onHitEntity(World world, ItemStack weapon, float damage, Entity entity, Vec3d hitVec, Vec3d startVec, Vec3d endVec, boolean headShot)
+    default void onHitEntity(World world, ItemStack weapon, float damage, Entity entity, Vector3d hitVec, Vector3d startVec, Vector3d endVec, boolean headShot)
     {
         if (world.isRemote())
             return;
@@ -269,13 +269,13 @@ public interface GunProjectile
                 event = SoundEvents.ENTITY_ITEM_BREAK; //TODO change
             }
             ServerPlayerEntity shooterPlayer = (ServerPlayerEntity) shooter;
-            shooterPlayer.connection.sendPacket(new SPlaySoundPacket(event.getRegistryName(), SoundCategory.PLAYERS, new Vec3d(shooter.getPosX(), shooter.getPosY(), shooter.getPosZ()), 0.75F, 1.0F));
+            shooterPlayer.connection.sendPacket(new SPlaySoundPacket(event.getRegistryName(), SoundCategory.PLAYERS, new Vector3d(shooter.getPosX(), shooter.getPosY(), shooter.getPosZ()), 0.75F, 1.0F));
         }
         else if ((critical || headShot) && shooter instanceof ServerPlayerEntity)
         {
             SoundEvent event = headShot ? SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP : SoundEvents.ENTITY_ITEM_BREAK;
             ServerPlayerEntity shooterPlayer = (ServerPlayerEntity) shooter;
-            shooterPlayer.connection.sendPacket(new SPlaySoundPacket(event.getRegistryName(), SoundCategory.PLAYERS, new Vec3d(shooter.getPosX(), shooter.getPosY(), shooter.getPosZ()), 0.75F, 1.0F));
+            shooterPlayer.connection.sendPacket(new SPlaySoundPacket(event.getRegistryName(), SoundCategory.PLAYERS, new Vector3d(shooter.getPosX(), shooter.getPosY(), shooter.getPosZ()), 0.75F, 1.0F));
         }
 
         /* Send blood particle to tracking clients. */
@@ -283,7 +283,7 @@ public interface GunProjectile
         PacketHandler.getPlayChannel().send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new MessageBlood(hitVec.getX(), hitVec.getY(), hitVec.getZ()));
     }
 
-    default void onHitBlock(World world, ItemStack weapon, float damage, BlockState state, BlockPos pos, Vec3d hitVec, Vec3d startVec, Vec3d endVec)
+    default void onHitBlock(World world, ItemStack weapon, float damage, BlockState state, BlockPos pos, Vector3d hitVec, Vector3d startVec, Vector3d endVec)
     {
         if (world.isRemote())
             return;
@@ -297,7 +297,7 @@ public interface GunProjectile
      *
      * @param completePos The position the bullet was completed at or null to just remove the bullet
      */
-    void complete(Vec3d completePos);
+    void complete(Vector3d completePos);
 
     /**
      * @return The amount of ticks this projectile has existed for
@@ -313,7 +313,7 @@ public interface GunProjectile
      * @return The position the bullet completed at or null to just remove it
      */
     @Nullable
-    Vec3d getCompletePos();
+    Vector3d getCompletePos();
 
     /**
      * @return The last x position this projectile was at
@@ -553,13 +553,13 @@ public interface GunProjectile
      * @return Whether or not an entity was hit by the projectile
      */
     @Nullable
-    static EntityResult findEntityOnPath(GunProjectile projectile, World world, float bulletSize, Vec3d startVec, Vec3d endVec)
+    static EntityResult findEntityOnPath(GunProjectile projectile, World world, float bulletSize, Vector3d startVec, Vector3d endVec)
     {
         Entity shooter = world.getEntityByID(projectile.getShooterId());
         if (shooter == null)
             return null;
 
-        Vec3d hitVec = null;
+        Vector3d hitVec = null;
         Entity hitEntity = null;
         boolean headshot = false;
         List<Entity> entities = world.getEntitiesInAABBexcluding(shooter, new AxisAlignedBB(projectile.getX() - bulletSize / 2, projectile.getY() - bulletSize / 2, projectile.getZ() - bulletSize / 2, projectile.getX() + bulletSize / 2, projectile.getY() + bulletSize / 2, projectile.getZ() + bulletSize / 2).expand(projectile.getMotionX(), projectile.getMotionY(), projectile.getMotionZ()).grow(1.0), PROJECTILE_TARGETS);
@@ -569,7 +569,7 @@ public interface GunProjectile
             if (!(entity instanceof GunProjectile))
             {
                 HitResult result = getHitResult(world, entity, startVec, endVec);
-                Optional<Vec3d> hitPos = result.getHitPos();
+                Optional<Vector3d> hitPos = result.getHitPos();
                 if (!hitPos.isPresent())
                 {
                     continue;
@@ -635,7 +635,7 @@ public interface GunProjectile
      * @param endVec     The ending position of the movement
      * @return The list of results collected by the ray trace
      */
-    static List<EntityResult> findEntitiesOnPath(GunProjectile projectile, World world, float bulletSize, Vec3d startVec, Vec3d endVec)
+    static List<EntityResult> findEntitiesOnPath(GunProjectile projectile, World world, float bulletSize, Vector3d startVec, Vector3d endVec)
     {
         Entity shooter = world.getEntityByID(projectile.getShooterId());
         if (shooter == null)
@@ -677,7 +677,7 @@ public interface GunProjectile
             if (!(entity instanceof GunProjectile))
             {
                 HitResult result = getHitResult(world, entity, startVec, endVec);
-                Optional<Vec3d> hitPos = result.getHitPos();
+                Optional<Vector3d> hitPos = result.getHitPos();
                 if (!hitPos.isPresent())
                 {
                     continue;
@@ -697,37 +697,37 @@ public interface GunProjectile
      * @param predicate the block state predicate
      * @return a result of the raytrace
      */
-    static BlockRayTraceResult rayTraceBlocks(World world, RayTraceContext context, java.util.function.Predicate<BlockState> predicate)
+    static BlockRayTraceResult rayTraceBlocks(World world, RayTraceContext context, Predicate<BlockState> predicate)
     {
         return func_217300_a(context, (rayTraceContext, blockPos) ->
         {
             BlockState blockState = world.getBlockState(blockPos);
             if (predicate.test(blockState)) return null;
-            IFluidState fluidState = world.getFluidState(blockPos);
-            Vec3d startVec = rayTraceContext.getStartVec();
-            Vec3d endVec = rayTraceContext.getEndVec();
+            FluidState fluidState = world.getFluidState(blockPos);
+            Vector3d startVec = rayTraceContext.func_222253_b();
+            Vector3d endVec = rayTraceContext.func_222250_a();
             VoxelShape blockShape = rayTraceContext.getBlockShape(blockState, world, blockPos);
             BlockRayTraceResult blockResult = world.rayTraceBlocks(startVec, endVec, blockPos, blockShape, blockState);
             VoxelShape fluidShape = rayTraceContext.getFluidShape(fluidState, world, blockPos);
             BlockRayTraceResult fluidResult = fluidShape.rayTrace(startVec, endVec, blockPos);
-            double blockDistance = blockResult == null ? Double.MAX_VALUE : rayTraceContext.getStartVec().squareDistanceTo(blockResult.getHitVec());
-            double fluidDistance = fluidResult == null ? Double.MAX_VALUE : rayTraceContext.getStartVec().squareDistanceTo(fluidResult.getHitVec());
+            double blockDistance = blockResult == null ? Double.MAX_VALUE : rayTraceContext.func_222253_b().squareDistanceTo(blockResult.getHitVec());
+            double fluidDistance = fluidResult == null ? Double.MAX_VALUE : rayTraceContext.func_222253_b().squareDistanceTo(fluidResult.getHitVec());
             return blockDistance <= fluidDistance ? blockResult : fluidResult;
         }, (rayTraceContext) ->
         {
-            Vec3d vec3d = rayTraceContext.getStartVec().subtract(rayTraceContext.getEndVec());
-            return BlockRayTraceResult.createMiss(rayTraceContext.getEndVec(), Direction.getFacingFromVector(vec3d.x, vec3d.y, vec3d.z), new BlockPos(rayTraceContext.getEndVec()));
+            Vector3d Vector3d = rayTraceContext.func_222253_b().subtract(rayTraceContext.func_222250_a());
+            return BlockRayTraceResult.createMiss(rayTraceContext.func_222250_a(), Direction.getFacingFromVector(Vector3d.x, Vector3d.y, Vector3d.z), new BlockPos(rayTraceContext.func_222250_a()));
         });
     }
 
     @SuppressWarnings("unchecked")
-    static HitResult getHitResult(World world, Entity entity, Vec3d startVec, Vec3d endVec)
+    static HitResult getHitResult(World world, Entity entity, Vector3d startVec, Vector3d endVec)
     {
         double expandHeight = entity instanceof PlayerEntity && !entity.isCrouching() ? 0.0625 : 0.0;
         AxisAlignedBB boundingBox = entity.getBoundingBox().expand(0, expandHeight, 0);
 
-        Vec3d hitPos = boundingBox.rayTrace(startVec, endVec).orElse(null);
-        Vec3d grownHitPos = boundingBox.grow(Config.COMMON.gameplay.growBoundingBoxAmount.get(), 0, Config.COMMON.gameplay.growBoundingBoxAmount.get()).rayTrace(startVec, endVec).orElse(null);
+        Vector3d hitPos = boundingBox.rayTrace(startVec, endVec).orElse(null);
+        Vector3d grownHitPos = boundingBox.grow(Config.COMMON.gameplay.growBoundingBoxAmount.get(), 0, Config.COMMON.gameplay.growBoundingBoxAmount.get()).rayTrace(startVec, endVec).orElse(null);
         if (hitPos == null && grownHitPos != null)
         {
             RayTraceResult raytraceresult = rayTraceBlocks(world, new RayTraceContext(startVec, grownHitPos, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, null), IGNORE_LEAVES);
@@ -749,7 +749,7 @@ public interface GunProjectile
                 if (box != null)
                 {
                     box = box.offset(entity.getPosX(), entity.getPosY(), entity.getPosZ());
-                    Optional<Vec3d> headshotHitPos = box.rayTrace(startVec, endVec);
+                    Optional<Vector3d> headshotHitPos = box.rayTrace(startVec, endVec);
                     if (!headshotHitPos.isPresent())
                     {
                         box = box.grow(Config.COMMON.gameplay.growBoundingBoxAmount.get(), 0, Config.COMMON.gameplay.growBoundingBoxAmount.get());
@@ -768,8 +768,8 @@ public interface GunProjectile
 
     static <T> T func_217300_a(RayTraceContext context, BiFunction<RayTraceContext, BlockPos, T> hitFunction, Function<RayTraceContext, T> p_217300_2_)
     {
-        Vec3d startVec = context.getStartVec();
-        Vec3d endVec = context.getEndVec();
+        Vector3d startVec = context.func_222253_b();
+        Vector3d endVec = context.func_222250_a();
         if (startVec.equals(endVec))
         {
             return p_217300_2_.apply(context);

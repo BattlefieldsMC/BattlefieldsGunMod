@@ -8,10 +8,9 @@ import com.mrcrayfish.guns.object.headshot.NoChildRotatedHeadshotBox;
 import com.mrcrayfish.guns.object.headshot.RotatedHeadshotBox;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -39,7 +38,8 @@ public class BoundingBoxManager
             double scale = 30.0 / 32.0;
             if(entity.isSwimming())
             {
-                Vec3d pos = Vec3d.fromPitchYaw(0.0F, entity.renderYawOffset).normalize().scale(0.8);
+                headBox = headBox.offset(0, 3 * 0.0625, 0);
+                Vector3d pos = Vector3d.fromPitchYaw(entity.rotationPitch, entity.renderYawOffset).normalize().scale(0.8);
                 headBox = headBox.offset(pos);
             }
             else
@@ -50,7 +50,7 @@ public class BoundingBoxManager
         });
 
         registerHeadshotBox(EntityType.ZOMBIE, new ChildHeadshotBox<>(8.0, 24.0, 0.75, 0.5));
-        registerHeadshotBox(EntityType.ZOMBIE_PIGMAN, new ChildHeadshotBox<>(8.0, 24.0, 0.75, 0.5));
+        registerHeadshotBox(EntityType.ZOMBIFIED_PIGLIN, new ChildHeadshotBox<>(8.0, 24.0, 0.75, 0.5));
         registerHeadshotBox(EntityType.HUSK, new ChildHeadshotBox<>(8.0, 24.0, 0.75, 0.5));
         registerHeadshotBox(EntityType.SKELETON, new BasicHeadshotBox<>(8.0, 24.0));
         registerHeadshotBox(EntityType.STRAY, new BasicHeadshotBox<>(8.0, 24.0));
@@ -81,16 +81,12 @@ public class BoundingBoxManager
         registerHeadshotBox(EntityType.TURTLE, new RotatedHeadshotBox<>(6.0, 5.0, 1.0, 10.0, false, true));
         registerHeadshotBox(EntityType.IRON_GOLEM, new RotatedHeadshotBox<>(8.0, 10.0, 33.0, 3.5, false, true));
         registerHeadshotBox(EntityType.PHANTOM, new RotatedHeadshotBox<>(6.0, 3.0, 1.5, 6.5, true, true));
+        registerHeadshotBox(EntityType.HOGLIN, new RotatedHeadshotBox<>(14.0, 16.0, 7.0, 19.0, false, true));
+        registerHeadshotBox(EntityType.ZOGLIN, new RotatedHeadshotBox<>(14.0, 16.0, 7.0, 19.0, false, true));
+        registerHeadshotBox(EntityType.PIGLIN, new ChildHeadshotBox<>(8.0, 24.0, 0.75, 0.5));
     }
 
-    /**
-     * Registers a headshot box for the specified entity type.
-     *
-     * @param type        the entity type
-     * @param headshotBox a {@link IHeadshotBox} instance
-     * @param <T>         a type that extends {@link LivingEntity}
-     */
-    public static <T extends LivingEntity> void registerHeadshotBox(EntityType<T> type, IHeadshotBox<T> headshotBox)
+    public static <T extends Entity> void registerHeadshotBox(EntityType<T> type, IHeadshotBox<T> headshotBox)
     {
         headshotBoxes.putIfAbsent(type, headshotBox);
     }

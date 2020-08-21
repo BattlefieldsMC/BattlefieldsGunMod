@@ -3,15 +3,18 @@ package com.mrcrayfish.guns.client.settings;
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 import com.mrcrayfish.guns.GunMod;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.SliderPercentageOption;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.commons.io.IOUtils;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Iterator;
@@ -20,7 +23,6 @@ import java.util.List;
 /**
  * Author: MrCrayfish
  */
-@OnlyIn(Dist.CLIENT)
 public class GunOptions
 {
     private static final DecimalFormat FORMAT = new DecimalFormat("0.0#");
@@ -31,7 +33,7 @@ public class GunOptions
         GunMod.getOptions().adsSensitivity = MathHelper.clamp(value, 0.0, 2.0);
     }, (gameSettings, option) -> {
         double adsSensitivity = GunMod.getOptions().adsSensitivity;
-        return I18n.format("cgm.options.adsSensitivity.format", FORMAT.format(adsSensitivity));
+        return new TranslationTextComponent("cgm.options.adsSensitivity.format", FORMAT.format(adsSensitivity));
     });
 
     public static final Splitter COLON_SPLITTER = Splitter.on(':');

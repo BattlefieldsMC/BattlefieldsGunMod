@@ -8,15 +8,16 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.IParticleRenderType;
 import net.minecraft.client.particle.SpriteTexturedParticle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.Quaternion;
-import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -33,7 +34,7 @@ public class BulletHoleParticle extends SpriteTexturedParticle
     private int vOffset;
     private float textureDensity;
 
-    public BulletHoleParticle(World world, double x, double y, double z, Direction direction, BlockPos pos)
+    public BulletHoleParticle(ClientWorld world, double x, double y, double z, Direction direction, BlockPos pos)
     {
         super(world, x, y, z);
         this.setSprite(this.getSprite(pos));
@@ -122,7 +123,7 @@ public class BulletHoleParticle extends SpriteTexturedParticle
     @Override
     public void renderParticle(IVertexBuilder buffer, ActiveRenderInfo renderInfo, float partialTicks)
     {
-        Vec3d view = renderInfo.getProjectedView();
+        Vector3d view = renderInfo.getProjectedView();
         float particleX = (float) (MathHelper.lerp((double) partialTicks, this.prevPosX, this.posX) - view.getX());
         float particleY = (float) (MathHelper.lerp((double) partialTicks, this.prevPosY, this.posY) - view.getY());
         float particleZ = (float) (MathHelper.lerp((double) partialTicks, this.prevPosZ, this.posZ) - view.getZ());

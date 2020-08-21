@@ -96,8 +96,9 @@ public class GrenadeItem extends AmmoItem
                 if (!worldIn.isRemote)
                 {
                     ThrowableGrenadeEntity grenade = this.create(worldIn, player, this.maxCookTime - duration);
-                    grenade.shoot(player, player.rotationPitch, player.rotationYaw, 0.0F, Math.min(1.0F, duration / 20F), 1.0F);
+                    grenade.func_234612_a_(player, player.rotationPitch, player.rotationYaw, 0.0F, Math.min(1.0F, duration / 20F), 1.0F);
                     worldIn.addEntity(grenade);
+                    this.onThrown(worldIn, grenade);
                 }
                 if (!this.canCook())
                     player.world.playSound(player.getPosX(), player.getPosY(), player.getPosZ(), ModSounds.ITEM_GRENADE_PIN.get(), SoundCategory.PLAYERS, 1.0F, 1.0F, false);
@@ -113,5 +114,10 @@ public class GrenadeItem extends AmmoItem
     public boolean canCook()
     {
         return true;
+    }
+
+    protected void onThrown(World world, ThrowableGrenadeEntity entity)
+    {
+
     }
 }

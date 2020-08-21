@@ -113,5 +113,7 @@
     "perk.cgm.ads_speed.positive": "Increased ADS Speed",
     "perk.cgm.ads_speed.negative": "Reduced ADS Speed",
     "perk.cgm.rate.positive": "Increased Fire Rate",
-    "perk.cgm.rate.negative": "Reduced Fire Rate"
+    "perk.cgm.rate.negative": "Reduced Fire Rate",
+    "gui.cgm.assemble": "Assemble",
+    "gui.cgm.show_remaining": "Show Remaining"
 }

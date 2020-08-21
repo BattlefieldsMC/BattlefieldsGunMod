@@ -1,6 +1,5 @@
 package com.mrcrayfish.guns.item;
 
-import com.google.common.annotations.Beta;
 import com.mrcrayfish.guns.Config;
 import com.mrcrayfish.guns.Reference;
 import com.mrcrayfish.guns.common.NetworkGunManager;
@@ -24,7 +23,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import javax.annotation.Nullable;
 import java.util.List;
 
-@Beta
 public class GunItem extends Item implements IColored
 {
     private Gun gun = new Gun();
@@ -51,7 +49,7 @@ public class GunItem extends Item implements IColored
 
         Item ammo = ForgeRegistries.ITEMS.getValue(modifiedGun.getProjectile().getItem());
         if (ammo != null)
-            tooltip.add(new TranslationTextComponent("info.cgm.ammo_type", ammo.getName()).setStyle(new Style().setColor(TextFormatting.GRAY)));
+            tooltip.add(new TranslationTextComponent("info.cgm.ammo_type", ammo.getName()).setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
 
         String additionalDamageText = "";
         CompoundNBT tagCompound = stack.getTag();
@@ -73,31 +71,31 @@ public class GunItem extends Item implements IColored
             }
         }
 
-        tooltip.add(new TranslationTextComponent("info.cgm.damage", ItemStack.DECIMALFORMAT.format(modifiedGun.getProjectile().getDamage()) + additionalDamageText).setStyle(new Style().setColor(TextFormatting.GRAY)));
-        tooltip.add(new TranslationTextComponent("info.cgm.fire_rate", GunModifierHelper.getModifiedRate(stack, GunEnchantmentHelper.getRate(stack, modifiedGun))).setStyle(new Style().setColor(TextFormatting.GRAY)));
-        tooltip.add(new TranslationTextComponent("info.cgm.reload_speed", modifiedGun.getGeneral().getReloadAmount()).setStyle(new Style().setColor(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("info.cgm.damage", ItemStack.DECIMALFORMAT.format(modifiedGun.getProjectile().getDamage()) + additionalDamageText).setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("info.cgm.fire_rate", GunModifierHelper.getModifiedRate(stack, GunEnchantmentHelper.getRate(stack, modifiedGun))).setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("info.cgm.reload_speed", modifiedGun.getGeneral().getReloadAmount()).setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
         if (modifiedGun.getGeneral().getSpread() == 0 || modifiedGun.getGeneral().isAlwaysSpread())
         {
-            tooltip.add(new TranslationTextComponent("info.cgm.always_spread", ItemStack.DECIMALFORMAT.format(GunModifierHelper.getModifiedSpread(stack, modifiedGun.getGeneral().getSpread()))).setStyle(new Style().setColor(TextFormatting.GRAY)));
+            tooltip.add(new TranslationTextComponent("info.cgm.always_spread", ItemStack.DECIMALFORMAT.format(GunModifierHelper.getModifiedSpread(stack, modifiedGun.getGeneral().getSpread()))).setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
         }
         else
         {
-            tooltip.add(new TranslationTextComponent("info.cgm.spread", ItemStack.DECIMALFORMAT.format((1.0 / Config.COMMON.projectileSpread.maxCount.get().doubleValue()) * modifiedGun.getGeneral().getSpread())).setStyle(new Style().setColor(TextFormatting.GRAY)));
+            tooltip.add(new TranslationTextComponent("info.cgm.spread", ItemStack.DECIMALFORMAT.format((1.0 / Config.COMMON.projectileSpread.maxCount.get().doubleValue()) * modifiedGun.getGeneral().getSpread())).setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
         }
 
         if (tagCompound != null)
         {
             if (tagCompound.getBoolean("IgnoreAmmo"))
             {
-                tooltip.add(new TranslationTextComponent("info.cgm.ignore_ammo").setStyle(new Style().setColor(TextFormatting.GRAY)));
+                tooltip.add(new TranslationTextComponent("info.cgm.ignore_ammo").setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
             }
             else
             {
-                tooltip.add(new TranslationTextComponent("info.cgm.ammo", tagCompound.getInt("AmmoCount"), GunEnchantmentHelper.getAmmoCapacity(stack, modifiedGun)).setStyle(new Style().setColor(TextFormatting.GRAY)));
+                tooltip.add(new TranslationTextComponent("info.cgm.ammo", tagCompound.getInt("AmmoCount"), GunEnchantmentHelper.getAmmoCapacity(stack, modifiedGun)).setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
             }
         }
 
-        tooltip.add(new TranslationTextComponent("info.cgm.attachment_help", new KeybindTextComponent("key." + Reference.MOD_ID + ".attachments")).setStyle(new Style().setColor(TextFormatting.GRAY)));
+        tooltip.add(new TranslationTextComponent("info.cgm.attachment_help", new KeybindTextComponent("key." + Reference.MOD_ID + ".attachments")).setStyle(Style.EMPTY.setFormatting(TextFormatting.GRAY)));
     }
 
     @Override
