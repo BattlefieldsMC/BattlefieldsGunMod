@@ -81,11 +81,12 @@ public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
                 if(!this.container.getSlot(i).isEnabled())
                 {
                     this.renderTooltip(matrixStack, new TranslationTextComponent("slot.cgm.attachment." + type.getTranslationKey()).appendString("\n").append(new TranslationTextComponent("slot.cgm.attachment.not_applicable")), mouseX, mouseY);
+
                 }
                 else if(this.weaponInventory.getStackInSlot(i).isEmpty())
                 {
-
                     this.renderTooltip(matrixStack, new TranslationTextComponent("slot.cgm.attachment." + type.getTranslationKey()), mouseX, mouseY);
+
                 }
             }
         }

@@ -93,7 +93,7 @@ public class GrenadeItem extends AmmoItem
             if (duration >= 10)
             {
                 PlayerEntity player = (PlayerEntity) entityLiving;
-                if (!worldIn.isRemote)
+                if (!worldIn.isRemote())
                 {
                     ThrowableGrenadeEntity grenade = this.create(worldIn, player, this.maxCookTime - duration);
                     grenade.func_234612_a_(player, player.rotationPitch, player.rotationYaw, 0.0F, Math.min(1.0F, duration / 20F), 1.0F);
