@@ -80,13 +80,12 @@ public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
                 IAttachment.Type type = IAttachment.Type.values()[i];
                 if(!this.container.getSlot(i).isEnabled())
                 {
-                    this.renderTooltip(matrixStack, new TranslationTextComponent("slot.cgm.attachment." + type.getTranslationKey()).appendString("\n").append(new TranslationTextComponent("slot.cgm.attachment.not_applicable")), mouseX, mouseY);
-
+                    this.renderTooltip(matrixStack, Arrays.asList(new TranslationTextComponent("slot.cgm.attachment." + type.getTranslationKey()), new TranslationTextComponent("slot.cgm.attachment.not_applicable")), mouseX, mouseY);
                 }
                 else if(this.weaponInventory.getStackInSlot(i).isEmpty())
                 {
-                    this.renderTooltip(matrixStack, new TranslationTextComponent("slot.cgm.attachment." + type.getTranslationKey()), mouseX, mouseY);
 
+                    this.renderTooltip(matrixStack, Collections.singletonList(new TranslationTextComponent("slot.cgm.attachment." + type.getTranslationKey())), mouseX, mouseY);
                 }
             }
         }
@@ -96,8 +95,8 @@ public class AttachmentScreen extends ContainerScreen<AttachmentContainer>
     protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY)
     {
         Minecraft minecraft = Minecraft.getInstance();
-        this.font.func_238422_b_(matrixStack, this.title.func_241878_f(), (float)this.titleX, (float)this.titleY, 4210752);
-        this.font.func_238422_b_(matrixStack, this.playerInventory.getDisplayName().func_241878_f(), (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY + 19, 4210752);
+        this.font.func_238422_b_(matrixStack, this.title, (float)this.titleX, (float)this.titleY, 4210752);
+        this.font.func_238422_b_(matrixStack, this.playerInventory.getDisplayName(), (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY + 19, 4210752);
 
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         int left = (this.width - this.xSize) / 2;

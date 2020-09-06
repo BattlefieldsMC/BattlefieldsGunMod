@@ -10,7 +10,6 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.client.settings.PointOfView;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
@@ -77,7 +76,7 @@ public class GripType
             ModelRenderer mainArm = right ? model.bipedRightArm : model.bipedLeftArm;
             ModelRenderer secondaryArm = right ? model.bipedLeftArm : model.bipedRightArm;
 
-            if(Minecraft.getInstance().getRenderViewEntity() == player && Minecraft.getInstance().gameSettings.func_243230_g() == PointOfView.FIRST_PERSON)
+            if(Minecraft.getInstance().getRenderViewEntity() == player && Minecraft.getInstance().gameSettings.thirdPersonView == 0)
             {
                 mainArm.rotateAngleX = 0;
                 mainArm.rotateAngleY = 0;

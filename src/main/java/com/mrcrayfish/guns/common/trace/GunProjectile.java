@@ -197,7 +197,7 @@ public interface GunProjectile
                 if (level > 0)
                 {
                     BlockPos offsetPos = pos.offset(blockRayTraceResult.getFace());
-                    if (AbstractFireBlock.canLightBlock(world, offsetPos, blockRayTraceResult.getFace()))
+                    if (AbstractFireBlock.canLightBlock(world, offsetPos))
                     {
                         BlockState fireState = AbstractFireBlock.getFireForPlacement(world, offsetPos);
                         world.setBlockState(offsetPos, fireState, 11);

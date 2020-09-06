@@ -349,8 +349,8 @@ public class WorkbenchScreen extends ContainerScreen<WorkbenchContainer>
     protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY)
     {
         int offset = this.tabs.isEmpty() ? 0 : 28;
-        this.font.func_238422_b_(matrixStack, this.title.func_241878_f(), (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY - 66 + offset, 4210752);
-        this.font.func_238422_b_(matrixStack, this.playerInventory.getDisplayName().func_241878_f(), (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY + 19 + offset, 4210752);
+        this.font.func_238422_b_(matrixStack, this.title, (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY - 66 + offset, 4210752);
+        this.font.func_238422_b_(matrixStack, this.playerInventory.getDisplayName(), (float)this.playerInventoryTitleX, (float)this.playerInventoryTitleY + 19 + offset, 4210752);
     }
 
     @Override

@@ -1,6 +1,5 @@
 modLoader="javafml"
 loaderVersion="[32,)"
-license = "All Rights Reserved"
 
 [[mods]]
 modId="cgm"

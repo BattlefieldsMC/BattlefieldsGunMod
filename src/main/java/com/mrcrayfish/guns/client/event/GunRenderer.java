@@ -42,7 +42,6 @@ import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.settings.PointOfView;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -114,7 +113,7 @@ public class GunRenderer
     public void onFovUpdate(FOVUpdateEvent event)
     {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null && !mc.player.getHeldItemMainhand().isEmpty() && mc.gameSettings.func_243230_g() == PointOfView.FIRST_PERSON)
+        if (mc.player != null && !mc.player.getHeldItemMainhand().isEmpty() && mc.gameSettings.thirdPersonView == 0)
         {
             ItemStack heldItem = mc.player.getHeldItemMainhand();
             if (heldItem.getItem() instanceof GunItem)
@@ -474,7 +473,7 @@ public class GunRenderer
             return;
         }
 
-        if (Minecraft.getInstance().gameSettings.func_243230_g() != PointOfView.FIRST_PERSON)
+        if (Minecraft.getInstance().gameSettings.thirdPersonView != 0)
         {
             return;
         }
@@ -1000,7 +999,7 @@ public class GunRenderer
     {
         float additionalAdsSensitivity = 1.0F;
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null && !mc.player.getHeldItemMainhand().isEmpty() && mc.gameSettings.func_243230_g() == PointOfView.FIRST_PERSON)
+        if (mc.player != null && !mc.player.getHeldItemMainhand().isEmpty() && mc.gameSettings.thirdPersonView == 0)
         {
             ItemStack heldItem = mc.player.getHeldItemMainhand();
             if (heldItem.getItem() instanceof GunItem)
