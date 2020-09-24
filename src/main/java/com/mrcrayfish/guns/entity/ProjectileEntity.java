@@ -469,7 +469,7 @@ public class ProjectileEntity extends Entity implements IEntityAdditionalSpawnDa
         if (world.isRemote())
             return;
 
-        Explosion explosion = new Explosion(world, entity, entity.getPosX(), entity.getPosY(), entity.getPosZ(), radius, false, Explosion.Mode.NONE);
+        Explosion explosion = new Explosion(world, entity, null, null, entity.getPosX(), entity.getPosY(), entity.getPosZ(), radius, false, Explosion.Mode.NONE);
         explosion.doExplosionA();
         explosion.getAffectedBlockPositions().forEach(pos ->
         {
