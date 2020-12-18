@@ -65,8 +65,8 @@ repositories {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.1-32.0.61'
-    implementation fg.deobf('com.github.MrCrayfish:Obfuscate:89e11e8')
-    implementation fg.deobf('com.github.MrCrayfish:Controllable:4d3d0f5')
+    implementation 'com.github.MrCrayfish:Obfuscate:89e11e8'
+    implementation 'com.github.MrCrayfish:Controllable:4d3d0f5'
 }
 
 jar {
